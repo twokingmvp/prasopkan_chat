@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+	<item id="Title"><![CDATA[Discuz! Plugin]]></item>
+	<item id="Data">
+		<item id="plugin">
+			<item id="available"><![CDATA[1]]></item>
+			<item id="adminid"><![CDATA[1]]></item>
+			<item id="name"><![CDATA[Prasopkan Public Chat]]></item>
+			<item id="identifier"><![CDATA[prasopkan_chat]]></item>
+			<item id="description"><![CDATA[ระบบห้องแชทรวมและแยกตามหมวดหมู่]]></item>
+			<item id="datatables"><![CDATA[prasopkan_chat_messages]]></item>
+			<item id="directory"><![CDATA[prasopkan_chat/]]></item>
+			<item id="copyright"><![CDATA[Prasopkan]]></item>
+			<item id="version"><![CDATA[1.1.0]]></item>
+			<item id="__modules">
+				<item id="0">
+					<item id="name"><![CDATA[chat_hook]]></item>
+					<item id="type"><![CDATA[11]]></item>
+				</item>
+			</item>
+		</item>
+		<item id="version"><![CDATA[X3.5]]></item>
+		<item id="var">
+			<item id="0">
+				<item id="displayorder"><![CDATA[1]]></item>
+				<item id="title"><![CDATA[เปิดใช้งานระบบแยกห้องแชท]]></item>
+				<item id="description"><![CDATA[หากเลือก ใช่ ระบบจะแสดงแท็บแยกห้องตามเว็บบอร์ดที่คุณเลือกด้านล่าง]]></item>
+				<item id="variable"><![CDATA[enable_rooms]]></item>
+				<item id="type"><![CDATA[radio]]></item>
+				<item id="value"><![CDATA[1]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+			<item id="1">
+				<item id="displayorder"><![CDATA[2]]></item>
+				<item id="title"><![CDATA[เลือกบอร์ดที่ต้องการทำเป็นห้องแชท]]></item>
+				<item id="description"><![CDATA[เลือกหมวดหมู่ที่ต้องการ (กดปุ่ม Ctrl ค้างไว้เพื่อเลือกหลายห้องพร้อมกัน)]]></item>
+				<item id="variable"><![CDATA[chat_forums]]></item>
+				<item id="type"><![CDATA[forums]]></item>
+				<item id="value"><![CDATA[]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+		</item>
+	</item>
+</root>

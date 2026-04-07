@@ -1,0 +1,20 @@
+<?php
+if(!defined('IN_DISCUZ')) {
+    exit('Access Denied');
+}
+
+class plugin_prasopkan_chat {
+    // ใช้ Hook global_footer เพื่อให้กล่องแชทแสดงทุกหน้า
+    public function global_footer() {
+        global $_G;
+        
+        // โหลดไฟล์ Template มาแสดงผล
+        ob_start();
+        include template('prasopkan_chat:chat_ui');
+        $html = ob_get_contents();
+        ob_end_clean();
+        
+        return $html;
+    }
+}
+?>
