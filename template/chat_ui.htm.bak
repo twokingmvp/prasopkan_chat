@@ -14,7 +14,7 @@
         <div id="pk-chat-input-area">
             <input type="text" id="pk-chat-input" placeholder="พิมพ์ข้อความ...">
                 <button id="pk-chat-send">ส่ง</button>
-            <div class="pk-login-notice">กรุณาล็อกอินเพื่อร่วมสนทนา ทดลอง</div>
+            <div class="pk-login-notice">กรุณาล็อกอินเพื่อร่วมสนทนา</div>
             </div>
     </div>
 </div>
