@@ -7,43 +7,49 @@ class plugin_prasopkan_chat {
     public function global_footer() {
         global $_G;
         
-        // โหลดการตั้งค่าปลั๊กอิน
+        // บังคับโหลดแคชการตั้งค่าปลั๊กอินให้ชัวร์ 100%
+        loadcache('plugin');
         $plugin_config = $_G['cache']['plugin']['prasopkan_chat'];
-        $enable_rooms = $plugin_config['enable_rooms'];
         
-        // จัดการดึงข้อมูลบอร์ดที่เลือกไว้
+        $enable_rooms = $plugin_config['enable_rooms'];
         $chat_forums = $plugin_config['chat_forums'];
-        if(!is_array($chat_forums)) {
-            $chat_forums = @unserialize($chat_forums);
-            if(!$chat_forums) $chat_forums = array();
-        }
-
+        
         $rooms_html = '';
-        if($enable_rooms && !empty($chat_forums)) {
-            $fids = implode(',', array_map('intval', $chat_forums));
-            if(!empty($fids)) {
-                // ไปค้นหาชื่อบอร์ดจากระบบ Discuz
-                $query = DB::query("SELECT fid, name FROM ".DB::table('forum_forum')." WHERE fid IN ($fids) AND status=1 ORDER BY displayorder");
-                $rooms = array();
-                while($row = DB::fetch($query)) {
-                    $rooms[] = $row;
-                }
-
-                // สร้างแท็บ HTML จาก PHP เลยเพื่อลดข้อผิดพลาด
-                if(!empty($rooms)) {
-                    $rooms_html .= '<div id="pk-chat-rooms">';
-                    $first = true;
-                    foreach($rooms as $r) {
-                        $active = $first ? ' active' : '';
-                        $rooms_html .= '<div class="pk-room-tab'.$active.'" data-room="'.$r['fid'].'">'.strip_tags($r['name']).'</div>';
-                        $first = false;
+        
+        // เช็คว่าเปิดใช้งานและมีการเลือกบอร์ดไว้หรือไม่
+        if($enable_rooms) {
+            // แปลงค่า forums ที่ได้จากระบบให้เป็น Array
+            if(!is_array($chat_forums)) {
+                $chat_forums = @unserialize($chat_forums);
+            }
+            
+            if(!empty($chat_forums) && is_array($chat_forums)) {
+                $fids = implode(',', array_map('intval', $chat_forums));
+                
+                if($fids) {
+                    // ไปค้นหาชื่อบอร์ดจากฐานข้อมูล
+                    $query = DB::query("SELECT fid, name FROM ".DB::table('forum_forum')." WHERE fid IN ($fids) ORDER BY displayorder");
+                    $rooms = array();
+                    while($row = DB::fetch($query)) {
+                        $rooms[] = $row;
                     }
-                    $rooms_html .= '</div>';
+
+                    // สร้าง HTML สำหรับแท็บห้องแชท
+                    if(!empty($rooms)) {
+                        $rooms_html .= '<div id="pk-chat-rooms">';
+                        $first = true;
+                        foreach($rooms as $r) {
+                            $active = $first ? ' active' : '';
+                            $rooms_html .= '<div class="pk-room-tab'.$active.'" data-room="'.$r['fid'].'">'.strip_tags($r['name']).'</div>';
+                            $first = false;
+                        }
+                        $rooms_html .= '</div>';
+                    }
                 }
             }
         }
 
-        // เช็คการล็อกอินให้เด็ดขาดจากฝั่ง PHP
+        // ตัวแปรเช็คการล็อกอิน ส่งไปให้ HTML ตรวจสอบ
         $is_logged_in = ($_G['uid'] > 0) ? true : false;
 
         ob_start();
