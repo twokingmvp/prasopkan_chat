@@ -11,7 +11,7 @@
 			<item id="datatables"><![CDATA[prasopkan_chat_messages,prasopkan_chat_envelopes,prasopkan_chat_envlogs,prasopkan_chat_reactions,prasopkan_chat_inventory,prasopkan_chat_equipment,prasopkan_chat_shop_items]]></item>
 			<item id="directory"><![CDATA[prasopkan_chat/]]></item>
 			<item id="copyright"><![CDATA[Prasopkan]]></item>
-			<item id="version"><![CDATA[1.6.0]]></item>
+			<item id="version"><![CDATA[1.7.0]]></item>
 			<item id="__modules">
 				<item id="0">
 					<item id="name"><![CDATA[chat_hook]]></item>
@@ -93,7 +93,7 @@
 			</item>
             <item id="7">
 				<item id="displayorder"><![CDATA[8]]></item>
-				<item id="title"><![CDATA[ชนิดของเครดิตที่ใช้แจก (extcredits)]]></item>
+				<item id="title"><![CDATA[ชนิดของเครดิตที่ใช้แจกอั่งเปา (extcredits)]]></item>
 				<item id="description"><![CDATA[ระบุหมายเลข 1-8 ของระบบเงินในเว็บ (เช่น 2 สำหรับเหรียญ/เครดิตหลัก)]]></item>
 				<item id="variable"><![CDATA[redpacket_credit_id]]></item>
 				<item id="type"><![CDATA[number]]></item>
@@ -152,6 +152,15 @@
 				<item id="variable"><![CDATA[welcome_tooltip]]></item>
 				<item id="type"><![CDATA[text]]></item>
 				<item id="value"><![CDATA[เข้ามาป้ายยากันเถอะ! ✨]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="14">
+				<item id="displayorder"><![CDATA[15]]></item>
+				<item id="title"><![CDATA[ชนิดของเครดิตที่ใช้ในร้านค้าแชท 🛒 (extcredits)]]></item>
+				<item id="description"><![CDATA[ระบุหมายเลข 1-8 ของระบบเงินในเว็บสำหรับให้สมาชิกซื้อของตกแต่งแชท (เช่น 2 สำหรับเหรียญ/เครดิตหลัก)]]></item>
+				<item id="variable"><![CDATA[shop_credit_id]]></item>
+				<item id="type"><![CDATA[number]]></item>
+				<item id="value"><![CDATA[2]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
 		</item>
