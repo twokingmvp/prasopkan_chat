@@ -129,3 +129,77 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 .pk-rp-btn-group { display: flex; justify-content: space-between; }
 #pk-rp-submit { background: #d9363e; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 48%; font-weight:bold; font-size: 14px;}
 #pk-rp-cancel { background: var(--pk-border); color: var(--pk-text); border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 48%; }
+
+/* =========================================
+   5. แก้ไขพรีวิวลิงก์ & รูปภาพให้อยู่ในขนาดมาตรฐาน 🖼️
+========================================= */
+
+/* จัดการกรอบการ์ดให้แสดงผลซ้าย-ขวา */
+.pk-link-preview { 
+    display: flex; 
+    align-items: center; 
+    background: var(--pk-bg); 
+    border: 1px solid var(--pk-border); 
+    border-left: 4px solid var(--pk-header); 
+    border-radius: 8px; 
+    padding: 10px; 
+    margin-top: 5px; 
+    overflow: hidden;
+    max-width: 100%;
+}
+
+/* 📸 บังคับขนาดรูปหน้าปกกระทู้ให้เป็นสี่เหลี่ยมจัตุรัสเล็กๆ */
+.pk-lp-img, .pk-lp-fallback {
+    width: 55px; 
+    height: 55px; 
+    object-fit: cover; 
+    border-radius: 6px; 
+    margin-right: 10px; 
+    flex-shrink: 0; 
+    border: 1px solid var(--pk-border);
+}
+
+/* ไอคอนสำรองกรณีไม่มีรูป */
+.pk-lp-fallback {
+    background: var(--pk-input-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+/* จัดการข้อความด้านขวาไม่ให้ล้น */
+.pk-lp-content { 
+    flex: 1; 
+    min-width: 0; 
+    text-align: left;
+}
+.pk-lp-title { 
+    display: block;
+    color: var(--pk-header) !important; 
+    font-weight: 600; 
+    font-size: 13px; 
+    text-decoration: none; 
+    margin-bottom: 4px; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
+.pk-lp-meta { 
+    font-size: 11px; 
+    color: var(--pk-text-muted); 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
+
+/* 📸 ปรับขนาดรูปภาพที่อัปโหลดเข้ามาในแชทให้พอดีตาขึ้น */
+.pk-chat-img { 
+    max-width: 100%; 
+    max-height: 180px; 
+    width: auto;
+    object-fit: contain;
+    border-radius: 8px; 
+    margin-top: 5px; 
+    background: transparent;
+}
