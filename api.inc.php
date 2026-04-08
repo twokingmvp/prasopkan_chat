@@ -12,6 +12,7 @@ if($action == 'send') {
     if(empty($message)) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาพิมพ์ข้อความ')); exit; }
     if(!$_G['uid']) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาล็อกอินก่อนส่งข้อความ')); exit; }
 
+    // แปลง URL ธรรมดาที่ผู้ใช้พิมพ์ให้เป็น BBCode อัตโนมัติ (เพื่อนำไปทำพรีวิว)
     $message = preg_replace('/(?<!\])(https?:\/\/[^\s<]+)/i', '[url=$1]$1[/url]', $message);
 
     $data = array(
@@ -64,9 +65,10 @@ elseif($action == 'get') {
         $row['time'] = dgmdate($row['dateline'], 'H:i');
         $row['message'] = preg_replace('/\[img\](.*?)\[\/img\]/i', '<br><img src="$1" style="max-width:100%; border-radius:8px; margin-top:5px; border:1px solid #ddd;" />', $row['message']);
         
-        // --- 🖼️ ระบบแปลงลิงก์เป็นการ์ดพรีวิว (เพิ่มการดึงรูปภาพ) ---
+        // --- 🖼️ ระบบแปลงลิงก์เป็นการ์ดพรีวิว (เวอร์ชันสมบูรณ์) ---
         if($enable_linkpreview) {
-            $row['message'] = preg_replace_callback('/\[url=(.*?tid=(\d+).*?)\](.*?)\[\/url\]/i', function($matches) {
+            // ดักจับทั้งลิงก์แบบปกติ (tid=) และลิงก์แบบสั้น (t- หรือ thread-)
+            $row['message'] = preg_replace_callback('/\[url=(.*?(?:tid=|t-|thread-)(\d+)[^\]]*?)\](.*?)\[\/url\]/i', function($matches) {
                 global $_G;
                 $url = $matches[1];
                 $tid = intval($matches[2]);
@@ -75,20 +77,23 @@ elseif($action == 'get') {
                 $thread = DB::fetch_first("SELECT subject, author, views, replies FROM ".DB::table('forum_thread')." WHERE tid='$tid'");
                 
                 if($thread) {
-                    // 📸 ค้นหารูปหน้าปกกระทู้ จากตาราง forum_threadimage
-                    $img_html = '';
+                    // รูปภาพสำรองกรณีที่กระทู้นั้นไม่มีรูป (จะแสดงเป็นไอคอน 💬 สีเทา)
+                    $img_html = '<div style="width:55px; height:55px; background:#f0f4f8; border-radius:4px; margin-right:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:24px; border:1px solid #eaeaea;">💬</div>';
+                    
+                    // 📸 ค้นหารูปหน้าปกกระทู้
                     $threadimage = DB::fetch_first("SELECT attachment FROM ".DB::table('forum_threadimage')." WHERE tid='$tid'");
                     if($threadimage && !empty($threadimage['attachment'])) {
-                        $img_url = 'data/attachment/forum/'.$threadimage['attachment'];
-                        // จัดรูปภาพให้อยู่ด้านซ้าย
+                        $attachurl = !empty($_G['setting']['attachurl']) ? $_G['setting']['attachurl'] : 'data/attachment/';
+                        $img_url = preg_match('/^http/i', $threadimage['attachment']) ? $threadimage['attachment'] : $attachurl.'forum/'.$threadimage['attachment'];
+                        
                         $img_html = '<img src="'.$img_url.'" style="width:55px; height:55px; object-fit:cover; border-radius:4px; margin-right:10px; flex-shrink:0; border:1px solid #eaeaea;" onerror="this.style.display=\'none\'">';
                     }
 
-                    // ใช้ HTML Flexbox จัดเลย์เอาต์ให้สวยงาม
+                    // สร้างโครงสร้างการ์ด
                     return '<div class="pk-link-preview" style="display:flex; align-items:center; overflow:hidden;">
                                 '.$img_html.'
                                 <div style="flex:1; min-width:0;">
-                                    <a href="'.$url.'" target="_blank" class="pk-lp-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;" title="'.$thread['subject'].'">📄 '.$thread['subject'].'</a>
+                                    <a href="'.$url.'" target="_blank" class="pk-lp-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;" title="'.strip_tags($thread['subject']).'">📄 '.strip_tags($thread['subject']).'</a>
                                     <div class="pk-lp-meta">✍️ '.$thread['author'].' &nbsp;|&nbsp; 👁️ '.$thread['views'].' &nbsp;|&nbsp; 💬 '.$thread['replies'].'</div>
                                 </div>
                             </div>';
@@ -96,6 +101,7 @@ elseif($action == 'get') {
                 return '<a href="'.$url.'" target="_blank" style="color:#0073ff; text-decoration:underline;">'.$text.'</a>';
             }, $row['message']);
             
+            // แปลงลิงก์ทั่วไปที่ไม่ได้เป็นการ์ดกระทู้
             $row['message'] = preg_replace('/\[url=(.*?)\](.*?)\[\/url\]/i', '<a href="$1" target="_blank" style="color:#0073ff; text-decoration:underline;">$2</a>', $row['message']);
         } else {
             $row['message'] = preg_replace('/\[url=(.*?)\](.*?)\[\/url\]/i', '<a href="$1" target="_blank" style="color:#ff6600; text-decoration:underline; font-weight:bold;">$2</a>', $row['message']);
