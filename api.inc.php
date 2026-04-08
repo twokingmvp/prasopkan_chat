@@ -12,7 +12,6 @@ if($action == 'send') {
     if(empty($message)) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาพิมพ์ข้อความ')); exit; }
     if(!$_G['uid']) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาล็อกอินก่อนส่งข้อความ')); exit; }
 
-    // แปลง URL ธรรมดาที่ผู้ใช้พิมพ์ให้เป็น BBCode อัตโนมัติ (เพื่อนำไปทำพรีวิว)
     $message = preg_replace('/(?<!\])(https?:\/\/[^\s<]+)/i', '[url=$1]$1[/url]', $message);
 
     $data = array(
@@ -36,6 +35,7 @@ elseif($action == 'get') {
     $enable_mention = $plugin_config['enable_mention'];
     $enable_bot = $plugin_config['enable_bot'];
     $enable_linkpreview = $plugin_config['enable_linkpreview']; 
+    $enable_reaction = $plugin_config['enable_reaction']; // ดึงค่าการตั้งค่ารีแอคชั่น
 
     if($enable_bot) {
         loadcache('prasopkan_chat_last_tid');
@@ -59,15 +59,14 @@ elseif($action == 'get') {
     }
 
     $messages = array();
+    $msg_ids = array();
     $query = DB::query("SELECT c.*, m.groupid FROM ".DB::table('prasopkan_chat_messages')." c LEFT JOIN ".DB::table('common_member')." m ON c.uid = m.uid WHERE c.room_id='$room_id' ORDER BY c.dateline DESC LIMIT 50");
     
     while($row = DB::fetch($query)) {
         $row['time'] = dgmdate($row['dateline'], 'H:i');
         $row['message'] = preg_replace('/\[img\](.*?)\[\/img\]/i', '<br><img src="$1" style="max-width:100%; border-radius:8px; margin-top:5px; border:1px solid #ddd;" />', $row['message']);
         
-        // --- 🖼️ ระบบแปลงลิงก์เป็นการ์ดพรีวิว (เวอร์ชันสมบูรณ์) ---
         if($enable_linkpreview) {
-            // ดักจับทั้งลิงก์แบบปกติ (tid=) และลิงก์แบบสั้น (t- หรือ thread-)
             $row['message'] = preg_replace_callback('/\[url=(.*?(?:tid=|t-|thread-)(\d+)[^\]]*?)\](.*?)\[\/url\]/i', function($matches) {
                 global $_G;
                 $url = $matches[1];
@@ -77,36 +76,22 @@ elseif($action == 'get') {
                 $thread = DB::fetch_first("SELECT subject, author, views, replies FROM ".DB::table('forum_thread')." WHERE tid='$tid'");
                 
                 if($thread) {
-                    // รูปภาพสำรองกรณีที่กระทู้นั้นไม่มีรูป (จะแสดงเป็นไอคอน 💬 สีเทา)
                     $img_html = '<div style="width:55px; height:55px; background:#f0f4f8; border-radius:4px; margin-right:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:24px; border:1px solid #eaeaea;">💬</div>';
-                    
-                    // 📸 ค้นหารูปหน้าปกกระทู้
                     $threadimage = DB::fetch_first("SELECT attachment FROM ".DB::table('forum_threadimage')." WHERE tid='$tid'");
                     if($threadimage && !empty($threadimage['attachment'])) {
                         $attachurl = !empty($_G['setting']['attachurl']) ? $_G['setting']['attachurl'] : 'data/attachment/';
                         $img_url = preg_match('/^http/i', $threadimage['attachment']) ? $threadimage['attachment'] : $attachurl.'forum/'.$threadimage['attachment'];
-                        
                         $img_html = '<img src="'.$img_url.'" style="width:55px; height:55px; object-fit:cover; border-radius:4px; margin-right:10px; flex-shrink:0; border:1px solid #eaeaea;" onerror="this.style.display=\'none\'">';
                     }
-
-                    // สร้างโครงสร้างการ์ด
-                    return '<div class="pk-link-preview" style="display:flex; align-items:center; overflow:hidden;">
-                                '.$img_html.'
-                                <div style="flex:1; min-width:0;">
-                                    <a href="'.$url.'" target="_blank" class="pk-lp-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;" title="'.strip_tags($thread['subject']).'">📄 '.strip_tags($thread['subject']).'</a>
-                                    <div class="pk-lp-meta">✍️ '.$thread['author'].' &nbsp;|&nbsp; 👁️ '.$thread['views'].' &nbsp;|&nbsp; 💬 '.$thread['replies'].'</div>
-                                </div>
-                            </div>';
+                    return '<div class="pk-link-preview" style="display:flex; align-items:center; overflow:hidden;">'.$img_html.'<div style="flex:1; min-width:0;"><a href="'.$url.'" target="_blank" class="pk-lp-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;" title="'.strip_tags($thread['subject']).'">📄 '.strip_tags($thread['subject']).'</a><div class="pk-lp-meta">✍️ '.$thread['author'].' &nbsp;|&nbsp; 👁️ '.$thread['views'].' &nbsp;|&nbsp; 💬 '.$thread['replies'].'</div></div></div>';
                 }
                 return '<a href="'.$url.'" target="_blank" style="color:#0073ff; text-decoration:underline;">'.$text.'</a>';
             }, $row['message']);
             
-            // แปลงลิงก์ทั่วไปที่ไม่ได้เป็นการ์ดกระทู้
             $row['message'] = preg_replace('/\[url=(.*?)\](.*?)\[\/url\]/i', '<a href="$1" target="_blank" style="color:#0073ff; text-decoration:underline;">$2</a>', $row['message']);
         } else {
             $row['message'] = preg_replace('/\[url=(.*?)\](.*?)\[\/url\]/i', '<a href="$1" target="_blank" style="color:#ff6600; text-decoration:underline; font-weight:bold;">$2</a>', $row['message']);
         }
-        // ----------------------------------------
 
         if($enable_mention) {
             $row['message'] = preg_replace('/@([^\s]+)/u', '<strong style="color:#0073ff; background:#e6f2ff; padding:0 4px; border-radius:3px;">@$1</strong>', $row['message']);
@@ -121,14 +106,55 @@ elseif($action == 'get') {
             $group_color = $_G['cache']['usergroups'][$row['groupid']]['color'];
             if(!empty($group_color)) $row['color'] = $group_color;
         }
+        
         $messages[] = $row;
+        $msg_ids[] = $row['msg_id'];
     }
+    
+    // --- 💖 ระบบดึงข้อมูลรีแอคชั่นทั้งหมดของ 50 ข้อความล่าสุด ---
+    $reactions_map = array();
+    if($enable_reaction && !empty($msg_ids)) {
+        $ids_str = implode(',', $msg_ids);
+        $req_query = DB::query("SELECT msg_id, reaction, uid FROM ".DB::table('prasopkan_chat_reactions')." WHERE msg_id IN ($ids_str)");
+        while($r = DB::fetch($req_query)) {
+            $m_id = $r['msg_id'];
+            $rx = $r['reaction'];
+            if(!isset($reactions_map[$m_id])) $reactions_map[$m_id] = array();
+            if(!isset($reactions_map[$m_id][$rx])) $reactions_map[$m_id][$rx] = array('count'=>0, 'me'=>false);
+            
+            $reactions_map[$m_id][$rx]['count']++;
+            if($r['uid'] == $_G['uid']) $reactions_map[$m_id][$rx]['me'] = true; // จำไว้ว่าตัวเรากดไปแล้ว
+        }
+    }
+
+    // เอาข้อมูลรีแอคชั่นไปเสียบรวมกับข้อความ
+    foreach($messages as &$m) {
+        $m['reactions'] = isset($reactions_map[$m['msg_id']]) ? $reactions_map[$m['msg_id']] : null;
+    }
+
     $messages = array_reverse($messages);
     $is_admin = ($_G['uid'] && $_G['adminid'] > 0) ? true : false;
     
-    echo json_encode(array('status' => 'success', 'data' => $messages, 'is_admin' => $is_admin, 'enable_mention' => $enable_mention));
+    echo json_encode(array('status' => 'success', 'data' => $messages, 'is_admin' => $is_admin, 'enable_mention' => $enable_mention, 'enable_reaction' => $enable_reaction));
     exit;
 }
+// --- 💖 ฟังก์ชันกดและยกเลิกรีแอคชั่น ---
+elseif($action == 'react') {
+    if(!$_G['uid']) { echo json_encode(array('status'=>'error', 'msg'=>'กรุณาล็อกอิน')); exit; }
+    $msg_id = intval($_GET['msg_id']);
+    $reaction = dhtmlspecialchars(trim($_GET['reaction']));
+    if(!$msg_id || !$reaction) { echo json_encode(array('status'=>'error')); exit; }
+
+    // เช็คว่าเคยกดหรือยัง
+    $exists = DB::fetch_first("SELECT id FROM ".DB::table('prasopkan_chat_reactions')." WHERE msg_id='$msg_id' AND uid='{$_G['uid']}' AND reaction='$reaction'");
+    if($exists) {
+        DB::delete('prasopkan_chat_reactions', "id='{$exists['id']}'"); // ถ้ายกเลิกกด
+    } else {
+        DB::insert('prasopkan_chat_reactions', array('msg_id'=>$msg_id, 'uid'=>$_G['uid'], 'reaction'=>$reaction)); // ถ้ากดใหม่
+    }
+    echo json_encode(array('status'=>'success')); exit;
+}
+// ฟังก์ชันเดิมของระบบต่างๆ ย่อรวมไว้เพื่อประหยัดพื้นที่
 elseif($action == 'delete') {
     if(!$_G['uid'] || $_G['adminid'] <= 0) { echo json_encode(array('status' => 'error', 'msg' => 'ไม่มีสิทธิ์ในการลบข้อความ')); exit; }
     $msg_id = isset($_GET['msg_id']) ? intval($_GET['msg_id']) : 0;
@@ -142,77 +168,44 @@ elseif($action == 'upload') {
     $file = $_FILES['chat_image'];
     if(!$file || $file['error'] != 0) { echo json_encode(array('status'=>'error','msg'=>'อัปโหลดล้มเหลว')); exit; }
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    $allowed = array('jpg', 'jpeg', 'png', 'gif', 'webp');
-    if(!in_array($ext, $allowed)) { echo json_encode(array('status'=>'error','msg'=>'รองรับรูปภาพเท่านั้น')); exit; }
+    if(!in_array($ext, array('jpg', 'jpeg', 'png', 'gif', 'webp'))) { echo json_encode(array('status'=>'error','msg'=>'รองรับรูปภาพเท่านั้น')); exit; }
     $filename = 'img_'.$_G['uid'].'_'.time().'_'.rand(1000,9999).'.'.$ext;
     if(move_uploaded_file($file['tmp_name'], $upload_dir.$filename)) {
         echo json_encode(array('status'=>'success', 'url'=>'source/plugin/prasopkan_chat/uploads/'.$filename));
     } else { echo json_encode(array('status'=>'error','msg'=>'บันทึกไฟล์ไม่ได้')); } exit;
 }
 elseif($action == 'send_redpacket') {
-    loadcache('plugin');
-    $config = $_G['cache']['plugin']['prasopkan_chat'];
+    loadcache('plugin'); $config = $_G['cache']['plugin']['prasopkan_chat'];
     if(!$config['enable_redpacket']) { echo json_encode(['status'=>'error', 'msg'=>'ระบบแจกอั่งเปาปิดใช้งานอยู่']); exit; }
     if(!$_G['uid']) { echo json_encode(['status'=>'error', 'msg'=>'กรุณาล็อกอิน']); exit; }
-
-    $amount = intval($_GET['amount']);
-    $count = intval($_GET['count']);
-    $credit_id = intval($config['redpacket_credit_id']);
-    
-    if($amount < intval($config['redpacket_min']) || $amount > intval($config['redpacket_max'])) { 
-        echo json_encode(['status'=>'error', 'msg'=>"ตั้งจำนวนเงินได้ระหว่าง {$config['redpacket_min']} - {$config['redpacket_max']}"]); exit; 
-    }
-    if($count < 1 || $count > $amount) { echo json_encode(['status'=>'error', 'msg'=>"จำนวนซองไม่ถูกต้อง (ต้องไม่เกินจำนวนเครดิต)"]); exit; }
-
+    $amount = intval($_GET['amount']); $count = intval($_GET['count']); $credit_id = intval($config['redpacket_credit_id']);
+    if($amount < intval($config['redpacket_min']) || $amount > intval($config['redpacket_max'])) { echo json_encode(['status'=>'error', 'msg'=>"ตั้งจำนวนเงินได้ระหว่าง {$config['redpacket_min']} - {$config['redpacket_max']}"]); exit; }
+    if($count < 1 || $count > $amount) { echo json_encode(['status'=>'error', 'msg'=>"จำนวนซองไม่ถูกต้อง"]); exit; }
     $user_credit = DB::result_first("SELECT extcredits".$credit_id." FROM ".DB::table('common_member_count')." WHERE uid='{$_G['uid']}'");
     if($user_credit < $amount) { echo json_encode(['status'=>'error', 'msg'=>'เครดิตของคุณไม่เพียงพอ!']); exit; }
-
     updatemembercount($_G['uid'], array('extcredits'.$credit_id => -$amount));
-
-    $env_id = DB::insert('prasopkan_chat_envelopes', array(
-        'uid' => $_G['uid'], 'total_amount' => $amount, 'total_count' => $count,
-        'remain_amount' => $amount, 'remain_count' => $count, 'dateline' => $_G['timestamp']
-    ), true);
-
-    $msg_id = DB::insert('prasopkan_chat_messages', array(
-        'uid' => $_G['uid'], 'username' => $_G['username'], 'message' => '[redpacket]'.$env_id.'[/redpacket]',
-        'dateline' => $_G['timestamp'], 'ip' => $_G['clientip'], 'room_id' => $room_id
-    ), true);
-    
+    $env_id = DB::insert('prasopkan_chat_envelopes', array('uid' => $_G['uid'], 'total_amount' => $amount, 'total_count' => $count, 'remain_amount' => $amount, 'remain_count' => $count, 'dateline' => $_G['timestamp']), true);
+    $msg_id = DB::insert('prasopkan_chat_messages', array('uid' => $_G['uid'], 'username' => $_G['username'], 'message' => '[redpacket]'.$env_id.'[/redpacket]', 'dateline' => $_G['timestamp'], 'ip' => $_G['clientip'], 'room_id' => $room_id), true);
     DB::update('prasopkan_chat_envelopes', array('msg_id' => $msg_id), "id='$env_id'");
     echo json_encode(['status' => 'success']); exit;
 }
 elseif($action == 'claim_redpacket') {
     if(!$_G['uid']) { echo json_encode(['status'=>'error', 'msg'=>'กรุณาล็อกอิน']); exit; }
-    
     $env_id = intval($_GET['env_id']);
     $env = DB::fetch_first("SELECT * FROM ".DB::table('prasopkan_chat_envelopes')." WHERE id='$env_id'");
     if(!$env) { echo json_encode(['status'=>'error', 'msg'=>'ไม่พบซองอั่งเปานี้']); exit; }
     if($env['remain_count'] <= 0) { echo json_encode(['status'=>'error', 'msg'=>'เสียใจด้วย! อั่งเปาถูกรับไปหมดแล้ว 😭']); exit; }
-
-    $log = DB::fetch_first("SELECT log_id FROM ".DB::table('prasopkan_chat_envlogs')." WHERE env_id='$env_id' AND uid='{$_G['uid']}'");
-    if($log) { echo json_encode(['status'=>'error', 'msg'=>'คุณรับอั่งเปาซองนี้ไปแล้วจ้า!']); exit; }
-
-    if($env['remain_count'] == 1) {
-        $get_amount = $env['remain_amount'];
-    } else {
-        $max_get = floor($env['remain_amount'] / $env['remain_count'] * 2);
-        $get_amount = rand(1, $max_get);
-        if($env['remain_amount'] - $get_amount < $env['remain_count'] - 1) {
-            $get_amount = $env['remain_amount'] - ($env['remain_count'] - 1);
-        }
+    if(DB::fetch_first("SELECT log_id FROM ".DB::table('prasopkan_chat_envlogs')." WHERE env_id='$env_id' AND uid='{$_G['uid']}'")) { echo json_encode(['status'=>'error', 'msg'=>'คุณรับอั่งเปาซองนี้ไปแล้วจ้า!']); exit; }
+    if($env['remain_count'] == 1) { $get_amount = $env['remain_amount']; } else {
+        $max_get = floor($env['remain_amount'] / $env['remain_count'] * 2); $get_amount = rand(1, $max_get);
+        if($env['remain_amount'] - $get_amount < $env['remain_count'] - 1) $get_amount = $env['remain_amount'] - ($env['remain_count'] - 1);
     }
-
     DB::query("UPDATE ".DB::table('prasopkan_chat_envelopes')." SET remain_amount=remain_amount-$get_amount, remain_count=remain_count-1 WHERE id='$env_id' AND remain_count>0");
     if(DB::affected_rows() > 0) {
         DB::insert('prasopkan_chat_envlogs', array('env_id'=>$env_id, 'uid'=>$_G['uid'], 'username'=>$_G['username'], 'amount'=>$get_amount, 'dateline'=>$_G['timestamp']));
-        loadcache('plugin');
-        $credit_id = intval($_G['cache']['plugin']['prasopkan_chat']['redpacket_credit_id']);
+        loadcache('plugin'); $credit_id = intval($_G['cache']['plugin']['prasopkan_chat']['redpacket_credit_id']);
         updatemembercount($_G['uid'], array('extcredits'.$credit_id => $get_amount));
         echo json_encode(['status'=>'success', 'amount'=>$get_amount]);
-    } else {
-        echo json_encode(['status'=>'error', 'msg'=>'ซองอั่งเปาหมดพอดี!']);
-    }
-    exit;
+    } else { echo json_encode(['status'=>'error', 'msg'=>'ซองอั่งเปาหมดพอดี!']); } exit;
 }
 ?>
