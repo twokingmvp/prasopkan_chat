@@ -5,7 +5,6 @@ if(!defined('IN_DISCUZ') || !defined('IN_ADMINCP')) {
 
 $sql = <<<EOF
 DROP TABLE IF EXISTS `pre_prasopkan_chat_messages`;
-
 CREATE TABLE IF NOT EXISTS `pre_prasopkan_chat_messages` (
   `msg_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `uid` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -16,6 +15,31 @@ CREATE TABLE IF NOT EXISTS `pre_prasopkan_chat_messages` (
   `room_id` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`msg_id`),
   KEY `dateline` (`dateline`)
+) ENGINE=MyISAM;
+
+DROP TABLE IF EXISTS `pre_prasopkan_chat_envelopes`;
+CREATE TABLE IF NOT EXISTS `pre_prasopkan_chat_envelopes` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `msg_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `uid` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `total_amount` int(10) unsigned NOT NULL DEFAULT '0',
+  `total_count` smallint(6) unsigned NOT NULL DEFAULT '0',
+  `remain_amount` int(10) unsigned NOT NULL DEFAULT '0',
+  `remain_count` smallint(6) unsigned NOT NULL DEFAULT '0',
+  `dateline` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM;
+
+DROP TABLE IF EXISTS `pre_prasopkan_chat_envlogs`;
+CREATE TABLE IF NOT EXISTS `pre_prasopkan_chat_envlogs` (
+  `log_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `env_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `uid` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `username` varchar(15) NOT NULL DEFAULT '',
+  `amount` int(10) unsigned NOT NULL DEFAULT '0',
+  `dateline` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`log_id`),
+  KEY `env_id` (`env_id`, `uid`)
 ) ENGINE=MyISAM;
 EOF;
 
