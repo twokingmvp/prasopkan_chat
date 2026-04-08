@@ -25,28 +25,77 @@ if($action == 'send') {
     echo json_encode(array('status' => 'success'));
     exit;
 } 
-// --- 2. ดึงข้อความและแปลง @Mention ---
+// --- 2. ดึงข้อความและบอทแจ้งเตือนกระทู้ใหม่ 🤖 ---
 elseif($action == 'get') {
     loadcache('plugin');
     loadcache('usergroups');
     $plugin_config = $_G['cache']['plugin']['prasopkan_chat'];
+    
     $enable_color = $plugin_config['enable_color'];
-    $enable_mention = $plugin_config['enable_mention']; // ดึงค่าการเปิดใช้งาน Mention
+    $enable_mention = $plugin_config['enable_mention'];
+    $enable_bot = $plugin_config['enable_bot']; // ดึงค่าการตั้งค่าบอท
+
+    // --- ส่วนการทำงานของบอท (จะทำงานเมื่อเปิดสวิตช์ในหลังบ้าน) ---
+    if($enable_bot) {
+        loadcache('prasopkan_chat_last_tid');
+        $last_tid = intval($_G['cache']['prasopkan_chat_last_tid']);
+        
+        // เช็คกระทู้ล่าสุดจากฐานข้อมูลของเว็บบอร์ด
+        $latest_thread = DB::fetch_first("SELECT tid, subject, author FROM ".DB::table('forum_thread')." WHERE displayorder >= 0 ORDER BY tid DESC LIMIT 1");
+        
+        // ถ้าเจอกระทู้ใหม่ที่ ID มากกว่าค่าที่จำไว้
+        if($latest_thread && $latest_thread['tid'] > $last_tid) {
+            // จำ ID ใหม่ไว้ทันทีเพื่อไม่ให้ส่งซ้ำ
+            savecache('prasopkan_chat_last_tid', $latest_thread['tid']);
+            
+            // ถ้าไม่ใช่การรันครั้งแรก (กันบอทย้อนหลังส่งกระทู้เก่า) ให้ทำการส่งแชท
+            if($last_tid > 0) {
+                // สร้างลิงก์กระทู้
+                $bot_msg = "📢 มีกระทู้ใหม่มาสดๆ ร้อนๆ: [url=forum.php?mod=viewthread&tid=".$latest_thread['tid']."]".$latest_thread['subject']."[/url] (โดย ".$latest_thread['author'].")";
+                
+                // ดึงรายชื่อห้องแชททั้งหมดที่คุณตั้งค่าไว้
+                $chat_forums = $plugin_config['chat_forums'];
+                if(!is_array($chat_forums)) $chat_forums = @unserialize($chat_forums);
+                if(empty($chat_forums)) $chat_forums = array(1);
+                
+                // สั่งให้บอทส่งข้อความไปหา "ทุกห้องแชท" พร้อมๆ กัน
+                foreach($chat_forums as $r_id) {
+                    $bot_data = array(
+                        'uid' => 0, // 0 คือระบบ
+                        'username' => '🤖 System Bot',
+                        'message' => $bot_msg,
+                        'dateline' => $_G['timestamp'],
+                        'ip' => '127.0.0.1',
+                        'room_id' => intval($r_id)
+                    );
+                    DB::insert('prasopkan_chat_messages', $bot_data);
+                }
+            }
+        }
+    }
 
     $messages = array();
     $query = DB::query("SELECT c.*, m.groupid FROM ".DB::table('prasopkan_chat_messages')." c LEFT JOIN ".DB::table('common_member')." m ON c.uid = m.uid WHERE c.room_id='$room_id' ORDER BY c.dateline DESC LIMIT 50");
     
     while($row = DB::fetch($query)) {
         $row['time'] = dgmdate($row['dateline'], 'H:i');
+        
+        // แปลงรูปภาพ
         $row['message'] = preg_replace('/\[img\](.*?)\[\/img\]/i', '<br><img src="$1" style="max-width:100%; border-radius:8px; margin-top:5px; border:1px solid #ddd;" />', $row['message']);
         
-        // แปลง @ชื่อ ให้เป็นป้ายสีฟ้า (ถ้าเปิดใช้งาน)
+        // แปลงลิงก์ (URL) ให้กดคลิกได้ (ใช้กับบอทและผู้ใช้ทั่วไป)
+        $row['message'] = preg_replace('/\[url=(.*?)\](.*?)\[\/url\]/i', '<a href="$1" target="_blank" style="color:#ff6600; text-decoration:underline; font-weight:bold;">$2</a>', $row['message']);
+
+        // แปลงแท็กชื่อ
         if($enable_mention) {
             $row['message'] = preg_replace('/@([^\s]+)/u', '<strong style="color:#0073ff; background:#e6f2ff; padding:0 4px; border-radius:3px;">@$1</strong>', $row['message']);
         }
 
+        // จัดการสีชื่อ (ถ้าเป็นบอทให้เป็นสีส้ม ถ้าคนทั่วไปให้ดึงตามยศ)
         $row['color'] = '#333333';
-        if($enable_color && !empty($row['groupid'])) {
+        if($row['uid'] == 0) {
+            $row['color'] = '#ff6600'; // สีของบอท
+        } elseif($enable_color && !empty($row['groupid'])) {
             $group_color = $_G['cache']['usergroups'][$row['groupid']]['color'];
             if(!empty($group_color)) {
                 $row['color'] = $group_color;
@@ -57,7 +106,6 @@ elseif($action == 'get') {
     $messages = array_reverse($messages);
     $is_admin = ($_G['uid'] && $_G['adminid'] > 0) ? true : false;
     
-    // ส่งค่า enable_mention ไปให้ JavaScript ด้วย
     echo json_encode(array('status' => 'success', 'data' => $messages, 'is_admin' => $is_admin, 'enable_mention' => $enable_mention));
     exit;
 }
