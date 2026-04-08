@@ -7,12 +7,7 @@ class plugin_prasopkan_chat {
     public function global_footer() {
         global $_G;
         
-        // 🚨 ดักตรงนี้เลย: ถ้าไม่ได้ล็อกอิน ให้คืนค่าว่างเปล่า (ไม่แสดงกล่องแชทใดๆ)
-        if(empty($_G['uid'])) {
-            return '';
-        }
-        
-        // บังคับโหลดแคชการตั้งค่าปลั๊กอินให้ชัวร์ 100%
+        // บังคับโหลดแคชการตั้งค่า
         loadcache('plugin');
         $plugin_config = $_G['cache']['plugin']['prasopkan_chat'];
         
@@ -21,7 +16,7 @@ class plugin_prasopkan_chat {
         
         $rooms_html = '';
         
-        // เช็คว่าเปิดใช้งานและมีการเลือกบอร์ดไว้หรือไม่
+        // จัดการสร้างแท็บห้องแชท
         if($enable_rooms) {
             if(!is_array($chat_forums)) {
                 $chat_forums = @unserialize($chat_forums);
@@ -31,14 +26,12 @@ class plugin_prasopkan_chat {
                 $fids = implode(',', array_map('intval', $chat_forums));
                 
                 if($fids) {
-                    // ไปค้นหาชื่อบอร์ดจากฐานข้อมูล
                     $query = DB::query("SELECT fid, name FROM ".DB::table('forum_forum')." WHERE fid IN ($fids) ORDER BY displayorder");
                     $rooms = array();
                     while($row = DB::fetch($query)) {
                         $rooms[] = $row;
                     }
 
-                    // สร้าง HTML สำหรับแท็บห้องแชท
                     if(!empty($rooms)) {
                         $rooms_html .= '<div id="pk-chat-rooms">';
                         $first = true;
