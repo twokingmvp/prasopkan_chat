@@ -10,6 +10,31 @@
         
         if ($('.pk-room-tab.active').length > 0) currentRoomId = $('.pk-room-tab.active').data('room');
 
+        // --- 🌙 โหลดสถานะ Dark Mode ที่บันทึกไว้ ---
+        var savedTheme = localStorage.getItem('prasopkan_chat_theme');
+        if(savedTheme === 'dark') {
+            $('#pk-chat-box, #pk-chat-head').addClass('pk-dark-mode');
+            $('#pk-dark-mode-toggle').prop('checked', true);
+        }
+
+        // เปิด-ปิด เมนูตั้งค่า ⚙️
+        $('#pk-chat-settings-btn').on('click', function(e) {
+            e.stopPropagation();
+            $('#pk-chat-emoji-picker, #pk-chat-rp-modal').hide();
+            $('#pk-chat-settings-menu').fadeToggle(150);
+        });
+
+        // สลับโหมด Dark Mode / Light Mode
+        $('#pk-dark-mode-toggle').on('change', function() {
+            if($(this).is(':checked')) {
+                $('#pk-chat-box, #pk-chat-head').addClass('pk-dark-mode');
+                localStorage.setItem('prasopkan_chat_theme', 'dark');
+            } else {
+                $('#pk-chat-box, #pk-chat-head').removeClass('pk-dark-mode');
+                localStorage.setItem('prasopkan_chat_theme', 'light');
+            }
+        });
+
         // --- ระบบเปิด-ปิดแบบ Floating Head ---
         function toggleChat() {
             if(chatBoxContainer.is(':hidden')) {
@@ -35,13 +60,11 @@
             typingTimer = setTimeout(function() { $.ajax({url: apiUrl + '&action=typing&room_id=' + currentRoomId}); }, 1000);
         });
 
-        // --- ระบบสลับแท็บ ---
         $('.pk-room-tab').on('click', function() {
             $('.pk-room-tab').removeClass('active'); $(this).addClass('active'); currentRoomId = $(this).data('room'); 
             chatBox.html('<div style="text-align:center; padding:15px; color:var(--pk-text-muted);">กำลังโหลด...</div>'); fetchMessages(true); 
         });
 
-        // --- ระบบดึงข้อมูล (แย่งฝั่งซ้าย-ขวา) ---
         function fetchMessages(forceScroll = false) {
             if(isFetching) return;
             isFetching = true;
@@ -55,7 +78,6 @@
                         var isMentionEnabled = (res.enable_mention == 1);
                         var isReactionEnabled = (res.enable_reaction == 1);
 
-                        // แสดงคนกำลังพิมพ์
                         if(res.typing_users && res.typing_users.length > 0) {
                             $('#pk-typing-names').text(res.typing_users.join(', '));
                             $('#pk-chat-typing-indicator').show();
@@ -67,7 +89,6 @@
                             html = '<div style="text-align:center; padding:15px; color:var(--pk-text-muted);">ยังไม่มีคนคุย มาเริ่มคุยกันเลย!</div>';
                         } else {
                             $.each(res.data, function(index, item) {
-                                // เช็คว่าเป็นข้อความของเราไหม
                                 var isMine = (item.uid == res.current_uid);
                                 var rowClass = isMine ? 'pk-msg-mine' : 'pk-msg-other';
                                 var nameColor = isMine ? 'var(--pk-text-muted)' : (item.color ? item.color : 'var(--pk-text)');
@@ -86,7 +107,6 @@
                                 var reactionsHtml = pills !== '' ? '<div class="pk-reactions-display">' + pills + '</div>' : '';
                                 var headerInfo = isMine ? '<span class="pk-msg-time">'+item.time+'</span>' : '<b style="color:'+nameColor+';">'+item.username+'</b> <span class="pk-msg-time">'+item.time+'</span>';
 
-                                // สร้างโครงสร้างกล่องคำพูด (LINE Style)
                                 html += '<div class="pk-msg-row ' + rowClass + '">';
                                 html += '<div class="pk-msg-info">' + headerInfo + '</div>';
                                 html += '<div class="pk-bubble-wrapper">';
@@ -97,12 +117,11 @@
                                     html += '<div class="pk-bubble">' + item.message + '</div>';
                                     html += '<div class="pk-msg-actions-inline">' + replyBtn + reactBtn + delBtn + '</div>';
                                 }
-                                html += '</div>'; // end wrapper
+                                html += '</div>';
                                 html += reactionsHtml;
-                                html += '</div>'; // end row
+                                html += '</div>';
                             });
                         }
-                        
                         var isAtBottom = (chatBox[0].scrollHeight - chatBox.scrollTop() <= chatBox.outerHeight() + 15);
                         chatBox.html(html);
                         if(isAtBottom || forceScroll) chatBox.scrollTop(chatBox[0].scrollHeight);
@@ -114,9 +133,18 @@
         }
         fetchMessages(true); setInterval(function() { fetchMessages(false); }, 3000);
 
-        // --- ระบบอั่งเปา & ปุ่มต่างๆ (ปล่อยไว้เหมือนเดิม แค่รวมโค้ด) ---
+        // --- ซ่อนทุกเมนูเมื่อคลิกพื้นที่อื่น ---
+        $(document).on('click', function(e) { 
+            if (!$(e.target).closest('#pk-chat-emoji-picker, #pk-chat-emoji-btn, #pk-chat-rp-modal, #pk-chat-rp-btn, #pk-chat-settings-btn, #pk-chat-settings-menu').length) { 
+                $('#pk-chat-emoji-picker').fadeOut(150); 
+                $('#pk-chat-rp-modal').fadeOut(150); 
+                $('#pk-chat-settings-menu').fadeOut(150);
+            } 
+        });
+
+        // --- อั่งเปา, อีโมจิ, รูปภาพ ฯลฯ ---
         var rpModal = $('#pk-chat-rp-modal');
-        $('#pk-chat-rp-btn').on('click', function(e) { e.stopPropagation(); $('#pk-chat-emoji-picker').hide(); rpModal.fadeToggle(150); });
+        $('#pk-chat-rp-btn').on('click', function(e) { e.stopPropagation(); $('#pk-chat-emoji-picker, #pk-chat-settings-menu').hide(); rpModal.fadeToggle(150); });
         $('#pk-rp-cancel').on('click', function() { rpModal.fadeOut(150); });
         $('#pk-rp-submit').on('click', function() {
             var amount = $('#pk-rp-amount').val(); var count = $('#pk-rp-count').val();
@@ -124,14 +152,13 @@
             $(this).prop('disabled', true).text('กำลังส่ง...');
             $.ajax({ url: apiUrl + '&action=send_redpacket&room_id=' + currentRoomId, type: 'GET', data: { amount: amount, count: count }, dataType: 'json', success: function(res) { $('#pk-rp-submit').prop('disabled', false).text('โยนซอง!'); if(res.status === 'success') { rpModal.fadeOut(150); $('#pk-rp-amount').val(''); $('#pk-rp-count').val(''); fetchMessages(true); } else { alert(res.msg); } } });
         });
-        $(document).on('click', '.pk-redpacket-box', function() { $.ajax({ url: apiUrl + '&action=claim_redpacket&env_id=' + $(this).data('envid'), type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') { alert('🎉 ยินดีด้วย! คุณได้รับอั่งเปาจำนวน ' + res.amount + ' เครดิต'); } else { alert(res.msg); } } }); });
+        $(document).on('click', '.pk-redpacket-box', function() { $.ajax({ url: apiUrl + '&action=claim_redpacket&env_id=' + $(this).data('envid'), type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') { alert('🎉 คุณได้รับอั่งเปา ' + res.amount + ' เครดิต'); } else { alert(res.msg); } } }); });
 
         var emojis = ['😀','😂','🤣','😊','😍','🥰','😘','😜','😎','🥺','😭','😡','👍','👎','👏','🙏','❤️','🔥','✨','🎉','🌟','🐱','🐶','💡','📌'];
         var emojiPicker = $('#pk-chat-emoji-picker'); var emojiHtml = '';
         $.each(emojis, function(i, emoji) { emojiHtml += '<span class="pk-emoji-item">' + emoji + '</span>'; }); emojiPicker.html(emojiHtml);
-        $('#pk-chat-emoji-btn').on('click', function(e) { e.stopPropagation(); rpModal.hide(); emojiPicker.fadeToggle(150); });
+        $('#pk-chat-emoji-btn').on('click', function(e) { e.stopPropagation(); rpModal.hide(); $('#pk-chat-settings-menu').hide(); emojiPicker.fadeToggle(150); });
         $(document).on('click', '.pk-emoji-item', function() { var input = $('#pk-chat-input'); input.val(input.val() + $(this).text()).focus(); });
-        $(document).on('click', function(e) { if (!$(e.target).closest('#pk-chat-emoji-picker, #pk-chat-emoji-btn, #pk-chat-rp-modal, #pk-chat-rp-btn').length) { emojiPicker.fadeOut(150); rpModal.fadeOut(150); } });
 
         $('#pk-chat-img-btn').on('click', function() { $('#pk-chat-file-upload').click(); });
         $('#pk-chat-file-upload').on('change', function() {
@@ -142,7 +169,7 @@
 
         $(document).on('click', '.pk-msg-reply', function() { var user = $(this).data('user'); var input = $('#pk-chat-input'); var currentVal = input.val(); if(currentVal.indexOf('@' + user) === -1) input.val('@' + user + ' ' + currentVal).focus(); else input.focus(); });
         $(document).on('click', '.pk-msg-add-react, .pk-react-pill', function() { $.ajax({ url: apiUrl + '&action=react&msg_id=' + $(this).data('id') + '&reaction=' + encodeURIComponent($(this).data('emoji')), type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') fetchMessages(false); } }); });
-        $(document).on('click', '.pk-msg-delete', function() { if(confirm('ต้องการลบข้อความนี้ใช่หรือไม่?')) { $.ajax({ url: apiUrl + '&action=delete&msg_id=' + $(this).data('id'), type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') fetchMessages(false); else alert(res.msg); } }); } });
+        $(document).on('click', '.pk-msg-delete', function() { if(confirm('ต้องการลบข้อความนี้?')) { $.ajax({ url: apiUrl + '&action=delete&msg_id=' + $(this).data('id'), type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') fetchMessages(false); else alert(res.msg); } }); } });
 
         function sendMessage(e) {
             if(e) e.preventDefault(); var inputField = $('#pk-chat-input'); if(inputField.length === 0) return; 
