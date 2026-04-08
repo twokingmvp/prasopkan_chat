@@ -169,3 +169,15 @@
 .pk-msg-delete:hover {
     text-decoration: underline;
 }
+
+/* --- ตกแต่งปุ่มตอบกลับ (Reply) --- */
+.pk-msg-reply {
+    color: #0073ff;
+    font-size: 11px;
+    margin-left: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+.pk-msg-reply:hover {
+    text-decoration: underline;
+}

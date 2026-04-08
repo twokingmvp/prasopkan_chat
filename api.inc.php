@@ -25,24 +25,27 @@ if($action == 'send') {
     echo json_encode(array('status' => 'success'));
     exit;
 } 
-// --- 2. ดึงข้อความ แปลงรูปภาพ และดึงสีชื่อ ---
+// --- 2. ดึงข้อความและแปลง @Mention ---
 elseif($action == 'get') {
-    // โหลดการตั้งค่าปลั๊กอินและแคชกลุ่มผู้ใช้
     loadcache('plugin');
     loadcache('usergroups');
     $plugin_config = $_G['cache']['plugin']['prasopkan_chat'];
     $enable_color = $plugin_config['enable_color'];
+    $enable_mention = $plugin_config['enable_mention']; // ดึงค่าการเปิดใช้งาน Mention
 
     $messages = array();
-    // ใช้ LEFT JOIN เพื่อดึง groupid ของผู้ส่งมาจากตาราง common_member
     $query = DB::query("SELECT c.*, m.groupid FROM ".DB::table('prasopkan_chat_messages')." c LEFT JOIN ".DB::table('common_member')." m ON c.uid = m.uid WHERE c.room_id='$room_id' ORDER BY c.dateline DESC LIMIT 50");
     
     while($row = DB::fetch($query)) {
         $row['time'] = dgmdate($row['dateline'], 'H:i');
         $row['message'] = preg_replace('/\[img\](.*?)\[\/img\]/i', '<br><img src="$1" style="max-width:100%; border-radius:8px; margin-top:5px; border:1px solid #ddd;" />', $row['message']);
         
-        // จัดการสีชื่อตาม Group
-        $row['color'] = '#333333'; // สีเริ่มต้น (สีเทาเข้ม)
+        // แปลง @ชื่อ ให้เป็นป้ายสีฟ้า (ถ้าเปิดใช้งาน)
+        if($enable_mention) {
+            $row['message'] = preg_replace('/@([^\s]+)/u', '<strong style="color:#0073ff; background:#e6f2ff; padding:0 4px; border-radius:3px;">@$1</strong>', $row['message']);
+        }
+
+        $row['color'] = '#333333';
         if($enable_color && !empty($row['groupid'])) {
             $group_color = $_G['cache']['usergroups'][$row['groupid']]['color'];
             if(!empty($group_color)) {
@@ -54,7 +57,8 @@ elseif($action == 'get') {
     $messages = array_reverse($messages);
     $is_admin = ($_G['uid'] && $_G['adminid'] > 0) ? true : false;
     
-    echo json_encode(array('status' => 'success', 'data' => $messages, 'is_admin' => $is_admin));
+    // ส่งค่า enable_mention ไปให้ JavaScript ด้วย
+    echo json_encode(array('status' => 'success', 'data' => $messages, 'is_admin' => $is_admin, 'enable_mention' => $enable_mention));
     exit;
 }
 // --- 3. ฟังก์ชันลบข้อความ ---

@@ -83,6 +83,19 @@
             });
         });
 
+        // --- ระบบแท็กชื่อ (Mention) 💬 ---
+        $(document).on('click', '.pk-msg-reply', function() {
+            var user = $(this).data('user');
+            var input = $('#pk-chat-input');
+            var currentVal = input.val();
+            // เช็คว่ามี @ชื่อ นี้อยู่แล้วหรือเปล่า จะได้ไม่แท็กซ้ำรัวๆ
+            if(currentVal.indexOf('@' + user) === -1) {
+                input.val('@' + user + ' ' + currentVal).focus();
+            } else {
+                input.focus();
+            }
+        });
+
         // --- ระบบสลับแท็บห้องแชท ---
         $('.pk-room-tab').on('click', function() {
             $('.pk-room-tab').removeClass('active');
@@ -121,14 +134,16 @@
                     if(res.status === 'success') {
                         var html = '';
                         var isAdmin = res.is_admin; 
+                        var isMentionEnabled = (res.enable_mention == 1);
 
                         if(res.data.length === 0) {
                             html = '<div style="text-align:center; padding:15px; color:#999;">ยังไม่มีคนคุยในห้องนี้ มาเริ่มคุยกันเลย!</div>';
                         } else {
                             $.each(res.data, function(index, item) {
                                 var delBtn = isAdmin ? '<span class="pk-msg-delete" data-id="' + item.msg_id + '">[ลบ]</span>' : '';
-                                // แทรก item.color เข้าไปที่ชื่อผู้ใช้ตรงนี้
-                                html += '<div class="pk-msg-item"><b style="color:' + item.color + ';">' + item.username + ':</b> ' + item.message + '<span class="pk-msg-time">[' + item.time + ']</span>' + delBtn + '</div>';
+                                var replyBtn = isMentionEnabled ? '<span class="pk-msg-reply" data-user="' + item.username + '">[ตอบ]</span>' : '';
+                                
+                                html += '<div class="pk-msg-item"><b style="color:' + item.color + ';">' + item.username + ':</b> ' + item.message + '<span class="pk-msg-time">[' + item.time + ']</span>' + replyBtn + delBtn + '</div>';
                             });
                         }
                         
