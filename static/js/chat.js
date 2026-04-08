@@ -35,7 +35,7 @@
             }
         });
 
-        // --- ระบบส่งรูปภาพ (Image Upload) 📸 ---
+        // --- ระบบส่งรูปภาพ (Image Upload) ---
         $('#pk-chat-img-btn').on('click', function() {
             $('#pk-chat-file-upload').click();
         });
@@ -47,7 +47,6 @@
             var formData = new FormData();
             formData.append('chat_image', file);
 
-            // แสดงสถานะกำลังอัปโหลด
             var inputField = $('#pk-chat-input');
             inputField.val('กำลังอัปโหลดรูปภาพ...').prop('disabled', true);
 
@@ -61,7 +60,6 @@
                 success: function(res) {
                     inputField.val('').prop('disabled', false).focus();
                     if(res.status === 'success') {
-                        // เมื่อได้ URL รูปมา ให้ยิงคำสั่งส่งข้อความทันที
                         var imgMsg = '[img]' + res.url + '[/img]';
                         $.ajax({
                             url: apiUrl + '&action=send&room_id=' + currentRoomId,
@@ -129,7 +127,8 @@
                         } else {
                             $.each(res.data, function(index, item) {
                                 var delBtn = isAdmin ? '<span class="pk-msg-delete" data-id="' + item.msg_id + '">[ลบ]</span>' : '';
-                                html += '<div class="pk-msg-item"><b>' + item.username + ':</b> ' + item.message + '<span class="pk-msg-time">[' + item.time + ']</span>' + delBtn + '</div>';
+                                // แทรก item.color เข้าไปที่ชื่อผู้ใช้ตรงนี้
+                                html += '<div class="pk-msg-item"><b style="color:' + item.color + ';">' + item.username + ':</b> ' + item.message + '<span class="pk-msg-time">[' + item.time + ']</span>' + delBtn + '</div>';
                             });
                         }
                         
