@@ -13,24 +13,20 @@ class plugin_prasopkan_chat {
         $enable_rooms = $plugin_config['enable_rooms'];
         $chat_forums = $plugin_config['chat_forums'];
         
-        // อ่านค่าว่าเปิดให้ส่งรูปภาพหรือไม่
         $enable_image = $plugin_config['enable_image'];
+        $enable_redpacket = $plugin_config['enable_redpacket']; // เพิ่มการดึงค่าอั่งเปา
         
         $rooms_html = '';
         
         if($enable_rooms) {
-            if(!is_array($chat_forums)) {
-                $chat_forums = @unserialize($chat_forums);
-            }
+            if(!is_array($chat_forums)) $chat_forums = @unserialize($chat_forums);
             
             if(!empty($chat_forums) && is_array($chat_forums)) {
                 $fids = implode(',', array_map('intval', $chat_forums));
                 if($fids) {
                     $query = DB::query("SELECT fid, name FROM ".DB::table('forum_forum')." WHERE fid IN ($fids) ORDER BY displayorder");
                     $rooms = array();
-                    while($row = DB::fetch($query)) {
-                        $rooms[] = $row;
-                    }
+                    while($row = DB::fetch($query)) { $rooms[] = $row; }
 
                     if(!empty($rooms)) {
                         $rooms_html .= '<div id="pk-chat-rooms">';
@@ -45,6 +41,8 @@ class plugin_prasopkan_chat {
                 }
             }
         }
+
+        $is_logged_in = ($_G['uid'] > 0) ? true : false;
 
         ob_start();
         include template('prasopkan_chat:chat_ui');

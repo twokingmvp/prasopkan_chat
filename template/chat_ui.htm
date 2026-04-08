@@ -13,11 +13,22 @@
         <div id="pk-chat-messages"></div>
         <div id="pk-chat-emoji-picker" style="display: none;"></div>
         
+        <div id="pk-chat-rp-modal" style="display: none;">
+            <h3>แจกอั่งเปาเครดิต 🧧</h3>
+            <input type="number" id="pk-rp-amount" class="pk-rp-input" placeholder="จำนวนเครดิตทั้งหมดที่จะแจก">
+            <input type="number" id="pk-rp-count" class="pk-rp-input" placeholder="จำนวนซอง (แบ่งแจกกี่คน)">
+            <div class="pk-rp-btn-group">
+                <button id="pk-rp-cancel">ยกเลิก</button>
+                <button id="pk-rp-submit">โยนซอง!</button>
+            </div>
+        </div>
+        
         <div id="pk-chat-input-area">
             <button id="pk-chat-emoji-btn" type="button">😀</button>
             
-            <button id="pk-chat-img-btn" type="button" style="background:none; border:none; font-size:20px; cursor:pointer; padding:0 8px 0 0; outline:none; transition:transform 0.2s;">📸</button>
+            <button id="pk-chat-img-btn" type="button" style="background:none; border:none; font-size:20px; cursor:pointer; padding:0 8px 0 0; outline:none;">📸</button>
             <input type="file" id="pk-chat-file-upload" accept="image/png, image/jpeg, image/gif, image/webp" style="display:none;">
+            <button id="pk-chat-rp-btn" type="button" style="background:none; border:none; font-size:20px; cursor:pointer; padding:0 8px 0 0; outline:none;">🧧</button>
             <input type="text" id="pk-chat-input" placeholder="พิมพ์ข้อความ...">
             <button id="pk-chat-send">ส่ง</button>
         </div>

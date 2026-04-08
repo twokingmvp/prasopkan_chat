@@ -181,3 +181,37 @@
 .pk-msg-reply:hover {
     text-decoration: underline;
 }
+
+/* --- ตกแต่งระบบอั่งเปา 🧧 --- */
+.pk-redpacket-box {
+    background: linear-gradient(135deg, #ff4d4f, #d9363e);
+    color: white;
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-top: 5px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 3px 8px rgba(217, 54, 62, 0.4);
+    transition: transform 0.2s;
+}
+.pk-redpacket-box:hover { transform: scale(1.03); }
+.pk-rp-icon { font-size: 28px; margin-right: 12px; }
+.pk-rp-text { line-height: 1.3; }
+
+#pk-chat-rp-modal {
+    position: absolute;
+    bottom: 60px;
+    right: 10px;
+    width: 260px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.25);
+    padding: 15px;
+    z-index: 10001;
+}
+#pk-chat-rp-modal h3 { margin: 0 0 12px 0; color: #d9363e; text-align: center; font-size: 16px;}
+.pk-rp-input { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+.pk-rp-btn-group { display: flex; justify-content: space-between; }
+#pk-rp-submit { background: #d9363e; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 48%; font-weight:bold;}
+#pk-rp-cancel { background: #eee; color: #555; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 48%; }
