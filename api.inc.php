@@ -11,37 +11,31 @@ if($action == 'send') {
     $message = dhtmlspecialchars(trim($_GET['message']));
     if(empty($message)) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาพิมพ์ข้อความ')); exit; }
     if(!$_G['uid']) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาล็อกอินก่อนส่งข้อความ')); exit; }
-
     $message = preg_replace('/(?<!\])(https?:\/\/[^\s<]+)/i', '[url=$1]$1[/url]', $message);
-
-    $data = array(
-        'uid' => $_G['uid'],
-        'username' => $_G['username'],
-        'message' => $message,
-        'dateline' => $_G['timestamp'],
-        'ip' => $_G['clientip'],
-        'room_id' => $room_id
-    );
+    $data = array('uid' => $_G['uid'], 'username' => $_G['username'], 'message' => $message, 'dateline' => $_G['timestamp'], 'ip' => $_G['clientip'], 'room_id' => $room_id);
     DB::insert('prasopkan_chat_messages', $data);
-    echo json_encode(array('status' => 'success'));
-    exit;
+    echo json_encode(array('status' => 'success')); exit;
 } 
+// --- ระบบ "กำลังพิมพ์..." ---
+elseif($action == 'typing') {
+    if($_G['uid']) {
+        DB::query("REPLACE INTO ".DB::table('prasopkan_chat_typing')." (room_id, uid, username, dateline) VALUES ('$room_id', '{$_G['uid']}', '{$_G['username']}', '{$_G['timestamp']}')");
+    }
+    echo json_encode(array('status'=>'success')); exit;
+}
 elseif($action == 'get') {
-    loadcache('plugin');
-    loadcache('usergroups');
+    loadcache('plugin'); loadcache('usergroups');
     $plugin_config = $_G['cache']['plugin']['prasopkan_chat'];
-    
     $enable_color = $plugin_config['enable_color'];
     $enable_mention = $plugin_config['enable_mention'];
     $enable_bot = $plugin_config['enable_bot'];
     $enable_linkpreview = $plugin_config['enable_linkpreview']; 
-    $enable_reaction = $plugin_config['enable_reaction']; // ดึงค่าการตั้งค่ารีแอคชั่น
+    $enable_reaction = $plugin_config['enable_reaction']; 
+    $current_uid = $_G['uid']; // ส่ง UID ปัจจุบันกลับไปให้ JS จัดหน้าจอฝั่งขวา
 
     if($enable_bot) {
-        loadcache('prasopkan_chat_last_tid');
-        $last_tid = intval($_G['cache']['prasopkan_chat_last_tid']);
+        loadcache('prasopkan_chat_last_tid'); $last_tid = intval($_G['cache']['prasopkan_chat_last_tid']);
         $latest_thread = DB::fetch_first("SELECT tid, subject, author FROM ".DB::table('forum_thread')." WHERE displayorder >= 0 ORDER BY tid DESC LIMIT 1");
-        
         if($latest_thread && $latest_thread['tid'] > $last_tid) {
             savecache('prasopkan_chat_last_tid', $latest_thread['tid']);
             if($last_tid > 0) {
@@ -49,112 +43,87 @@ elseif($action == 'get') {
                 $chat_forums = $plugin_config['chat_forums'];
                 if(!is_array($chat_forums)) $chat_forums = @unserialize($chat_forums);
                 if(empty($chat_forums)) $chat_forums = array(1);
-                
                 foreach($chat_forums as $r_id) {
-                    $bot_data = array('uid' => 0, 'username' => '🤖 System Bot', 'message' => $bot_msg, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => intval($r_id));
-                    DB::insert('prasopkan_chat_messages', $bot_data);
+                    DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🤖 System Bot', 'message' => $bot_msg, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => intval($r_id)));
                 }
             }
         }
     }
 
-    $messages = array();
-    $msg_ids = array();
+    // ล้างและดึงข้อมูลคนกำลังพิมพ์
+    DB::query("DELETE FROM ".DB::table('prasopkan_chat_typing')." WHERE dateline < ".($_G['timestamp'] - 6));
+    $typing_users = array();
+    $q_type = DB::query("SELECT username FROM ".DB::table('prasopkan_chat_typing')." WHERE room_id='$room_id' AND uid != '{$_G['uid']}'");
+    while($t = DB::fetch($q_type)) { $typing_users[] = $t['username']; }
+
+    $messages = array(); $msg_ids = array();
     $query = DB::query("SELECT c.*, m.groupid FROM ".DB::table('prasopkan_chat_messages')." c LEFT JOIN ".DB::table('common_member')." m ON c.uid = m.uid WHERE c.room_id='$room_id' ORDER BY c.dateline DESC LIMIT 50");
     
     while($row = DB::fetch($query)) {
         $row['time'] = dgmdate($row['dateline'], 'H:i');
-        $row['message'] = preg_replace('/\[img\](.*?)\[\/img\]/i', '<br><img src="$1" style="max-width:100%; border-radius:8px; margin-top:5px; border:1px solid #ddd;" />', $row['message']);
+        $row['message'] = preg_replace('/\[img\](.*?)\[\/img\]/i', '<img src="$1" class="pk-chat-img" />', $row['message']);
         
         if($enable_linkpreview) {
             $row['message'] = preg_replace_callback('/\[url=(.*?(?:tid=|t-|thread-)(\d+)[^\]]*?)\](.*?)\[\/url\]/i', function($matches) {
-                global $_G;
-                $url = $matches[1];
-                $tid = intval($matches[2]);
-                $text = $matches[3];
-                
+                global $_G; $url = $matches[1]; $tid = intval($matches[2]); $text = $matches[3];
                 $thread = DB::fetch_first("SELECT subject, author, views, replies FROM ".DB::table('forum_thread')." WHERE tid='$tid'");
-                
                 if($thread) {
-                    $img_html = '<div style="width:55px; height:55px; background:#f0f4f8; border-radius:4px; margin-right:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:24px; border:1px solid #eaeaea;">💬</div>';
+                    $img_html = '<div class="pk-lp-fallback">💬</div>';
                     $threadimage = DB::fetch_first("SELECT attachment FROM ".DB::table('forum_threadimage')." WHERE tid='$tid'");
                     if($threadimage && !empty($threadimage['attachment'])) {
                         $attachurl = !empty($_G['setting']['attachurl']) ? $_G['setting']['attachurl'] : 'data/attachment/';
                         $img_url = preg_match('/^http/i', $threadimage['attachment']) ? $threadimage['attachment'] : $attachurl.'forum/'.$threadimage['attachment'];
-                        $img_html = '<img src="'.$img_url.'" style="width:55px; height:55px; object-fit:cover; border-radius:4px; margin-right:10px; flex-shrink:0; border:1px solid #eaeaea;" onerror="this.style.display=\'none\'">';
+                        $img_html = '<img src="'.$img_url.'" class="pk-lp-img" onerror="this.style.display=\'none\'">';
                     }
-                    return '<div class="pk-link-preview" style="display:flex; align-items:center; overflow:hidden;">'.$img_html.'<div style="flex:1; min-width:0;"><a href="'.$url.'" target="_blank" class="pk-lp-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;" title="'.strip_tags($thread['subject']).'">📄 '.strip_tags($thread['subject']).'</a><div class="pk-lp-meta">✍️ '.$thread['author'].' &nbsp;|&nbsp; 👁️ '.$thread['views'].' &nbsp;|&nbsp; 💬 '.$thread['replies'].'</div></div></div>';
+                    return '<div class="pk-link-preview">'.$img_html.'<div class="pk-lp-content"><a href="'.$url.'" target="_blank" class="pk-lp-title" title="'.strip_tags($thread['subject']).'">📄 '.strip_tags($thread['subject']).'</a><div class="pk-lp-meta">✍️ '.$thread['author'].' &nbsp;|&nbsp; 👁️ '.$thread['views'].' &nbsp;|&nbsp; 💬 '.$thread['replies'].'</div></div></div>';
                 }
-                return '<a href="'.$url.'" target="_blank" style="color:#0073ff; text-decoration:underline;">'.$text.'</a>';
+                return '<a href="'.$url.'" target="_blank" class="pk-text-link">'.$text.'</a>';
             }, $row['message']);
-            
-            $row['message'] = preg_replace('/\[url=(.*?)\](.*?)\[\/url\]/i', '<a href="$1" target="_blank" style="color:#0073ff; text-decoration:underline;">$2</a>', $row['message']);
+            $row['message'] = preg_replace('/\[url=(.*?)\](.*?)\[\/url\]/i', '<a href="$1" target="_blank" class="pk-text-link">$2</a>', $row['message']);
         } else {
-            $row['message'] = preg_replace('/\[url=(.*?)\](.*?)\[\/url\]/i', '<a href="$1" target="_blank" style="color:#ff6600; text-decoration:underline; font-weight:bold;">$2</a>', $row['message']);
+            $row['message'] = preg_replace('/\[url=(.*?)\](.*?)\[\/url\]/i', '<a href="$1" target="_blank" class="pk-text-link">$2</a>', $row['message']);
         }
 
-        if($enable_mention) {
-            $row['message'] = preg_replace('/@([^\s]+)/u', '<strong style="color:#0073ff; background:#e6f2ff; padding:0 4px; border-radius:3px;">@$1</strong>', $row['message']);
-        }
-        
-        $row['message'] = preg_replace('/\[redpacket\](\d+)\[\/redpacket\]/i', '<div class="pk-redpacket-box" data-envid="$1"><div class="pk-rp-icon">🧧</div><div class="pk-rp-text"><b>อั่งเปาเครดิต</b><br><span style="font-size:11px; opacity:0.8;">คลิกเพื่อลุ้นรับเครดิต!</span></div></div>', $row['message']);
+        if($enable_mention) $row['message'] = preg_replace('/@([^\s]+)/u', '<strong class="pk-mention-badge">@$1</strong>', $row['message']);
+        $row['message'] = preg_replace('/\[redpacket\](\d+)\[\/redpacket\]/i', '<div class="pk-redpacket-box" data-envid="$1"><div class="pk-rp-icon">🧧</div><div class="pk-rp-text"><b>อั่งเปาเครดิต</b><br><span>คลิกลุ้นรับเครดิต!</span></div></div>', $row['message']);
 
-        $row['color'] = '#333333';
-        if($row['uid'] == 0) {
-            $row['color'] = '#ff6600';
-        } elseif($enable_color && !empty($row['groupid'])) {
+        $row['color'] = ''; // ปล่อยให้ CSS จัดการถ้าไม่ได้กำหนด
+        if($row['uid'] == 0) $row['color'] = '#ff6600';
+        elseif($enable_color && !empty($row['groupid'])) {
             $group_color = $_G['cache']['usergroups'][$row['groupid']]['color'];
             if(!empty($group_color)) $row['color'] = $group_color;
         }
-        
-        $messages[] = $row;
-        $msg_ids[] = $row['msg_id'];
+        $messages[] = $row; $msg_ids[] = $row['msg_id'];
     }
     
-    // --- 💖 ระบบดึงข้อมูลรีแอคชั่นทั้งหมดของ 50 ข้อความล่าสุด ---
     $reactions_map = array();
     if($enable_reaction && !empty($msg_ids)) {
         $ids_str = implode(',', $msg_ids);
         $req_query = DB::query("SELECT msg_id, reaction, uid FROM ".DB::table('prasopkan_chat_reactions')." WHERE msg_id IN ($ids_str)");
         while($r = DB::fetch($req_query)) {
-            $m_id = $r['msg_id'];
-            $rx = $r['reaction'];
+            $m_id = $r['msg_id']; $rx = $r['reaction'];
             if(!isset($reactions_map[$m_id])) $reactions_map[$m_id] = array();
             if(!isset($reactions_map[$m_id][$rx])) $reactions_map[$m_id][$rx] = array('count'=>0, 'me'=>false);
-            
             $reactions_map[$m_id][$rx]['count']++;
-            if($r['uid'] == $_G['uid']) $reactions_map[$m_id][$rx]['me'] = true; // จำไว้ว่าตัวเรากดไปแล้ว
+            if($r['uid'] == $_G['uid']) $reactions_map[$m_id][$rx]['me'] = true; 
         }
     }
-
-    // เอาข้อมูลรีแอคชั่นไปเสียบรวมกับข้อความ
-    foreach($messages as &$m) {
-        $m['reactions'] = isset($reactions_map[$m['msg_id']]) ? $reactions_map[$m['msg_id']] : null;
-    }
-
+    foreach($messages as &$m) { $m['reactions'] = isset($reactions_map[$m['msg_id']]) ? $reactions_map[$m['msg_id']] : null; }
     $messages = array_reverse($messages);
     $is_admin = ($_G['uid'] && $_G['adminid'] > 0) ? true : false;
     
-    echo json_encode(array('status' => 'success', 'data' => $messages, 'is_admin' => $is_admin, 'enable_mention' => $enable_mention, 'enable_reaction' => $enable_reaction));
+    echo json_encode(array('status' => 'success', 'data' => $messages, 'is_admin' => $is_admin, 'enable_mention' => $enable_mention, 'enable_reaction' => $enable_reaction, 'current_uid' => $current_uid, 'typing_users' => $typing_users));
     exit;
 }
-// --- 💖 ฟังก์ชันกดและยกเลิกรีแอคชั่น ---
-elseif($action == 'react') {
+elseif($action == 'react') { /* (โค้ดรีแอคชั่นเดิม ปล่อยไว้เลยครับ) */
     if(!$_G['uid']) { echo json_encode(array('status'=>'error', 'msg'=>'กรุณาล็อกอิน')); exit; }
-    $msg_id = intval($_GET['msg_id']);
-    $reaction = dhtmlspecialchars(trim($_GET['reaction']));
+    $msg_id = intval($_GET['msg_id']); $reaction = dhtmlspecialchars(trim($_GET['reaction']));
     if(!$msg_id || !$reaction) { echo json_encode(array('status'=>'error')); exit; }
-
-    // เช็คว่าเคยกดหรือยัง
     $exists = DB::fetch_first("SELECT id FROM ".DB::table('prasopkan_chat_reactions')." WHERE msg_id='$msg_id' AND uid='{$_G['uid']}' AND reaction='$reaction'");
-    if($exists) {
-        DB::delete('prasopkan_chat_reactions', "id='{$exists['id']}'"); // ถ้ายกเลิกกด
-    } else {
-        DB::insert('prasopkan_chat_reactions', array('msg_id'=>$msg_id, 'uid'=>$_G['uid'], 'reaction'=>$reaction)); // ถ้ากดใหม่
-    }
+    if($exists) DB::delete('prasopkan_chat_reactions', "id='{$exists['id']}'");
+    else DB::insert('prasopkan_chat_reactions', array('msg_id'=>$msg_id, 'uid'=>$_G['uid'], 'reaction'=>$reaction));
     echo json_encode(array('status'=>'success')); exit;
 }
-// ฟังก์ชันเดิมของระบบต่างๆ ย่อรวมไว้เพื่อประหยัดพื้นที่
 elseif($action == 'delete') {
     if(!$_G['uid'] || $_G['adminid'] <= 0) { echo json_encode(array('status' => 'error', 'msg' => 'ไม่มีสิทธิ์ในการลบข้อความ')); exit; }
     $msg_id = isset($_GET['msg_id']) ? intval($_GET['msg_id']) : 0;
@@ -170,9 +139,7 @@ elseif($action == 'upload') {
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     if(!in_array($ext, array('jpg', 'jpeg', 'png', 'gif', 'webp'))) { echo json_encode(array('status'=>'error','msg'=>'รองรับรูปภาพเท่านั้น')); exit; }
     $filename = 'img_'.$_G['uid'].'_'.time().'_'.rand(1000,9999).'.'.$ext;
-    if(move_uploaded_file($file['tmp_name'], $upload_dir.$filename)) {
-        echo json_encode(array('status'=>'success', 'url'=>'source/plugin/prasopkan_chat/uploads/'.$filename));
-    } else { echo json_encode(array('status'=>'error','msg'=>'บันทึกไฟล์ไม่ได้')); } exit;
+    if(move_uploaded_file($file['tmp_name'], $upload_dir.$filename)) { echo json_encode(array('status'=>'success', 'url'=>'source/plugin/prasopkan_chat/uploads/'.$filename)); } else { echo json_encode(array('status'=>'error','msg'=>'บันทึกไฟล์ไม่ได้')); } exit;
 }
 elseif($action == 'send_redpacket') {
     loadcache('plugin'); $config = $_G['cache']['plugin']['prasopkan_chat'];
@@ -191,10 +158,9 @@ elseif($action == 'send_redpacket') {
 }
 elseif($action == 'claim_redpacket') {
     if(!$_G['uid']) { echo json_encode(['status'=>'error', 'msg'=>'กรุณาล็อกอิน']); exit; }
-    $env_id = intval($_GET['env_id']);
-    $env = DB::fetch_first("SELECT * FROM ".DB::table('prasopkan_chat_envelopes')." WHERE id='$env_id'");
+    $env_id = intval($_GET['env_id']); $env = DB::fetch_first("SELECT * FROM ".DB::table('prasopkan_chat_envelopes')." WHERE id='$env_id'");
     if(!$env) { echo json_encode(['status'=>'error', 'msg'=>'ไม่พบซองอั่งเปานี้']); exit; }
-    if($env['remain_count'] <= 0) { echo json_encode(['status'=>'error', 'msg'=>'เสียใจด้วย! อั่งเปาถูกรับไปหมดแล้ว 😭']); exit; }
+    if($env['remain_count'] <= 0) { echo json_encode(['status'=>'error', 'msg'=>'อั่งเปาถูกรับไปหมดแล้ว 😭']); exit; }
     if(DB::fetch_first("SELECT log_id FROM ".DB::table('prasopkan_chat_envlogs')." WHERE env_id='$env_id' AND uid='{$_G['uid']}'")) { echo json_encode(['status'=>'error', 'msg'=>'คุณรับอั่งเปาซองนี้ไปแล้วจ้า!']); exit; }
     if($env['remain_count'] == 1) { $get_amount = $env['remain_amount']; } else {
         $max_get = floor($env['remain_amount'] / $env['remain_count'] * 2); $get_amount = rand(1, $max_get);

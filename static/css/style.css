@@ -1,291 +1,157 @@
 /* =========================================
-   1. โครงสร้างหลักของกล่องแชท
+   1. ตัวแปรสีรองรับโหมดมืด-สว่าง (Dark Mode)
 ========================================= */
+:root {
+    --pk-bg: #ffffff;
+    --pk-header: #0073ff;
+    --pk-header-text: #ffffff;
+    --pk-border: #f0f0f0;
+    --pk-msg-bg: #fafafa;
+    --pk-text: #333333;
+    --pk-text-muted: #888888;
+    --pk-bubble-mine: #0073ff;
+    --pk-bubble-mine-text: #ffffff;
+    --pk-bubble-other: #ffffff;
+    --pk-bubble-other-border: #e0e0e0;
+    --pk-input-bg: #f9f9f9;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --pk-bg: #1e1e24;
+        --pk-header: #2b2b36;
+        --pk-header-text: #ffffff;
+        --pk-border: #333344;
+        --pk-msg-bg: #121216;
+        --pk-text: #e0e0e0;
+        --pk-text-muted: #aaaaaa;
+        --pk-bubble-mine: #0066cc;
+        --pk-bubble-mine-text: #ffffff;
+        --pk-bubble-other: #2b2b36;
+        --pk-bubble-other-border: #3a3a4a;
+        --pk-input-bg: #2b2b36;
+    }
+}
+
+/* =========================================
+   2. โครงสร้างหลัก & บับเบิลลอยได้
+========================================= */
+#pk-chat-head {
+    position: fixed; bottom: 25px; right: 25px;
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, #0073ff, #0056cc);
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0, 115, 255, 0.4);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 9999;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+#pk-chat-head:hover { transform: scale(1.1); }
+
 #pk-chat-box {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 300px;
-    background: #ffffff;
-    border-radius: 10px 10px 0 0;
-    box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
-    display: flex;
-    flex-direction: column;
-    z-index: 9999;
-    font-family: sans-serif;
-    overflow: hidden;
-    transition: all 0.3s ease;
+    position: fixed; bottom: 25px; right: 25px;
+    width: 350px; background: var(--pk-bg);
+    border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    display: flex; flex-direction: column; z-index: 9999;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
+    overflow: hidden; border: 1px solid var(--pk-border);
 }
+
 #pk-chat-header {
-    background: #0073ff;
-    color: white;
-    padding: 12px;
-    font-weight: bold;
-    font-size: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
+    background: var(--pk-header); color: var(--pk-header-text);
+    padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;
 }
-#pk-chat-toggle-btn {
-    background: rgba(255,255,255,0.2);
-    border-radius: 4px;
-    padding: 2px 8px;
-    font-size: 12px;
-}
-#pk-chat-body {
-    display: flex;
-    flex-direction: column;
-    height: 350px;
-    position: relative; /* สำหรับอิงตำแหน่งกล่องอีโมจิ */
-}
-#pk-chat-messages {
-    flex: 1;
-    padding: 10px;
-    overflow-y: auto;
-    background: #f9f9f9;
-    font-size: 13px;
-}
-.pk-msg-item {
-    margin-bottom: 8px;
-    line-height: 1.4;
-    word-wrap: break-word;
-}
-.pk-msg-time {
-    font-size: 11px;
-    color: #999;
-    margin-left: 5px;
-}
-#pk-chat-input-area {
-    display: flex;
-    padding: 10px;
-    border-top: 1px solid #ddd;
-    background: #fff;
-    align-items: center;
-}
-#pk-chat-input {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    outline: none;
-}
-#pk-chat-send {
-    background: #0073ff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 12px;
-    margin-left: 8px;
-    cursor: pointer;
-}
+.pk-header-title { font-weight: bold; font-size: 15px; }
+#pk-chat-close-btn { cursor: pointer; opacity: 0.8; transition: opacity 0.2s; display:flex; }
+#pk-chat-close-btn:hover { opacity: 1; }
 
-/* =========================================
-   2. ระบบแท็บห้องแชท
-========================================= */
 #pk-chat-rooms {
-    display: flex;
-    background: #eef2f5;
-    overflow-x: auto;
-    padding: 8px;
-    gap: 8px;
-    border-bottom: 1px solid #ddd;
+    display: flex; background: var(--pk-msg-bg); overflow-x: auto;
+    padding: 10px; gap: 8px; border-bottom: 1px solid var(--pk-border);
 }
-#pk-chat-rooms::-webkit-scrollbar { height: 4px; }
-#pk-chat-rooms::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-
+#pk-chat-rooms::-webkit-scrollbar { display: none; }
 .pk-room-tab {
-    padding: 4px 10px;
-    font-size: 12px;
-    background: #fff;
-    color: #555;
-    border: 1px solid #ccc;
-    border-radius: 15px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.2s;
+    padding: 6px 12px; font-size: 12px; font-weight: 500;
+    background: var(--pk-bg); color: var(--pk-text-muted);
+    border: 1px solid var(--pk-border); border-radius: 20px;
+    cursor: pointer; white-space: nowrap; transition: all 0.2s;
 }
-.pk-room-tab.active {
-    background: #0073ff;
-    color: white;
-    border-color: #0073ff;
-}
+.pk-room-tab.active { background: var(--pk-header); color: var(--pk-header-text); border-color: var(--pk-header); }
+
+#pk-chat-body { display: flex; flex-direction: column; height: 400px; position: relative; }
+#pk-chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: var(--pk-msg-bg); font-size: 13.5px; }
+#pk-chat-messages::-webkit-scrollbar { width: 6px; }
+#pk-chat-messages::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 10px; }
 
 /* =========================================
-   3. ระบบตกแต่ง Emoji
+   3. กล่องคำพูด (Chat Bubble) สไตล์ LINE
 ========================================= */
-#pk-chat-emoji-btn {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 0 8px 0 0;
-    outline: none;
-    transition: transform 0.2s;
-}
-#pk-chat-emoji-btn:hover {
-    transform: scale(1.1);
-}
-#pk-chat-emoji-picker {
-    position: absolute;
-    bottom: 50px;
-    left: 10px;
-    width: 260px;
-    background: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.15);
-    padding: 10px;
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 8px;
-    max-height: 150px;
-    overflow-y: auto;
-    z-index: 10000;
-}
-#pk-chat-emoji-picker::-webkit-scrollbar { width: 5px; }
-#pk-chat-emoji-picker::-webkit-scrollbar-thumb { background: #ccc; border-radius: 5px; }
+.pk-msg-row { display: flex; flex-direction: column; margin-bottom: 15px; }
+.pk-msg-mine { align-items: flex-end; }
+.pk-msg-other { align-items: flex-start; }
 
-.pk-emoji-item {
-    font-size: 20px;
-    cursor: pointer;
-    text-align: center;
-    user-select: none;
-    transition: background 0.2s;
-    border-radius: 4px;
-}
-.pk-emoji-item:hover {
-    background: #f0f0f0;
-}
+.pk-msg-info { font-size: 11px; color: var(--pk-text-muted); margin-bottom: 5px; display: flex; gap: 6px; }
+.pk-bubble-wrapper { display: flex; align-items: flex-end; gap: 6px; max-width: 85%; }
 
-/* --- ตกแต่งปุ่มลบสำหรับ Admin --- */
-.pk-msg-delete {
-    color: #ff3333;
-    font-size: 11px;
-    margin-left: 8px;
-    cursor: pointer;
-    font-weight: bold;
+.pk-bubble {
+    padding: 10px 14px; border-radius: 18px; line-height: 1.4; word-wrap: break-word;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05); color: var(--pk-text);
 }
-.pk-msg-delete:hover {
-    text-decoration: underline;
-}
+.pk-msg-mine .pk-bubble { background: var(--pk-bubble-mine); color: var(--pk-bubble-mine-text); border-bottom-right-radius: 4px; }
+.pk-msg-other .pk-bubble { background: var(--pk-bubble-other); border: 1px solid var(--pk-bubble-other-border); border-bottom-left-radius: 4px; }
 
-/* --- ตกแต่งปุ่มตอบกลับ (Reply) --- */
-.pk-msg-reply {
-    color: #0073ff;
-    font-size: 11px;
-    margin-left: 8px;
-    cursor: pointer;
-    font-weight: bold;
-}
-.pk-msg-reply:hover {
-    text-decoration: underline;
-}
+.pk-chat-img { max-width: 100%; border-radius: 12px; margin-top: 5px; }
 
-/* --- ตกแต่งระบบอั่งเปา 🧧 --- */
-.pk-redpacket-box {
-    background: linear-gradient(135deg, #ff4d4f, #d9363e);
-    color: white;
-    border-radius: 8px;
-    padding: 10px 15px;
-    margin-top: 5px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    box-shadow: 0 3px 8px rgba(217, 54, 62, 0.4);
-    transition: transform 0.2s;
+/* ไอคอนหลัง/หน้าข้อความ */
+.pk-msg-actions-inline { display: flex; gap: 6px; opacity: 0; transition: opacity 0.2s; padding-bottom: 5px; }
+.pk-msg-row:hover .pk-msg-actions-inline { opacity: 1; }
+.pk-msg-action-btn { cursor: pointer; font-size: 13px; filter: grayscale(100%); transition: all 0.2s; }
+.pk-msg-action-btn:hover { filter: grayscale(0%); transform: scale(1.2); }
+
+/* =========================================
+   4. ระบบ Input, รีแอคชั่น, และ Typing 
+========================================= */
+#pk-chat-input-area {
+    display: flex; padding: 12px; background: var(--pk-bg);
+    border-top: 1px solid var(--pk-border); align-items: center; gap: 8px;
 }
-.pk-redpacket-box:hover { transform: scale(1.03); }
+#pk-chat-input-area button { background: none; border: none; font-size: 22px; cursor: pointer; padding: 0; transition: transform 0.2s; }
+#pk-chat-input-area button:hover { transform: scale(1.1); }
+#pk-chat-input {
+    flex: 1; padding: 10px 14px; background: var(--pk-input-bg);
+    border: 1px solid var(--pk-border); border-radius: 20px;
+    outline: none; color: var(--pk-text); font-size: 13.5px;
+}
+#pk-chat-send { background: var(--pk-header) !important; width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+
+/* Typing Indicator */
+#pk-chat-typing-indicator {
+    padding: 6px 15px; font-size: 11px; color: var(--pk-text-muted); background: var(--pk-msg-bg); font-style: italic;
+}
+.pk-dot-typing { animation: typing 1.5s infinite; }
+@keyframes typing { 0% { content: "."; } 33% { content: ".."; } 66% { content: "..."; } }
+
+/* การ์ดลิงก์และอั่งเปาอัปเดตสีตามโหมด */
+.pk-link-preview { background: var(--pk-bg); border: 1px solid var(--pk-border); border-left: 4px solid var(--pk-header); border-radius: 8px; padding: 10px; margin-top: 5px; }
+.pk-lp-title { color: var(--pk-header) !important; font-weight: 600; font-size: 13px; text-decoration: none; margin-bottom: 4px; }
+.pk-lp-meta { font-size: 11px; color: var(--pk-text-muted); }
+.pk-text-link { color: var(--pk-header); text-decoration: underline; }
+
+.pk-reactions-display { display: flex; gap: 6px; margin-top: 4px; justify-content: inherit; }
+.pk-react-pill { padding: 2px 8px; background: var(--pk-bg); border: 1px solid var(--pk-border); border-radius: 12px; font-size: 11px; color: var(--pk-text-muted); cursor: pointer; }
+.pk-react-pill.active { background: rgba(0, 115, 255, 0.1); border-color: var(--pk-header); color: var(--pk-header); font-weight: bold; }
+
+/* อั่งเปา */
+.pk-redpacket-box { background: linear-gradient(135deg, #ff4d4f, #d9363e); color: white; border-radius: 12px; padding: 10px 15px; margin-top: 5px; cursor: pointer; display: inline-flex; align-items: center; }
 .pk-rp-icon { font-size: 28px; margin-right: 12px; }
-.pk-rp-text { line-height: 1.3; }
+.pk-mention-badge { background: rgba(0, 115, 255, 0.15); color: var(--pk-header); padding: 0 4px; border-radius: 4px; }
 
-#pk-chat-rp-modal {
-    position: absolute;
-    bottom: 60px;
-    right: 10px;
-    width: 260px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.25);
-    padding: 15px;
-    z-index: 10001;
-}
-#pk-chat-rp-modal h3 { margin: 0 0 12px 0; color: #d9363e; text-align: center; font-size: 16px;}
-.pk-rp-input { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+/* Modal & Emoji */
+#pk-chat-emoji-picker { position: absolute; bottom: 70px; left: 15px; width: 280px; background: var(--pk-bg); border: 1px solid var(--pk-border); border-radius: 12px; padding: 10px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); }
+.pk-emoji-item { font-size: 22px; cursor: pointer; text-align: center; border-radius: 4px; }
+.pk-emoji-item:hover { background: var(--pk-border); }
+#pk-chat-rp-modal { position: absolute; bottom: 70px; right: 15px; width: 260px; background: var(--pk-bg); border-radius: 12px; padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); }
+#pk-chat-rp-modal h3 { margin: 0 0 12px 0; color: #d9363e; text-align: center; }
+.pk-rp-input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--pk-border); border-radius: 6px; box-sizing: border-box; background: var(--pk-input-bg); color: var(--pk-text); }
 .pk-rp-btn-group { display: flex; justify-content: space-between; }
-#pk-rp-submit { background: #d9363e; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 48%; font-weight:bold;}
-#pk-rp-cancel { background: #eee; color: #555; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 48%; }
-
-
-/* --- ตกแต่งระบบพรีวิวลิงก์กระทู้ 🖼️ --- */
-.pk-link-preview {
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
-    border-left: 4px solid #0073ff;
-    border-radius: 6px;
-    padding: 10px 12px;
-    margin-top: 6px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.04);
-}
-.pk-lp-title {
-    display: block;
-    font-weight: bold;
-    color: #0073ff !important;
-    text-decoration: none;
-    margin-bottom: 6px;
-    font-size: 13px;
-    line-height: 1.4;
-}
-.pk-lp-title:hover {
-    text-decoration: underline;
-}
-.pk-lp-meta {
-    font-size: 11px;
-    color: #888;
-    background: #f9f9f9;
-    padding: 4px 8px;
-    border-radius: 4px;
-    display: inline-block;
-}
-
-/* --- ตกแต่งระบบรีแอคชั่น (Message Reactions) 💖 --- */
-.pk-msg-add-react {
-    cursor: pointer;
-    font-size: 12px;
-    margin-left: 6px;
-    opacity: 0.5;
-    transition: all 0.2s ease;
-    filter: grayscale(100%);
-}
-.pk-msg-add-react:hover {
-    opacity: 1;
-    transform: scale(1.2);
-    filter: grayscale(0%);
-}
-.pk-reactions-display {
-    display: flex;
-    gap: 6px;
-    margin-top: 4px;
-    margin-bottom: 2px;
-}
-.pk-react-pill {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 6px;
-    background: #f0f0f0;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    font-size: 11px;
-    color: #555;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.pk-react-pill:hover {
-    background: #e8e8e8;
-}
-.pk-react-pill.active {
-    background: #e6f2ff;
-    border-color: #0073ff;
-    color: #0073ff;
-    font-weight: bold;
-}
+#pk-rp-submit { background: #d9363e; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 48%; font-weight:bold; font-size: 14px;}
+#pk-rp-cancel { background: var(--pk-border); color: var(--pk-text); border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 48%; }
