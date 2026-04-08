@@ -5,13 +5,17 @@
     <div class="pk-chat-head-icon">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="white"><path d="M20 2H4C2.9 2 2 2.9 2 4v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"></path></svg>
     </div>
-</div>
+    <div id="pk-chat-badge" style="display:none;">1</div>
+    <div id="pk-chat-tooltip">{$welcome_tooltip}</div>
+    </div>
 
 <div id="pk-chat-box" style="display: none;">
     <div id="pk-chat-header">
         <span class="pk-header-title">💬 Public Chat</span>
-        
         <div class="pk-header-actions">
+            <span id="pk-chat-shop-btn" class="pk-header-icon" title="ร้านค้าไอเทม">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+            </span>
             <a href="home.php?mod=space&do=pm" target="_blank" class="pk-header-icon" title="ข้อความส่วนตัว">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"></path></svg>
             </a>
@@ -28,36 +32,37 @@
     </div>
     
     <div id="pk-chat-settings-menu" style="display: none;">
-        <div class="pk-setting-item">
-            <span>โหมดมืด (Dark Mode)</span>
-            <label class="pk-switch">
-                <input type="checkbox" id="pk-dark-mode-toggle">
-                <span class="pk-slider"></span>
-            </label>
-        </div>
+        <div class="pk-setting-item"><span>โหมดมืด (Dark Mode)</span><label class="pk-switch"><input type="checkbox" id="pk-dark-mode-toggle"><span class="pk-slider"></span></label></div>
     </div>
     
+    <div id="pk-chat-shop-modal" style="display: none;">
+        <div class="pk-shop-header">
+            <h3>ร้านค้าไอเทม 🛒</h3>
+            <span id="pk-shop-credit">ยอดเงิน: <b id="pk-user-balance">0</b></span>
+        </div>
+        <div class="pk-shop-tabs">
+            <div class="pk-shop-tab active" data-type="name_style">สีชื่อ</div>
+            <div class="pk-shop-tab" data-type="badge">ป้ายฉายา</div>
+        </div>
+        <div id="pk-shop-content" class="pk-shop-grid"></div>
+        <div style="text-align:center; margin-top:10px;">
+            <button id="pk-shop-close" class="pk-btn-close">ปิดร้านค้า</button>
+        </div>
+    </div>
+
     {$rooms_html}
     
     <div id="pk-chat-body">
-        <div id="pk-chat-announcement">
-            <span class="pk-announce-icon">📢</span>
-            <div class="pk-announce-text">{$admin_announcement}</div>
-        </div>
+        <div id="pk-chat-announcement"><span class="pk-announce-icon">📢</span><div class="pk-announce-text">{$admin_announcement}</div></div>
         <div id="pk-chat-messages"></div>
-        <div id="pk-chat-typing-indicator" style="display:none;">
-            <span id="pk-typing-names"></span> กำลังพิมพ์<span class="pk-dot-typing">...</span>
-        </div>
+        <div id="pk-chat-typing-indicator" style="display:none;"><span id="pk-typing-names"></span> กำลังพิมพ์<span class="pk-dot-typing">...</span></div>
 
         <div id="pk-chat-emoji-picker" style="display: none;"></div>
         <div id="pk-chat-rp-modal" style="display: none;">
             <h3>แจกอั่งเปาเครดิต 🧧</h3>
             <input type="number" id="pk-rp-amount" class="pk-rp-input" placeholder="จำนวนเครดิตทั้งหมดที่จะแจก">
             <input type="number" id="pk-rp-count" class="pk-rp-input" placeholder="จำนวนซอง (แบ่งแจกกี่คน)">
-            <div class="pk-rp-btn-group">
-                <button id="pk-rp-cancel">ยกเลิก</button>
-                <button id="pk-rp-submit">โยนซอง!</button>
-            </div>
+            <div class="pk-rp-btn-group"><button id="pk-rp-cancel">ยกเลิก</button><button id="pk-rp-submit">โยนซอง!</button></div>
         </div>
         
         <div id="pk-chat-input-area">
@@ -66,10 +71,7 @@
             <input type="file" id="pk-chat-file-upload" accept="image/png, image/jpeg, image/gif, image/webp" style="display:none;">
             <button id="pk-chat-rp-btn" class="pk-action-btn" type="button" title="แจกอั่งเปา">🧧</button>
             <input type="text" id="pk-chat-input" placeholder="พิมพ์ข้อความ..." autocomplete="off">
-            
-            <button id="pk-chat-send" title="ส่งข้อความ">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
-            </button>
+            <button id="pk-chat-send" title="ส่งข้อความ"><svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg></button>
         </div>
     </div>
 </div>

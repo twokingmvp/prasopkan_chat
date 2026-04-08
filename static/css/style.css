@@ -109,3 +109,143 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 .pk-rp-btn-group { display: flex; justify-content: space-between; }
 #pk-rp-submit { background: #d9363e; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 48%; font-weight:bold; font-size: 14px;}
 #pk-rp-cancel { background: var(--pk-border); color: var(--pk-text); border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 48%; }
+
+/* ทำให้ปุ่มแชทกระเพื่อม (Pulse) เรียกแขก */
+#pk-chat-head {
+    animation: pk-pulse 2s infinite;
+}
+@keyframes pk-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(0, 115, 255, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(0, 115, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 115, 255, 0); }
+}
+
+/* =========================================
+   6. 🔴 ป้ายแจ้งเตือน (Badge) & 💭 บอลลูนคำพูด (Tooltip)
+========================================= */
+
+/* ป้ายแจ้งเตือนสีแดงมุมขวาบนของปุ่มลอย */
+#pk-chat-badge {
+    position: absolute; 
+    top: -2px; 
+    right: -2px;
+    background: #ff3b30; 
+    color: white; 
+    border-radius: 50%;
+    min-width: 18px; 
+    height: 18px; 
+    line-height: 18px;
+    text-align: center; 
+    font-size: 11px; 
+    font-weight: bold;
+    border: 2px solid var(--pk-bg); 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    /* แอนิเมชันเด้งดุ๊กดิ๊กเบาๆ */
+    animation: pk-bounce 1s infinite alternate; 
+    z-index: 2;
+}
+
+@keyframes pk-bounce { 
+    0% { transform: translateY(0); } 
+    100% { transform: translateY(-3px); } 
+}
+
+/* บอลลูนคำพูดทักทาย */
+#pk-chat-tooltip {
+    position: absolute; 
+    right: 75px; 
+    top: 12px;
+    background: var(--pk-bg); 
+    color: var(--pk-text);
+    padding: 8px 14px; 
+    border-radius: 12px; 
+    font-size: 13px; 
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
+    white-space: nowrap; 
+    pointer-events: none;
+    border: 1px solid var(--pk-border);
+    
+    /* ตั้งค่าเริ่มต้นให้ซ่อนและเลื่อนหลบไปทางขวา */
+    opacity: 0; 
+    transform: translateX(10px); 
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ลูกศรชี้ไปทางปุ่มแชท */
+#pk-chat-tooltip::after {
+    content: ''; 
+    position: absolute; 
+    right: -6px; 
+    top: 50%; 
+    transform: translateY(-50%);
+    border-width: 6px 0 6px 6px; 
+    border-style: solid; 
+    border-color: transparent transparent transparent var(--pk-bg);
+}
+
+/* สีลูกศรและกล่องในโหมดมืด */
+.pk-dark-mode #pk-chat-tooltip { 
+    background: var(--pk-input-bg); 
+    border-color: var(--pk-border); 
+}
+.pk-dark-mode #pk-chat-tooltip::after { 
+    border-color: transparent transparent transparent var(--pk-input-bg); 
+}
+
+/* คลาสสำหรับสลับแสดงผลบอลลูน */
+.pk-tooltip-show { 
+    opacity: 1 !important; 
+    transform: translateX(0) !important; 
+}
+
+/* =========================================
+   7. 🛒 ระบบร้านค้า (Chat Shop UI) & Animations
+========================================= */
+
+#pk-chat-shop-btn { cursor: pointer; opacity: 0.8; transition: all 0.2s; display:flex; color: #ffeb3b; }
+#pk-chat-shop-btn:hover { opacity: 1; transform: scale(1.1) rotate(-10deg); }
+
+/* หน้าต่างร้านค้า */
+#pk-chat-shop-modal { 
+    position: absolute; bottom: 70px; left: 10px; right: 10px; 
+    background: var(--pk-bg); border-radius: 12px; padding: 15px; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25); z-index: 10005; border: 1px solid var(--pk-border);
+}
+.pk-shop-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--pk-border); padding-bottom: 8px;}
+.pk-shop-header h3 { margin: 0; color: var(--pk-header); font-size: 15px; }
+#pk-shop-credit { font-size: 12px; color: var(--pk-text-muted); background: var(--pk-input-bg); padding: 4px 8px; border-radius: 12px; }
+#pk-user-balance { color: #ff9900; font-weight: bold; }
+
+/* แท็บหมวดหมู่ */
+.pk-shop-tabs { display: flex; gap: 10px; margin-bottom: 12px; }
+.pk-shop-tab { padding: 6px 12px; cursor: pointer; border-bottom: 2px solid transparent; font-size: 12px; color: var(--pk-text-muted); font-weight: 500; transition: all 0.2s;}
+.pk-shop-tab.active { border-color: var(--pk-header); color: var(--pk-header); font-weight: bold; }
+
+/* Grid สินค้า */
+.pk-shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 220px; overflow-y: auto; padding-right: 5px;}
+.pk-shop-grid::-webkit-scrollbar { width: 4px; }
+.pk-shop-grid::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+.pk-dark-mode .pk-shop-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+
+.pk-shop-item { border: 1px solid var(--pk-border); border-radius: 8px; padding: 10px; text-align: center; background: var(--pk-msg-bg); display: flex; flex-direction: column; justify-content: space-between; gap: 8px;}
+.pk-shop-item-preview { font-size: 14px; padding: 12px 5px; background: var(--pk-bg); border-radius: 6px; border: 1px dashed var(--pk-border); word-break: break-all;}
+.pk-shop-item-name { font-size: 11px; color: var(--pk-text); font-weight: 600;}
+
+/* ปุ่มซื้อ / สวมใส่ */
+.pk-btn-buy, .pk-btn-equip, .pk-btn-equipped { width: 100%; padding: 6px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; transition: all 0.2s; }
+.pk-btn-buy { background: #ff9900; color: #fff; }
+.pk-btn-buy:hover { background: #e68a00; transform: scale(1.05); }
+.pk-btn-equip { background: var(--pk-header); color: #fff; }
+.pk-btn-equip:hover { opacity: 0.9; transform: scale(1.05); }
+.pk-btn-equipped { background: var(--pk-border); color: var(--pk-text-muted); cursor: default; }
+.pk-btn-close { width: 100%; padding: 8px; background: var(--pk-border); color: var(--pk-text); border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+/* ไอคอนฉายาหน้าชื่อ */
+.pk-chat-badge-icon { font-size: 14px; margin-right: 2px; }
+
+/* แอนิเมชันสำหรับสีชื่อรุ้งนีออน */
+@keyframes pk-hue { 
+    from { filter: hue-rotate(0deg); } 
+    to { filter: hue-rotate(360deg); } 
+}

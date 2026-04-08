@@ -11,7 +11,7 @@
 			<item id="datatables"><![CDATA[prasopkan_chat_messages,prasopkan_chat_envelopes,prasopkan_chat_envlogs,prasopkan_chat_reactions]]></item>
 			<item id="directory"><![CDATA[prasopkan_chat/]]></item>
 			<item id="copyright"><![CDATA[Prasopkan]]></item>
-			<item id="version"><![CDATA[1.4.0]]></item>
+			<item id="version"><![CDATA[1.5.0]]></item>
 			<item id="__modules">
 				<item id="0">
 					<item id="name"><![CDATA[chat_hook]]></item>
@@ -136,6 +136,15 @@
 				<item id="variable"><![CDATA[admin_announcement]]></item>
 				<item id="type"><![CDATA[text]]></item>
 				<item id="value"><![CDATA[]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="13">
+				<item id="displayorder"><![CDATA[14]]></item>
+				<item id="title"><![CDATA[ข้อความบอลลูนทักทาย 💭]]></item>
+				<item id="description"><![CDATA[ข้อความที่จะลอยขึ้นมาข้างๆ ปุ่มแชทเพื่อดึงดูดความสนใจ (เว้นว่างไว้เพื่อปิดใช้งาน)]]></item>
+				<item id="variable"><![CDATA[welcome_tooltip]]></item>
+				<item id="type"><![CDATA[text]]></item>
+				<item id="value"><![CDATA[เข้ามาป้ายยากันเถอะ! ✨]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
 		</item>

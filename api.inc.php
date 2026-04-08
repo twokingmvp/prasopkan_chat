@@ -1,11 +1,24 @@
 <?php
-if(!defined('IN_DISCUZ')) {
-    exit('Access Denied');
-}
+if(!defined('IN_DISCUZ')) { exit('Access Denied'); }
 
 global $_G;
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 $room_id = isset($_GET['room_id']) ? intval($_GET['room_id']) : 1; 
+
+// 🛍️ รายการสินค้าในร้านค้าแชท (แก้ไขราคาและชื่อได้ที่นี่)
+$shop_items = array(
+    'name_style' => array(
+        'ns_gold' => array('name' => 'สีทองพรีเมียม', 'price' => 500, 'css' => 'background: linear-gradient(90deg, #d4af37, #ffdf00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold;'),
+        'ns_rainbow' => array('name' => 'สีรุ้งนีออน', 'price' => 1500, 'css' => 'background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; animation: pk-hue 3s infinite linear;'),
+        'ns_fire' => array('name' => 'เปลวไฟเดือด', 'price' => 800, 'css' => 'color: #ff4500; text-shadow: 0 0 5px #ff8c00; font-weight: bold;')
+    ),
+    'badge' => array(
+        'bd_vip' => array('name' => 'มงกุฎ VIP', 'price' => 2000, 'icon' => '👑'),
+        'bd_cat' => array('name' => 'ทาสแมว', 'price' => 300, 'icon' => '🐱'),
+        'bd_dog' => array('name' => 'ทาสหมา', 'price' => 300, 'icon' => '🐶'),
+        'bd_rich' => array('name' => 'เศรษฐี', 'price' => 5000, 'icon' => '💎')
+    )
+);
 
 if($action == 'send') {
     $message = dhtmlspecialchars(trim($_GET['message']));
@@ -17,9 +30,7 @@ if($action == 'send') {
     echo json_encode(array('status' => 'success')); exit;
 } 
 elseif($action == 'typing') {
-    if($_G['uid']) {
-        DB::query("REPLACE INTO ".DB::table('prasopkan_chat_typing')." (room_id, uid, username, dateline) VALUES ('$room_id', '{$_G['uid']}', '{$_G['username']}', '{$_G['timestamp']}')");
-    }
+    if($_G['uid']) { DB::query("REPLACE INTO ".DB::table('prasopkan_chat_typing')." (room_id, uid, username, dateline) VALUES ('$room_id', '{$_G['uid']}', '{$_G['username']}', '{$_G['timestamp']}')"); }
     echo json_encode(array('status'=>'success')); exit;
 }
 elseif($action == 'get') {
@@ -42,9 +53,7 @@ elseif($action == 'get') {
                 $chat_forums = $plugin_config['chat_forums'];
                 if(!is_array($chat_forums)) $chat_forums = @unserialize($chat_forums);
                 if(empty($chat_forums)) $chat_forums = array(1);
-                foreach($chat_forums as $r_id) {
-                    DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🤖 System Bot', 'message' => $bot_msg, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => intval($r_id)));
-                }
+                foreach($chat_forums as $r_id) { DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🤖 System Bot', 'message' => $bot_msg, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => intval($r_id))); }
             }
         }
     }
@@ -55,7 +64,8 @@ elseif($action == 'get') {
     while($t = DB::fetch($q_type)) { $typing_users[] = $t['username']; }
 
     $messages = array(); $msg_ids = array();
-    $query = DB::query("SELECT c.*, m.groupid FROM ".DB::table('prasopkan_chat_messages')." c LEFT JOIN ".DB::table('common_member')." m ON c.uid = m.uid WHERE c.room_id='$room_id' ORDER BY c.dateline DESC LIMIT 50");
+    // 🎒 ดึงข้อมูลการสวมใส่ (Equipment) ของผู้ส่งด้วย LEFT JOIN
+    $query = DB::query("SELECT c.*, m.groupid, e.name_style, e.badge FROM ".DB::table('prasopkan_chat_messages')." c LEFT JOIN ".DB::table('common_member')." m ON c.uid = m.uid LEFT JOIN ".DB::table('prasopkan_chat_equipment')." e ON c.uid = e.uid WHERE c.room_id='$room_id' ORDER BY c.dateline DESC LIMIT 50");
     
     while($row = DB::fetch($query)) {
         $row['time'] = dgmdate($row['dateline'], 'H:i');
@@ -73,7 +83,6 @@ elseif($action == 'get') {
                         $img_url = preg_match('/^http/i', $threadimage['attachment']) ? $threadimage['attachment'] : $attachurl.'forum/'.$threadimage['attachment'];
                         $img_html = '<img src="'.$img_url.'" class="pk-lp-img" onerror="this.style.display=\'none\'">';
                     }
-                    // เอา inline style เจ้าปัญหาออกแล้วให้ class จัดการแทน
                     return '<div class="pk-link-preview">'.$img_html.'<div class="pk-lp-content"><a href="'.$url.'" target="_blank" class="pk-lp-title" title="'.strip_tags($thread['subject']).'">📄 '.strip_tags($thread['subject']).'</a><div class="pk-lp-meta">✍️ '.$thread['author'].' &nbsp;|&nbsp; 👁️ '.$thread['views'].' &nbsp;|&nbsp; 💬 '.$thread['replies'].'</div></div></div>';
                 }
                 return '<a href="'.$url.'" target="_blank" class="pk-text-link">'.$text.'</a>';
@@ -86,12 +95,22 @@ elseif($action == 'get') {
         if($enable_mention) $row['message'] = preg_replace('/@([^\s]+)/u', '<strong class="pk-mention-badge">@$1</strong>', $row['message']);
         $row['message'] = preg_replace('/\[redpacket\](\d+)\[\/redpacket\]/i', '<div class="pk-redpacket-box" data-envid="$1"><div class="pk-rp-icon">🧧</div><div class="pk-rp-text"><b>อั่งเปาเครดิต</b><br><span>คลิกลุ้นรับเครดิต!</span></div></div>', $row['message']);
 
-        $row['color'] = '';
-        if($row['uid'] == 0) $row['color'] = '#ff6600';
-        elseif($enable_color && !empty($row['groupid'])) {
+        // 🎨 จัดการสไตล์ชื่อตามไอเทมที่สวมใส่
+        $row['name_css'] = '';
+        $row['badge_icon'] = '';
+        if(!empty($row['name_style']) && isset($shop_items['name_style'][$row['name_style']])) {
+            $row['name_css'] = $shop_items['name_style'][$row['name_style']]['css'];
+        } elseif($row['uid'] == 0) {
+            $row['name_css'] = 'color:#ff6600;';
+        } elseif($enable_color && !empty($row['groupid'])) {
             $group_color = $_G['cache']['usergroups'][$row['groupid']]['color'];
-            if(!empty($group_color)) $row['color'] = $group_color;
+            if(!empty($group_color)) $row['name_css'] = 'color:'.$group_color.';';
         }
+
+        if(!empty($row['badge']) && isset($shop_items['badge'][$row['badge']])) {
+            $row['badge_icon'] = $shop_items['badge'][$row['badge']]['icon'];
+        }
+
         $messages[] = $row; $msg_ids[] = $row['msg_id'];
     }
     
@@ -114,6 +133,61 @@ elseif($action == 'get') {
     echo json_encode(array('status' => 'success', 'data' => $messages, 'is_admin' => $is_admin, 'enable_mention' => $enable_mention, 'enable_reaction' => $enable_reaction, 'current_uid' => $current_uid, 'typing_users' => $typing_users));
     exit;
 }
+// 🛒 --- ระบบร้านค้า (ดึงข้อมูล, ซื้อ, สวมใส่) ---
+elseif($action == 'shop_info') {
+    if(!$_G['uid']) exit;
+    loadcache('plugin'); $config = $_G['cache']['plugin']['prasopkan_chat'];
+    $credit_id = intval($config['redpacket_credit_id'] ? $config['redpacket_credit_id'] : 2);
+    $user_credit = DB::result_first("SELECT extcredits".$credit_id." FROM ".DB::table('common_member_count')." WHERE uid='{$_G['uid']}'");
+    
+    $inventory = array();
+    $q_inv = DB::query("SELECT item_key FROM ".DB::table('prasopkan_chat_inventory')." WHERE uid='{$_G['uid']}'");
+    while($inv = DB::fetch($q_inv)) { $inventory[] = $inv['item_key']; }
+    
+    $equipment = DB::fetch_first("SELECT name_style, badge FROM ".DB::table('prasopkan_chat_equipment')." WHERE uid='{$_G['uid']}'");
+    if(!$equipment) $equipment = array('name_style'=>'', 'badge'=>'');
+
+    echo json_encode(array('status'=>'success', 'items'=>$shop_items, 'inventory'=>$inventory, 'equipment'=>$equipment, 'credit'=>intval($user_credit), 'credit_name'=>$_G['setting']['extcredits'][$credit_id]['title']));
+    exit;
+}
+elseif($action == 'shop_buy') {
+    if(!$_G['uid']) { echo json_encode(['status'=>'error', 'msg'=>'กรุณาล็อกอิน']); exit; }
+    $item_key = trim($_GET['item_key']);
+    $item_type = trim($_GET['item_type']); // 'name_style' หรือ 'badge'
+    if(!isset($shop_items[$item_type][$item_key])) { echo json_encode(['status'=>'error', 'msg'=>'ไม่พบสินค้านี้']); exit; }
+    
+    $check_inv = DB::fetch_first("SELECT item_key FROM ".DB::table('prasopkan_chat_inventory')." WHERE uid='{$_G['uid']}' AND item_key='$item_key'");
+    if($check_inv) { echo json_encode(['status'=>'error', 'msg'=>'คุณมีไอเทมชิ้นนี้อยู่แล้ว!']); exit; }
+
+    loadcache('plugin'); $config = $_G['cache']['plugin']['prasopkan_chat'];
+    $credit_id = intval($config['redpacket_credit_id'] ? $config['redpacket_credit_id'] : 2);
+    $price = intval($shop_items[$item_type][$item_key]['price']);
+    $user_credit = DB::result_first("SELECT extcredits".$credit_id." FROM ".DB::table('common_member_count')." WHERE uid='{$_G['uid']}'");
+    if($user_credit < $price) { echo json_encode(['status'=>'error', 'msg'=>'เครดิตไม่พอจ้า!']); exit; }
+
+    updatemembercount($_G['uid'], array('extcredits'.$credit_id => -$price));
+    DB::insert('prasopkan_chat_inventory', array('uid'=>$_G['uid'], 'item_key'=>$item_key, 'dateline'=>$_G['timestamp']));
+    echo json_encode(['status'=>'success']); exit;
+}
+elseif($action == 'shop_equip') {
+    if(!$_G['uid']) { echo json_encode(['status'=>'error', 'msg'=>'กรุณาล็อกอิน']); exit; }
+    $item_key = trim($_GET['item_key']);
+    $item_type = trim($_GET['item_type']);
+    
+    if($item_key !== '') {
+        $check_inv = DB::fetch_first("SELECT item_key FROM ".DB::table('prasopkan_chat_inventory')." WHERE uid='{$_G['uid']}' AND item_key='$item_key'");
+        if(!$check_inv) { echo json_encode(['status'=>'error', 'msg'=>'คุณยังไม่มีไอเทมชิ้นนี้']); exit; }
+    }
+
+    $eq = DB::fetch_first("SELECT uid FROM ".DB::table('prasopkan_chat_equipment')." WHERE uid='{$_G['uid']}'");
+    if(!$eq) DB::insert('prasopkan_chat_equipment', array('uid'=>$_G['uid']));
+    
+    if($item_type == 'name_style' || $item_type == 'badge') {
+        DB::update('prasopkan_chat_equipment', array($item_type => $item_key), "uid='{$_G['uid']}'");
+    }
+    echo json_encode(['status'=>'success']); exit;
+}
+// (โค้ดเก่า react, delete, upload, redpacket ปล่อยไว้เหมือนเดิมครับ)
 elseif($action == 'react') { 
     if(!$_G['uid']) { echo json_encode(array('status'=>'error', 'msg'=>'กรุณาล็อกอิน')); exit; }
     $msg_id = intval($_GET['msg_id']); $reaction = dhtmlspecialchars(trim($_GET['reaction']));
@@ -144,7 +218,7 @@ elseif($action == 'send_redpacket') {
     loadcache('plugin'); $config = $_G['cache']['plugin']['prasopkan_chat'];
     if(!$config['enable_redpacket']) { echo json_encode(['status'=>'error', 'msg'=>'ระบบแจกอั่งเปาปิดใช้งานอยู่']); exit; }
     if(!$_G['uid']) { echo json_encode(['status'=>'error', 'msg'=>'กรุณาล็อกอิน']); exit; }
-    $amount = intval($_GET['amount']); $count = intval($_GET['count']); $credit_id = intval($config['redpacket_credit_id']);
+    $amount = intval($_GET['amount']); $count = intval($_GET['count']); $credit_id = intval($config['redpacket_credit_id'] ? $config['redpacket_credit_id'] : 2);
     if($amount < intval($config['redpacket_min']) || $amount > intval($config['redpacket_max'])) { echo json_encode(['status'=>'error', 'msg'=>"ตั้งจำนวนเงินได้ระหว่าง {$config['redpacket_min']} - {$config['redpacket_max']}"]); exit; }
     if($count < 1 || $count > $amount) { echo json_encode(['status'=>'error', 'msg'=>"จำนวนซองไม่ถูกต้อง"]); exit; }
     $user_credit = DB::result_first("SELECT extcredits".$credit_id." FROM ".DB::table('common_member_count')." WHERE uid='{$_G['uid']}'");
@@ -168,7 +242,8 @@ elseif($action == 'claim_redpacket') {
     DB::query("UPDATE ".DB::table('prasopkan_chat_envelopes')." SET remain_amount=remain_amount-$get_amount, remain_count=remain_count-1 WHERE id='$env_id' AND remain_count>0");
     if(DB::affected_rows() > 0) {
         DB::insert('prasopkan_chat_envlogs', array('env_id'=>$env_id, 'uid'=>$_G['uid'], 'username'=>$_G['username'], 'amount'=>$get_amount, 'dateline'=>$_G['timestamp']));
-        loadcache('plugin'); $credit_id = intval($_G['cache']['plugin']['prasopkan_chat']['redpacket_credit_id']);
+        loadcache('plugin'); $config = $_G['cache']['plugin']['prasopkan_chat'];
+        $credit_id = intval($config['redpacket_credit_id'] ? $config['redpacket_credit_id'] : 2);
         updatemembercount($_G['uid'], array('extcredits'.$credit_id => $get_amount));
         echo json_encode(['status'=>'success', 'amount'=>$get_amount]);
     } else { echo json_encode(['status'=>'error', 'msg'=>'ซองอั่งเปาหมดพอดี!']); } exit;

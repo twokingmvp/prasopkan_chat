@@ -15,8 +15,9 @@ class plugin_prasopkan_chat {
         $enable_image = $plugin_config['enable_image'];
         $enable_redpacket = $plugin_config['enable_redpacket'];
         
-        // 📢 ดึงข้อความประกาศจากแอดมิน
         $admin_announcement = trim($plugin_config['admin_announcement']);
+        // 💭 ดึงข้อความบอลลูน
+        $welcome_tooltip = trim($plugin_config['welcome_tooltip']);
         
         $rooms_html = '';
         
@@ -27,14 +28,13 @@ class plugin_prasopkan_chat {
             $fids = array_map('intval', $chat_forums);
             
             $rooms_html .= '<div id="pk-chat-rooms">';
-            // 📌 ล็อกให้ห้อง 1 (ทั่วไป) แสดงเป็นห้องแรกเสมอ
             $rooms_html .= '<div class="pk-room-tab active" data-room="1">ทั่วไป</div>';
             
             if(!empty($fids)) {
                 $fids_str = implode(',', $fids);
                 $query = DB::query("SELECT fid, name FROM ".DB::table('forum_forum')." WHERE fid IN ($fids_str) ORDER BY displayorder");
                 while($row = DB::fetch($query)) {
-                    if($row['fid'] == 1) continue; // ข้ามห้อง 1 เพราะเราใส่ไปแล้วด้านบน
+                    if($row['fid'] == 1) continue; 
                     $rooms_html .= '<div class="pk-room-tab" data-room="'.$row['fid'].'">'.strip_tags($row['name']).'</div>';
                 }
             }
