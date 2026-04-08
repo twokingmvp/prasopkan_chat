@@ -5,20 +5,17 @@ global $_G;
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 $room_id = isset($_GET['room_id']) ? intval($_GET['room_id']) : 1; 
 
-// 🛍️ รายการสินค้าในร้านค้าแชท (แก้ไขราคาและชื่อได้ที่นี่)
-$shop_items = array(
-    'name_style' => array(
-        'ns_gold' => array('name' => 'สีทองพรีเมียม', 'price' => 500, 'css' => 'background: linear-gradient(90deg, #d4af37, #ffdf00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold;'),
-        'ns_rainbow' => array('name' => 'สีรุ้งนีออน', 'price' => 1500, 'css' => 'background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; animation: pk-hue 3s infinite linear;'),
-        'ns_fire' => array('name' => 'เปลวไฟเดือด', 'price' => 800, 'css' => 'color: #ff4500; text-shadow: 0 0 5px #ff8c00; font-weight: bold;')
-    ),
-    'badge' => array(
-        'bd_vip' => array('name' => 'มงกุฎ VIP', 'price' => 2000, 'icon' => '👑'),
-        'bd_cat' => array('name' => 'ทาสแมว', 'price' => 300, 'icon' => '🐱'),
-        'bd_dog' => array('name' => 'ทาสหมา', 'price' => 300, 'icon' => '🐶'),
-        'bd_rich' => array('name' => 'เศรษฐี', 'price' => 5000, 'icon' => '💎')
-    )
-);
+// 🛍️ โหลดรายการสินค้าจากฐานข้อมูล (Dynamic Shop Items)
+$shop_items = array('name_style' => array(), 'badge' => array());
+$q_shop = DB::query("SELECT * FROM ".DB::table('prasopkan_chat_shop_items')." ORDER BY displayorder ASC");
+while($s = DB::fetch($q_shop)) {
+    $shop_items[$s['item_type']][$s['item_key']] = array(
+        'name' => $s['name'],
+        'price' => $s['price'],
+        'css' => $s['css'],
+        'icon' => $s['icon']
+    );
+}
 
 if($action == 'send') {
     $message = dhtmlspecialchars(trim($_GET['message']));
@@ -64,7 +61,7 @@ elseif($action == 'get') {
     while($t = DB::fetch($q_type)) { $typing_users[] = $t['username']; }
 
     $messages = array(); $msg_ids = array();
-    // 🎒 ดึงข้อมูลการสวมใส่ (Equipment) ของผู้ส่งด้วย LEFT JOIN
+    // 🎒 ดึงข้อมูลการสวมใส่ของผู้ส่ง
     $query = DB::query("SELECT c.*, m.groupid, e.name_style, e.badge FROM ".DB::table('prasopkan_chat_messages')." c LEFT JOIN ".DB::table('common_member')." m ON c.uid = m.uid LEFT JOIN ".DB::table('prasopkan_chat_equipment')." e ON c.uid = e.uid WHERE c.room_id='$room_id' ORDER BY c.dateline DESC LIMIT 50");
     
     while($row = DB::fetch($query)) {
@@ -95,7 +92,7 @@ elseif($action == 'get') {
         if($enable_mention) $row['message'] = preg_replace('/@([^\s]+)/u', '<strong class="pk-mention-badge">@$1</strong>', $row['message']);
         $row['message'] = preg_replace('/\[redpacket\](\d+)\[\/redpacket\]/i', '<div class="pk-redpacket-box" data-envid="$1"><div class="pk-rp-icon">🧧</div><div class="pk-rp-text"><b>อั่งเปาเครดิต</b><br><span>คลิกลุ้นรับเครดิต!</span></div></div>', $row['message']);
 
-        // 🎨 จัดการสไตล์ชื่อตามไอเทมที่สวมใส่
+        // 🎨 จัดการสไตล์ชื่อตามไอเทมที่ดึงมาจาก Shop Database
         $row['name_css'] = '';
         $row['badge_icon'] = '';
         if(!empty($row['name_style']) && isset($shop_items['name_style'][$row['name_style']])) {
@@ -133,7 +130,7 @@ elseif($action == 'get') {
     echo json_encode(array('status' => 'success', 'data' => $messages, 'is_admin' => $is_admin, 'enable_mention' => $enable_mention, 'enable_reaction' => $enable_reaction, 'current_uid' => $current_uid, 'typing_users' => $typing_users));
     exit;
 }
-// 🛒 --- ระบบร้านค้า (ดึงข้อมูล, ซื้อ, สวมใส่) ---
+// 🛒 --- ระบบร้านค้า (Shop APIs) ---
 elseif($action == 'shop_info') {
     if(!$_G['uid']) exit;
     loadcache('plugin'); $config = $_G['cache']['plugin']['prasopkan_chat'];
@@ -153,7 +150,7 @@ elseif($action == 'shop_info') {
 elseif($action == 'shop_buy') {
     if(!$_G['uid']) { echo json_encode(['status'=>'error', 'msg'=>'กรุณาล็อกอิน']); exit; }
     $item_key = trim($_GET['item_key']);
-    $item_type = trim($_GET['item_type']); // 'name_style' หรือ 'badge'
+    $item_type = trim($_GET['item_type']); 
     if(!isset($shop_items[$item_type][$item_key])) { echo json_encode(['status'=>'error', 'msg'=>'ไม่พบสินค้านี้']); exit; }
     
     $check_inv = DB::fetch_first("SELECT item_key FROM ".DB::table('prasopkan_chat_inventory')." WHERE uid='{$_G['uid']}' AND item_key='$item_key'");
@@ -173,21 +170,18 @@ elseif($action == 'shop_equip') {
     if(!$_G['uid']) { echo json_encode(['status'=>'error', 'msg'=>'กรุณาล็อกอิน']); exit; }
     $item_key = trim($_GET['item_key']);
     $item_type = trim($_GET['item_type']);
-    
     if($item_key !== '') {
         $check_inv = DB::fetch_first("SELECT item_key FROM ".DB::table('prasopkan_chat_inventory')." WHERE uid='{$_G['uid']}' AND item_key='$item_key'");
         if(!$check_inv) { echo json_encode(['status'=>'error', 'msg'=>'คุณยังไม่มีไอเทมชิ้นนี้']); exit; }
     }
-
     $eq = DB::fetch_first("SELECT uid FROM ".DB::table('prasopkan_chat_equipment')." WHERE uid='{$_G['uid']}'");
     if(!$eq) DB::insert('prasopkan_chat_equipment', array('uid'=>$_G['uid']));
-    
     if($item_type == 'name_style' || $item_type == 'badge') {
         DB::update('prasopkan_chat_equipment', array($item_type => $item_key), "uid='{$_G['uid']}'");
     }
     echo json_encode(['status'=>'success']); exit;
 }
-// (โค้ดเก่า react, delete, upload, redpacket ปล่อยไว้เหมือนเดิมครับ)
+// โค้ดส่วนอื่นๆ (react, delete, upload, redpacket) ปล่อยไว้เหมือนเดิมครับ
 elseif($action == 'react') { 
     if(!$_G['uid']) { echo json_encode(array('status'=>'error', 'msg'=>'กรุณาล็อกอิน')); exit; }
     $msg_id = intval($_GET['msg_id']); $reaction = dhtmlspecialchars(trim($_GET['reaction']));
