@@ -1,9 +1,9 @@
-:root { --pk-bg: #ffffff; --pk-header: #0073ff; --pk-header-text: #ffffff; --pk-border: #f0f0f0; --pk-msg-bg: #fafafa; --pk-text: #333333; --pk-text-muted: #888888; --pk-bubble-mine: #0073ff; --pk-bubble-mine-text: #ffffff; --pk-bubble-other: #ffffff; --pk-bubble-other-border: #e0e0e0; --pk-input-bg: #f9f9f9; }
+:root { --pk-bg: #ffffff; --pk-header: #4CA1AF; --pk-header-text: #ffffff; --pk-border: #f0f0f0; --pk-msg-bg: #fafafa; --pk-text: #333333; --pk-text-muted: #888888; --pk-bubble-mine: #4CA1AF; --pk-bubble-mine-text: #ffffff; --pk-bubble-other: #ffffff; --pk-bubble-other-border: #e0e0e0; --pk-input-bg: #f9f9f9; }
 .pk-dark-mode { --pk-bg: #1e1e24; --pk-header: #2b2b36; --pk-header-text: #ffffff; --pk-border: #333344; --pk-msg-bg: #121216; --pk-text: #e0e0e0; --pk-text-muted: #aaaaaa; --pk-bubble-mine: #0066cc; --pk-bubble-mine-text: #ffffff; --pk-bubble-other: #2b2b36; --pk-bubble-other-border: #3a3a4a; --pk-input-bg: #2b2b36; }
 
-#pk-chat-head { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: linear-gradient(135deg, #0073ff, #0056cc); border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 115, 255, 0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 9999; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+#pk-chat-head { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: linear-gradient(135deg, #4CA1AF, #0056cc); border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 115, 255, 0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 9999; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 #pk-chat-head:hover { transform: scale(1.1); }
-#pk-chat-box { position: fixed; bottom: 25px; right: 25px; width: 350px !important; max-width: 90vw; background: var(--pk-bg); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column; z-index: 9999; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif; overflow: hidden; border: 1px solid var(--pk-border); }
+#pk-chat-box { position: fixed; bottom: 25px; right: 25px; width: 350px !important; max-width: 90vw; background: var(--pk-bg); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column; z-index: 9999; font-family: -apple-system, BlinkMacSystemFont, ""LINE Seed Sans TH" !important", Roboto, Helvetica, sans-serif; overflow: hidden; border: 1px solid var(--pk-border); }
 
 #pk-chat-header { background: var(--pk-header); color: var(--pk-header-text); padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
 .pk-header-title { font-weight: bold; font-size: 15px; }
@@ -11,7 +11,15 @@
 /* 🔔 สไตล์ปุ่มบน Header (PM, Notice, Settings) */
 .pk-header-actions { display: flex; align-items: center; gap: 10px; }
 .pk-header-icon, #pk-chat-settings-btn, #pk-chat-close-btn { color: var(--pk-header-text); text-decoration: none; display: flex; align-items: center; cursor: pointer; opacity: 0.75; transition: opacity 0.2s, transform 0.2s; }
-.pk-header-icon:hover, #pk-chat-settings-btn:hover, #pk-chat-close-btn:hover { opacity: 1; transform: scale(1.1); }
+.pk-header-icon, #pk-chat-settings-btn, #pk-chat-close-btn, #pk-chat-shop-btn { 
+    color: var(--pk-header-text) !important; 
+    opacity: 0.75; 
+    transition: all 0.2s; 
+}
+.pk-header-icon:hover, #pk-chat-settings-btn:hover, #pk-chat-close-btn:hover, #pk-chat-shop-btn:hover { 
+    opacity: 1 !important; 
+    transform: scale(1.1); 
+}
 
 #pk-chat-settings-menu { position: absolute; top: 50px; right: 15px; background: var(--pk-bg); border: 1px solid var(--pk-border); border-radius: 8px; padding: 12px 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 10002; color: var(--pk-text); min-width: 160px; }
 .pk-setting-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 500;}
@@ -19,7 +27,7 @@
 .pk-switch input { opacity: 0; width: 0; height: 0; }
 .pk-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
 .pk-slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-input:checked + .pk-slider { background-color: #0073ff; }
+input:checked + .pk-slider { background-color: #4CA1AF; }
 input:checked + .pk-slider:before { transform: translateX(14px); }
 
 #pk-chat-rooms { display: flex; background: var(--pk-msg-bg); overflow-x: auto; padding: 10px; gap: 8px; border-bottom: 1px solid var(--pk-border); }
@@ -394,4 +402,17 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
         z-index: 1000000 !important;
     }
     #pk-chat-tooltip { display: none !important; }
+}
+
+/* 1. จัดการการ์ดพรีวิวลิงก์ให้กว้างขึ้น แต่ไม่ให้ทะลุกรอบแม่ */
+.pk-link-preview {
+    width: 260px !important; 
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* 2. สั่งให้กล่องคำพูด (Bubble) ล็อกของทุกอย่างให้อยู่ข้างใน ห้ามทะลุขอบโค้งออกมา */
+.pk-bubble {
+    overflow: hidden !important; 
+    word-break: break-word !important;
 }
