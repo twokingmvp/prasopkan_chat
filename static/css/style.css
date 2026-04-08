@@ -215,3 +215,35 @@
 .pk-rp-btn-group { display: flex; justify-content: space-between; }
 #pk-rp-submit { background: #d9363e; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 48%; font-weight:bold;}
 #pk-rp-cancel { background: #eee; color: #555; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 48%; }
+
+
+/* --- ตกแต่งระบบพรีวิวลิงก์กระทู้ 🖼️ --- */
+.pk-link-preview {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-left: 4px solid #0073ff;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-top: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+}
+.pk-lp-title {
+    display: block;
+    font-weight: bold;
+    color: #0073ff !important;
+    text-decoration: none;
+    margin-bottom: 6px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+.pk-lp-title:hover {
+    text-decoration: underline;
+}
+.pk-lp-meta {
+    font-size: 11px;
+    color: #888;
+    background: #f9f9f9;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
