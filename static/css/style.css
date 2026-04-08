@@ -157,3 +157,15 @@
 .pk-emoji-item:hover {
     background: #f0f0f0;
 }
+
+/* --- ตกแต่งปุ่มลบสำหรับ Admin --- */
+.pk-msg-delete {
+    color: #ff3333;
+    font-size: 11px;
+    margin-left: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+.pk-msg-delete:hover {
+    text-decoration: underline;
+}

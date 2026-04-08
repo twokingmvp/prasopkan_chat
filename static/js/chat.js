@@ -16,26 +16,22 @@
         var emojiPicker = $('#pk-chat-emoji-picker');
         var emojiHtml = '';
         
-        // สร้างรายการอีโมจิใส่กล่อง
         $.each(emojis, function(i, emoji) {
             emojiHtml += '<span class="pk-emoji-item">' + emoji + '</span>';
         });
         emojiPicker.html(emojiHtml);
 
-        // เปิด/ปิด กล่องอีโมจิ
         $('#pk-chat-emoji-btn').on('click', function(e) {
-            e.stopPropagation(); // กันคลิกทะลุ
+            e.stopPropagation(); 
             emojiPicker.fadeToggle(150);
         });
 
-        // เมื่อกดเลือกอีโมจิ
         $(document).on('click', '.pk-emoji-item', function() {
             var input = $('#pk-chat-input');
             input.val(input.val() + $(this).text());
             input.focus();
         });
 
-        // กดพื้นที่อื่นบนหน้าเว็บ ให้ซ่อนกล่องอีโมจิ
         $(document).on('click', function(e) {
             if (!$(e.target).closest('#pk-chat-emoji-picker, #pk-chat-emoji-btn').length) {
                 emojiPicker.fadeOut(150);
@@ -52,7 +48,6 @@
             fetchMessages(true); 
         });
 
-        // --- ระบบเปิด-ปิดกล่องแชท ---
         function toggleChat() {
             chatBody.slideToggle(200, function() {
                 var isHidden = chatBody.is(':hidden');
@@ -68,7 +63,7 @@
             toggleBtn.text('☐');
         }
 
-        // --- ระบบดึงข้อมูล ---
+        // --- ระบบดึงข้อมูล (เพิ่มปุ่มลบสำหรับแอดมิน) ---
         function fetchMessages(forceScroll = false) {
             if(isFetching) return;
             isFetching = true;
@@ -80,11 +75,15 @@
                 success: function(res) {
                     if(res.status === 'success') {
                         var html = '';
+                        var isAdmin = res.is_admin; // รับค่าว่าเป็นแอดมินหรือไม่
+
                         if(res.data.length === 0) {
                             html = '<div style="text-align:center; padding:15px; color:#999;">ยังไม่มีคนคุยในห้องนี้ มาเริ่มคุยกันเลย!</div>';
                         } else {
                             $.each(res.data, function(index, item) {
-                                html += '<div class="pk-msg-item"><b>' + item.username + ':</b> ' + item.message + '<span class="pk-msg-time">[' + item.time + ']</span></div>';
+                                // ถ้าเป็นแอดมิน ให้แสดงปุ่ม [ลบ] ที่มี ID ของข้อความนั้นๆ
+                                var delBtn = isAdmin ? '<span class="pk-msg-delete" data-id="' + item.msg_id + '">[ลบ]</span>' : '';
+                                html += '<div class="pk-msg-item"><b>' + item.username + ':</b> ' + item.message + '<span class="pk-msg-time">[' + item.time + ']</span>' + delBtn + '</div>';
                             });
                         }
                         
@@ -104,6 +103,25 @@
         fetchMessages(true);
         setInterval(function() { fetchMessages(false); }, 3000);
 
+        // --- ระบบคลิกลบข้อความ (สำหรับแอดมิน) ---
+        $(document).on('click', '.pk-msg-delete', function() {
+            if(confirm('คุณต้องการลบข้อความนี้ใช่หรือไม่?')) {
+                var msgId = $(this).data('id');
+                $.ajax({
+                    url: apiUrl + '&action=delete&msg_id=' + msgId,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(res) {
+                        if(res.status === 'success') {
+                            fetchMessages(false); // อัปเดตแชททันทีโดยไม่เลื่อนจอ
+                        } else {
+                            alert(res.msg);
+                        }
+                    }
+                });
+            }
+        });
+
         // --- ระบบส่งข้อมูล ---
         function sendMessage(e) {
             if(e) e.preventDefault();
@@ -113,7 +131,7 @@
             var msg = inputField.val();
             if(msg.trim() !== '') {
                 inputField.prop('disabled', true);
-                emojiPicker.fadeOut(150); // ซ่อนกล่องอีโมจิตอนกดส่ง
+                emojiPicker.fadeOut(150); 
                 
                 $.ajax({
                     url: apiUrl + '&action=send&room_id=' + currentRoomId,
