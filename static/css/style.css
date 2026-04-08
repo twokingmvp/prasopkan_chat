@@ -1,124 +1,48 @@
-/* prasopkan_chat/static/css/style.css */
-#pk-chat-box {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 300px;
-    background: #ffffff;
-    border-radius: 10px 10px 0 0;
-    box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
-    display: flex;
-    flex-direction: column;
-    z-index: 9999;
-    font-family: sans-serif;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-#pk-chat-header {
-    background: #0073ff;
-    color: white;
-    padding: 12px;
-    font-weight: bold;
-    font-size: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-}
-#pk-chat-toggle-btn {
-    background: rgba(255,255,255,0.2);
-    border-radius: 4px;
-    padding: 2px 8px;
-    font-size: 12px;
-}
+/* --- ระบบตกแต่ง Emoji --- */
 #pk-chat-body {
-    display: flex;
-    flex-direction: column;
-    height: 350px;
+    position: relative; /* ให้กล่องอีโมจิลอยอิงกับกล่องแชท */
 }
-#pk-chat-messages {
-    flex: 1;
-    padding: 10px;
-    overflow-y: auto;
-    background: #f9f9f9;
-    font-size: 13px;
-}
-.pk-msg-item {
-    margin-bottom: 8px;
-    line-height: 1.4;
-    word-wrap: break-word;
-}
-.pk-msg-time {
-    font-size: 11px;
-    color: #999;
-    margin-left: 5px;
-}
-#pk-chat-input-area {
-    display: flex;
-    padding: 10px;
-    border-top: 1px solid #ddd;
-    background: #fff;
-    align-items: center;
-}
-#pk-chat-input {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    outline: none;
-}
-#pk-chat-send {
-    background: #0073ff;
-    color: white;
+#pk-chat-emoji-btn {
+    background: none;
     border: none;
-    border-radius: 4px;
-    padding: 8px 12px;
-    margin-left: 8px;
+    font-size: 20px;
     cursor: pointer;
+    padding: 0 8px 0 0;
+    outline: none;
+    transition: transform 0.2s;
 }
-.pk-login-notice {
-    flex: 1;
-    text-align: center;
-    color: #888;
-    font-size: 13px;
-    padding: 8px 0;
+#pk-chat-emoji-btn:hover {
+    transform: scale(1.1);
 }
-/* ตกแต่งระบบแท็บห้องแชท */
-#pk-chat-rooms {
-    display: flex;
-    background: #eef2f5;
-    overflow-x: auto;
-    padding: 8px;
+#pk-chat-emoji-picker {
+    position: absolute;
+    bottom: 50px; /* ลอยอยู่เหนือช่องพิมพ์ข้อความ */
+    left: 10px;
+    width: 260px;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.15);
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
     gap: 8px;
-    border-bottom: 1px solid #ddd;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 10000;
 }
-#pk-chat-rooms::-webkit-scrollbar { height: 4px; }
-#pk-chat-rooms::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+/* ปรับสโครลบาร์ของกล่องอีโมจิ */
+#pk-chat-emoji-picker::-webkit-scrollbar { width: 5px; }
+#pk-chat-emoji-picker::-webkit-scrollbar-thumb { background: #ccc; border-radius: 5px; }
 
-.pk-room-tab {
-    padding: 4px 10px;
-    font-size: 12px;
-    background: #fff;
-    color: #555;
-    border: 1px solid #ccc;
-    border-radius: 15px;
+.pk-emoji-item {
+    font-size: 20px;
     cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.2s;
-}
-.pk-room-tab.active {
-    background: #0073ff;
-    color: white;
-    border-color: #0073ff;
-}
-
-/* จัดระเบียบการแสดงผลตอนยังไม่ล็อกอิน */
-.pk-login-notice {
-    width: 100%;
     text-align: center;
-    color: #888;
-    font-size: 13px;
-    padding: 8px 0;
-    background: #f9f9f9;
+    user-select: none;
+    transition: background 0.2s;
     border-radius: 4px;
+}
+.pk-emoji-item:hover {
+    background: #f0f0f0;
 }

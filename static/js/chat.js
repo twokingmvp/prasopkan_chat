@@ -5,20 +5,51 @@
         var toggleBtn = $('#pk-chat-toggle-btn');
         var isFetching = false;
         var apiUrl = 'plugin.php?id=prasopkan_chat:api';
-        var currentRoomId = 0; // ค่าเริ่มต้นถ้าไม่เปิดแยกห้อง
+        var currentRoomId = 0; 
+        
         if ($('.pk-room-tab.active').length > 0) {
             currentRoomId = $('.pk-room-tab.active').data('room');
         }
+
+        // --- ระบบอีโมจิ (Emoji) ---
+        var emojis = ['😀','😂','🤣','😊','😍','🥰','😘','😜','😎','🥺','😭','😡','👍','👎','👏','🙏','❤️','🔥','✨','🎉','🌟','🐱','🐶','💡','📌'];
+        var emojiPicker = $('#pk-chat-emoji-picker');
+        var emojiHtml = '';
+        
+        // สร้างรายการอีโมจิใส่กล่อง
+        $.each(emojis, function(i, emoji) {
+            emojiHtml += '<span class="pk-emoji-item">' + emoji + '</span>';
+        });
+        emojiPicker.html(emojiHtml);
+
+        // เปิด/ปิด กล่องอีโมจิ
+        $('#pk-chat-emoji-btn').on('click', function(e) {
+            e.stopPropagation(); // กันคลิกทะลุ
+            emojiPicker.fadeToggle(150);
+        });
+
+        // เมื่อกดเลือกอีโมจิ
+        $(document).on('click', '.pk-emoji-item', function() {
+            var input = $('#pk-chat-input');
+            input.val(input.val() + $(this).text());
+            input.focus();
+        });
+
+        // กดพื้นที่อื่นบนหน้าเว็บ ให้ซ่อนกล่องอีโมจิ
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('#pk-chat-emoji-picker, #pk-chat-emoji-btn').length) {
+                emojiPicker.fadeOut(150);
+            }
+        });
 
         // --- ระบบสลับแท็บห้องแชท ---
         $('.pk-room-tab').on('click', function() {
             $('.pk-room-tab').removeClass('active');
             $(this).addClass('active');
-            currentRoomId = $(this).data('room'); // รับค่าไอดีห้องจาก HTML
+            currentRoomId = $(this).data('room'); 
             
-            // เคลียร์ข้อความและแสดงสถานะกำลังโหลด
             chatBox.html('<div style="text-align:center; padding:15px; color:#999;">กำลังโหลดข้อความ...</div>');
-            fetchMessages(true); // บังคับเลื่อนลงล่างสุดเมื่อสลับห้อง
+            fetchMessages(true); 
         });
 
         // --- ระบบเปิด-ปิดกล่องแชท ---
@@ -42,7 +73,7 @@
             if(isFetching) return;
             isFetching = true;
             $.ajax({
-                url: apiUrl + '&action=get&room_id=' + currentRoomId, // ส่ง room_id ไปด้วย
+                url: apiUrl + '&action=get&room_id=' + currentRoomId,
                 type: 'GET',
                 dataType: 'json',
                 cache: false,
@@ -82,8 +113,10 @@
             var msg = inputField.val();
             if(msg.trim() !== '') {
                 inputField.prop('disabled', true);
+                emojiPicker.fadeOut(150); // ซ่อนกล่องอีโมจิตอนกดส่ง
+                
                 $.ajax({
-                    url: apiUrl + '&action=send&room_id=' + currentRoomId, // ส่ง room_id ไปด้วย
+                    url: apiUrl + '&action=send&room_id=' + currentRoomId,
                     type: 'GET',
                     data: { message: msg },
                     dataType: 'json',

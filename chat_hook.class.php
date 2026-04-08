@@ -7,6 +7,11 @@ class plugin_prasopkan_chat {
     public function global_footer() {
         global $_G;
         
+        // 🚨 ดักตรงนี้เลย: ถ้าไม่ได้ล็อกอิน ให้คืนค่าว่างเปล่า (ไม่แสดงกล่องแชทใดๆ)
+        if(empty($_G['uid'])) {
+            return '';
+        }
+        
         // บังคับโหลดแคชการตั้งค่าปลั๊กอินให้ชัวร์ 100%
         loadcache('plugin');
         $plugin_config = $_G['cache']['plugin']['prasopkan_chat'];
@@ -18,7 +23,6 @@ class plugin_prasopkan_chat {
         
         // เช็คว่าเปิดใช้งานและมีการเลือกบอร์ดไว้หรือไม่
         if($enable_rooms) {
-            // แปลงค่า forums ที่ได้จากระบบให้เป็น Array
             if(!is_array($chat_forums)) {
                 $chat_forums = @unserialize($chat_forums);
             }
@@ -48,9 +52,6 @@ class plugin_prasopkan_chat {
                 }
             }
         }
-
-        // ตัวแปรเช็คการล็อกอิน ส่งไปให้ HTML ตรวจสอบ
-        $is_logged_in = ($_G['uid'] > 0) ? true : false;
 
         ob_start();
         include template('prasopkan_chat:chat_ui');
