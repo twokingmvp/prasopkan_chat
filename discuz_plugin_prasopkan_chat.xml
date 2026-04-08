@@ -7,11 +7,11 @@
 			<item id="adminid"><![CDATA[1]]></item>
 			<item id="name"><![CDATA[Prasopkan Public Chat]]></item>
 			<item id="identifier"><![CDATA[prasopkan_chat]]></item>
-			<item id="description"><![CDATA[ระบบห้องแชทรวมและแยกตามหมวดหมู่]]></item>
+			<item id="description"><![CDATA[ระบบห้องแชทรวมและแยกตามหมวดหมู่ พร้อมฟีเจอร์ขั้นสูง]]></item>
 			<item id="datatables"><![CDATA[prasopkan_chat_messages]]></item>
 			<item id="directory"><![CDATA[prasopkan_chat/]]></item>
 			<item id="copyright"><![CDATA[Prasopkan]]></item>
-			<item id="version"><![CDATA[1.1.0]]></item>
+			<item id="version"><![CDATA[1.2.0]]></item>
 			<item id="__modules">
 				<item id="0">
 					<item id="name"><![CDATA[chat_hook]]></item>
@@ -37,6 +37,42 @@
 				<item id="variable"><![CDATA[chat_forums]]></item>
 				<item id="type"><![CDATA[forums]]></item>
 				<item id="value"><![CDATA[]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="2">
+				<item id="displayorder"><![CDATA[3]]></item>
+				<item id="title"><![CDATA[เปิดใช้งาน ส่งรูปภาพ/GIF 📸]]></item>
+				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้อัปโหลดและส่งรูปภาพในแชทได้]]></item>
+				<item id="variable"><![CDATA[enable_image]]></item>
+				<item id="type"><![CDATA[radio]]></item>
+				<item id="value"><![CDATA[1]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="3">
+				<item id="displayorder"><![CDATA[4]]></item>
+				<item id="title"><![CDATA[เปิดใช้งาน สีชื่อตามยศ 🎖️]]></item>
+				<item id="description"><![CDATA[แสดงสีชื่อของสมาชิกตามกลุ่มผู้ใช้งานของ Discuz]]></item>
+				<item id="variable"><![CDATA[enable_color]]></item>
+				<item id="type"><![CDATA[radio]]></item>
+				<item id="value"><![CDATA[0]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="4">
+				<item id="displayorder"><![CDATA[5]]></item>
+				<item id="title"><![CDATA[เปิดใช้งาน แท็กชื่อ (@Mention) 💬]]></item>
+				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้พิมพ์ @ เพื่อแท็กหรือตอบกลับสมาชิกคนอื่น]]></item>
+				<item id="variable"><![CDATA[enable_mention]]></item>
+				<item id="type"><![CDATA[radio]]></item>
+				<item id="value"><![CDATA[0]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="5">
+				<item id="displayorder"><![CDATA[6]]></item>
+				<item id="title"><![CDATA[เปิดใช้งาน บอทแจ้งเตือนกระทู้ใหม่ 🤖]]></item>
+				<item id="description"><![CDATA[ให้ระบบส่งข้อความแจ้งเตือนลงแชทอัตโนมัติเมื่อมีคนตั้งกระทู้ใหม่]]></item>
+				<item id="variable"><![CDATA[enable_bot]]></item>
+				<item id="type"><![CDATA[radio]]></item>
+				<item id="value"><![CDATA[0]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
 		</item>

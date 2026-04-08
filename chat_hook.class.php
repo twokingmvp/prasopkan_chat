@@ -7,16 +7,17 @@ class plugin_prasopkan_chat {
     public function global_footer() {
         global $_G;
         
-        // บังคับโหลดแคชการตั้งค่า
         loadcache('plugin');
         $plugin_config = $_G['cache']['plugin']['prasopkan_chat'];
         
         $enable_rooms = $plugin_config['enable_rooms'];
         $chat_forums = $plugin_config['chat_forums'];
         
+        // อ่านค่าว่าเปิดให้ส่งรูปภาพหรือไม่
+        $enable_image = $plugin_config['enable_image'];
+        
         $rooms_html = '';
         
-        // จัดการสร้างแท็บห้องแชท
         if($enable_rooms) {
             if(!is_array($chat_forums)) {
                 $chat_forums = @unserialize($chat_forums);
@@ -24,7 +25,6 @@ class plugin_prasopkan_chat {
             
             if(!empty($chat_forums) && is_array($chat_forums)) {
                 $fids = implode(',', array_map('intval', $chat_forums));
-                
                 if($fids) {
                     $query = DB::query("SELECT fid, name FROM ".DB::table('forum_forum')." WHERE fid IN ($fids) ORDER BY displayorder");
                     $rooms = array();

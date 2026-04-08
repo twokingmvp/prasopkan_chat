@@ -11,11 +11,13 @@
     
     <div id="pk-chat-body">
         <div id="pk-chat-messages"></div>
-        
         <div id="pk-chat-emoji-picker" style="display: none;"></div>
         
         <div id="pk-chat-input-area">
             <button id="pk-chat-emoji-btn" type="button">😀</button>
+            
+            <button id="pk-chat-img-btn" type="button" style="background:none; border:none; font-size:20px; cursor:pointer; padding:0 8px 0 0; outline:none; transition:transform 0.2s;">📸</button>
+            <input type="file" id="pk-chat-file-upload" accept="image/png, image/jpeg, image/gif, image/webp" style="display:none;">
             <input type="text" id="pk-chat-input" placeholder="พิมพ์ข้อความ...">
             <button id="pk-chat-send">ส่ง</button>
         </div>

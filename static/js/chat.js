@@ -15,10 +15,7 @@
         var emojis = ['😀','😂','🤣','😊','😍','🥰','😘','😜','😎','🥺','😭','😡','👍','👎','👏','🙏','❤️','🔥','✨','🎉','🌟','🐱','🐶','💡','📌'];
         var emojiPicker = $('#pk-chat-emoji-picker');
         var emojiHtml = '';
-        
-        $.each(emojis, function(i, emoji) {
-            emojiHtml += '<span class="pk-emoji-item">' + emoji + '</span>';
-        });
+        $.each(emojis, function(i, emoji) { emojiHtml += '<span class="pk-emoji-item">' + emoji + '</span>'; });
         emojiPicker.html(emojiHtml);
 
         $('#pk-chat-emoji-btn').on('click', function(e) {
@@ -36,6 +33,56 @@
             if (!$(e.target).closest('#pk-chat-emoji-picker, #pk-chat-emoji-btn').length) {
                 emojiPicker.fadeOut(150);
             }
+        });
+
+        // --- ระบบส่งรูปภาพ (Image Upload) 📸 ---
+        $('#pk-chat-img-btn').on('click', function() {
+            $('#pk-chat-file-upload').click();
+        });
+
+        $('#pk-chat-file-upload').on('change', function() {
+            var file = this.files[0];
+            if(!file) return;
+
+            var formData = new FormData();
+            formData.append('chat_image', file);
+
+            // แสดงสถานะกำลังอัปโหลด
+            var inputField = $('#pk-chat-input');
+            inputField.val('กำลังอัปโหลดรูปภาพ...').prop('disabled', true);
+
+            $.ajax({
+                url: apiUrl + '&action=upload',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function(res) {
+                    inputField.val('').prop('disabled', false).focus();
+                    if(res.status === 'success') {
+                        // เมื่อได้ URL รูปมา ให้ยิงคำสั่งส่งข้อความทันที
+                        var imgMsg = '[img]' + res.url + '[/img]';
+                        $.ajax({
+                            url: apiUrl + '&action=send&room_id=' + currentRoomId,
+                            type: 'GET',
+                            data: { message: imgMsg },
+                            dataType: 'json',
+                            success: function(sendRes) {
+                                if(sendRes.status === 'success') fetchMessages(true);
+                            }
+                        });
+                    } else {
+                        alert(res.msg);
+                    }
+                    $('#pk-chat-file-upload').val(''); 
+                },
+                error: function() {
+                    inputField.val('').prop('disabled', false).focus();
+                    alert('เกิดข้อผิดพลาดในการเชื่อมต่อเพื่ออัปโหลด');
+                    $('#pk-chat-file-upload').val('');
+                }
+            });
         });
 
         // --- ระบบสลับแท็บห้องแชท ---
@@ -63,7 +110,7 @@
             toggleBtn.text('☐');
         }
 
-        // --- ระบบดึงข้อมูล (เพิ่มปุ่มลบสำหรับแอดมิน) ---
+        // --- ระบบดึงข้อมูล ---
         function fetchMessages(forceScroll = false) {
             if(isFetching) return;
             isFetching = true;
@@ -75,13 +122,12 @@
                 success: function(res) {
                     if(res.status === 'success') {
                         var html = '';
-                        var isAdmin = res.is_admin; // รับค่าว่าเป็นแอดมินหรือไม่
+                        var isAdmin = res.is_admin; 
 
                         if(res.data.length === 0) {
                             html = '<div style="text-align:center; padding:15px; color:#999;">ยังไม่มีคนคุยในห้องนี้ มาเริ่มคุยกันเลย!</div>';
                         } else {
                             $.each(res.data, function(index, item) {
-                                // ถ้าเป็นแอดมิน ให้แสดงปุ่ม [ลบ] ที่มี ID ของข้อความนั้นๆ
                                 var delBtn = isAdmin ? '<span class="pk-msg-delete" data-id="' + item.msg_id + '">[ลบ]</span>' : '';
                                 html += '<div class="pk-msg-item"><b>' + item.username + ':</b> ' + item.message + '<span class="pk-msg-time">[' + item.time + ']</span>' + delBtn + '</div>';
                             });
@@ -103,7 +149,7 @@
         fetchMessages(true);
         setInterval(function() { fetchMessages(false); }, 3000);
 
-        // --- ระบบคลิกลบข้อความ (สำหรับแอดมิน) ---
+        // --- ระบบคลิกลบข้อความ ---
         $(document).on('click', '.pk-msg-delete', function() {
             if(confirm('คุณต้องการลบข้อความนี้ใช่หรือไม่?')) {
                 var msgId = $(this).data('id');
@@ -112,17 +158,14 @@
                     type: 'GET',
                     dataType: 'json',
                     success: function(res) {
-                        if(res.status === 'success') {
-                            fetchMessages(false); // อัปเดตแชททันทีโดยไม่เลื่อนจอ
-                        } else {
-                            alert(res.msg);
-                        }
+                        if(res.status === 'success') fetchMessages(false);
+                        else alert(res.msg);
                     }
                 });
             }
         });
 
-        // --- ระบบส่งข้อมูล ---
+        // --- ระบบส่งข้อมูลข้อความปกติ ---
         function sendMessage(e) {
             if(e) e.preventDefault();
             var inputField = $('#pk-chat-input');
@@ -140,11 +183,8 @@
                     dataType: 'json',
                     success: function(res) {
                         inputField.prop('disabled', false).val('').focus();
-                        if(res.status === 'success') {
-                            fetchMessages(true);
-                        } else {
-                            alert(res.msg);
-                        }
+                        if(res.status === 'success') fetchMessages(true);
+                        else alert(res.msg);
                     },
                     error: function() {
                         inputField.prop('disabled', false).focus();
