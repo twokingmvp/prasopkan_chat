@@ -1,52 +1,18 @@
-/* =========================================
-   1. ตัวแปรสีพื้นฐาน (โหมดสว่าง)
-========================================= */
-:root {
-    --pk-bg: #ffffff;
-    --pk-header: #0073ff;
-    --pk-header-text: #ffffff;
-    --pk-border: #f0f0f0;
-    --pk-msg-bg: #fafafa;
-    --pk-text: #333333;
-    --pk-text-muted: #888888;
-    --pk-bubble-mine: #0073ff;
-    --pk-bubble-mine-text: #ffffff;
-    --pk-bubble-other: #ffffff;
-    --pk-bubble-other-border: #e0e0e0;
-    --pk-input-bg: #f9f9f9;
-}
+:root { --pk-bg: #ffffff; --pk-header: #0073ff; --pk-header-text: #ffffff; --pk-border: #f0f0f0; --pk-msg-bg: #fafafa; --pk-text: #333333; --pk-text-muted: #888888; --pk-bubble-mine: #0073ff; --pk-bubble-mine-text: #ffffff; --pk-bubble-other: #ffffff; --pk-bubble-other-border: #e0e0e0; --pk-input-bg: #f9f9f9; }
+.pk-dark-mode { --pk-bg: #1e1e24; --pk-header: #2b2b36; --pk-header-text: #ffffff; --pk-border: #333344; --pk-msg-bg: #121216; --pk-text: #e0e0e0; --pk-text-muted: #aaaaaa; --pk-bubble-mine: #0066cc; --pk-bubble-mine-text: #ffffff; --pk-bubble-other: #2b2b36; --pk-bubble-other-border: #3a3a4a; --pk-input-bg: #2b2b36; }
 
-/* 🌙 ตัวแปรสี (โหมดมืด - จะทำงานเมื่อมีคลาส pk-dark-mode) */
-.pk-dark-mode {
-    --pk-bg: #1e1e24;
-    --pk-header: #2b2b36;
-    --pk-header-text: #ffffff;
-    --pk-border: #333344;
-    --pk-msg-bg: #121216;
-    --pk-text: #e0e0e0;
-    --pk-text-muted: #aaaaaa;
-    --pk-bubble-mine: #0066cc;
-    --pk-bubble-mine-text: #ffffff;
-    --pk-bubble-other: #2b2b36;
-    --pk-bubble-other-border: #3a3a4a;
-    --pk-input-bg: #2b2b36;
-}
-
-/* =========================================
-   2. โครงสร้างหลัก & บับเบิลลอยได้
-========================================= */
 #pk-chat-head { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: linear-gradient(135deg, #0073ff, #0056cc); border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 115, 255, 0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 9999; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 #pk-chat-head:hover { transform: scale(1.1); }
-#pk-chat-box { position: fixed; bottom: 25px; right: 25px; width: 350px; background: var(--pk-bg); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column; z-index: 9999; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif; overflow: hidden; border: 1px solid var(--pk-border); }
+#pk-chat-box { position: fixed; bottom: 25px; right: 25px; width: 350px !important; max-width: 90vw; background: var(--pk-bg); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column; z-index: 9999; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif; overflow: hidden; border: 1px solid var(--pk-border); }
 
-/* Header & Actions */
 #pk-chat-header { background: var(--pk-header); color: var(--pk-header-text); padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
 .pk-header-title { font-weight: bold; font-size: 15px; }
-.pk-header-actions { display: flex; align-items: center; gap: 12px; }
-#pk-chat-settings-btn, #pk-chat-close-btn { cursor: pointer; opacity: 0.8; transition: opacity 0.2s; display:flex; }
-#pk-chat-settings-btn:hover, #pk-chat-close-btn:hover { opacity: 1; }
 
-/* ⚙️ เมนูตั้งค่า (Settings Menu) */
+/* 🔔 สไตล์ปุ่มบน Header (PM, Notice, Settings) */
+.pk-header-actions { display: flex; align-items: center; gap: 10px; }
+.pk-header-icon, #pk-chat-settings-btn, #pk-chat-close-btn { color: var(--pk-header-text); text-decoration: none; display: flex; align-items: center; cursor: pointer; opacity: 0.75; transition: opacity 0.2s, transform 0.2s; }
+.pk-header-icon:hover, #pk-chat-settings-btn:hover, #pk-chat-close-btn:hover { opacity: 1; transform: scale(1.1); }
+
 #pk-chat-settings-menu { position: absolute; top: 50px; right: 15px; background: var(--pk-bg); border: 1px solid var(--pk-border); border-radius: 8px; padding: 12px 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 10002; color: var(--pk-text); min-width: 160px; }
 .pk-setting-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 500;}
 .pk-switch { position: relative; display: inline-block; width: 34px; height: 20px; }
@@ -62,66 +28,80 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 .pk-room-tab.active { background: var(--pk-header); color: var(--pk-header-text); border-color: var(--pk-header); }
 
 #pk-chat-body { display: flex; flex-direction: column; height: 400px; position: relative; }
-#pk-chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: var(--pk-msg-bg); font-size: 13.5px; }
+
+/* 📢 แถบประกาศจากแอดมิน */
+#pk-chat-announcement { background: #fff3cd; color: #856404; padding: 8px 12px; font-size: 12px; display: flex; align-items: center; border-bottom: 1px solid #ffeeba; }
+.pk-dark-mode #pk-chat-announcement { background: #332b00; color: #ffdb4d; border-color: #4d4000; }
+.pk-announce-icon { margin-right: 8px; font-size: 14px; }
+.pk-announce-text { flex: 1; font-weight: 500;}
+
+#pk-chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: var(--pk-msg-bg); font-size: 13.5px; overflow-x: hidden; }
 #pk-chat-messages::-webkit-scrollbar { width: 6px; }
 #pk-chat-messages::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 10px; }
 
-/* =========================================
-   3. กล่องคำพูด (Chat Bubble) สไตล์ LINE
-========================================= */
-.pk-msg-row { display: flex; flex-direction: column; margin-bottom: 15px; }
+.pk-msg-row { display: flex; flex-direction: column; margin-bottom: 15px; max-width: 100%; }
 .pk-msg-mine { align-items: flex-end; }
 .pk-msg-other { align-items: flex-start; }
 .pk-msg-info { font-size: 11px; color: var(--pk-text-muted); margin-bottom: 5px; display: flex; gap: 6px; }
-.pk-bubble-wrapper { display: flex; align-items: flex-end; gap: 6px; max-width: 85%; }
-.pk-bubble { padding: 10px 14px; border-radius: 18px; line-height: 1.4; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.05); color: var(--pk-text); }
+
+.pk-bubble-wrapper { display: flex; align-items: flex-end; gap: 6px; max-width: 85%; min-width: 0; }
+.pk-bubble { padding: 10px 14px; border-radius: 18px; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.05); color: var(--pk-text); max-width: 100%; min-width: 0; word-break: break-word; overflow-wrap: break-word; }
 .pk-msg-mine .pk-bubble { background: var(--pk-bubble-mine); color: var(--pk-bubble-mine-text); border-bottom-right-radius: 4px; }
 .pk-msg-other .pk-bubble { background: var(--pk-bubble-other); border: 1px solid var(--pk-bubble-other-border); border-bottom-left-radius: 4px; }
 
-/* 📸 จำกัดขนาดรูปภาพในแชท */
-.pk-chat-img { 
-    max-width: 220px; 
-    max-height: 250px; 
-    width: auto;
-    object-fit: contain;
-    border-radius: 10px; 
-    margin-top: 5px; 
-    background: var(--pk-bg);
-}
+/* 🤖 ดึงข้อความบอทให้เต็มจอและอยู่ตรงกลาง */
+.pk-msg-bot { align-items: center; margin-bottom: 20px; }
+.pk-msg-bot .pk-bubble-wrapper { max-width: 95%; width: 95%; justify-content: center; }
+.pk-msg-bot .pk-bubble { background: rgba(255, 102, 0, 0.08); border: 1px dashed #ff6600; color: #cc5200; width: 100%; text-align: center; font-size: 12.5px; border-radius: 8px; }
+.pk-dark-mode .pk-msg-bot .pk-bubble { background: rgba(255, 102, 0, 0.15); color: #ff9933; border-color: #ff9933;}
+
+.pk-chat-img { max-width: 100%; max-height: 180px; width: auto; object-fit: contain; border-radius: 8px; margin-top: 5px; background: transparent; }
 
 .pk-msg-actions-inline { display: flex; gap: 6px; opacity: 0; transition: opacity 0.2s; padding-bottom: 5px; }
 .pk-msg-row:hover .pk-msg-actions-inline { opacity: 1; }
 .pk-msg-action-btn { cursor: pointer; font-size: 13px; filter: grayscale(100%); transition: all 0.2s; }
 .pk-msg-action-btn:hover { filter: grayscale(0%); transform: scale(1.2); }
 
-/* =========================================
-   4. ระบบ Input, รีแอคชั่น, และ Typing 
-========================================= */
-#pk-chat-input-area { display: flex; padding: 12px; background: var(--pk-bg); border-top: 1px solid var(--pk-border); align-items: center; gap: 8px; }
-#pk-chat-input-area button { background: none; border: none; font-size: 22px; cursor: pointer; padding: 0; transition: transform 0.2s; }
-#pk-chat-input-area button:hover { transform: scale(1.1); }
-#pk-chat-input { flex: 1; padding: 10px 14px; background: var(--pk-input-bg); border: 1px solid var(--pk-border); border-radius: 20px; outline: none; color: var(--pk-text); font-size: 13.5px; }
-#pk-chat-send { background: var(--pk-header) !important; width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+#pk-chat-input-area { display: flex; padding: 12px; background: var(--pk-bg); border-top: 1px solid var(--pk-border); align-items: center; gap: 6px; }
+
+/* 🎨 ปรับ UI ปุ่มกดส่งอีโมจิ/ภาพ/ซอง ให้น่ากด */
+.pk-action-btn { 
+    background: var(--pk-border) !important; border: none; border-radius: 50%; 
+    width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; 
+    font-size: 16px; cursor: pointer; transition: all 0.2s ease; padding: 0; outline: none; 
+}
+.pk-action-btn:hover { background: #e0e0e0 !important; transform: scale(1.1); }
+.pk-dark-mode .pk-action-btn:hover { background: #444 !important; }
+
+#pk-chat-input { flex: 1; padding: 10px 14px; background: var(--pk-input-bg); border: 1px solid var(--pk-border); border-radius: 20px; outline: none; color: var(--pk-text); font-size: 13.5px; min-width:0; }
+#pk-chat-send { background: var(--pk-header) !important; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s;}
+#pk-chat-send:hover { transform: scale(1.1); }
 
 #pk-chat-typing-indicator { padding: 6px 15px; font-size: 11px; color: var(--pk-text-muted); background: var(--pk-msg-bg); font-style: italic; }
 .pk-dot-typing { animation: typing 1.5s infinite; }
 @keyframes typing { 0% { content: "."; } 33% { content: ".."; } 66% { content: "..."; } }
 
-.pk-link-preview { background: var(--pk-bg); border: 1px solid var(--pk-border); border-left: 4px solid var(--pk-header); border-radius: 8px; padding: 10px; margin-top: 5px; }
-.pk-lp-title { color: var(--pk-header) !important; font-weight: 600; font-size: 13px; text-decoration: none; margin-bottom: 4px; }
-.pk-lp-meta { font-size: 11px; color: var(--pk-text-muted); }
-.pk-text-link { color: var(--pk-header); text-decoration: underline; }
+.pk-link-preview { display: flex; align-items: center; background: var(--pk-bg); border: 1px solid var(--pk-border); border-left: 4px solid var(--pk-header); border-radius: 8px; padding: 8px; margin-top: 5px; overflow: hidden; width: 100%; box-sizing: border-box;}
+.pk-lp-img, .pk-lp-fallback { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; margin-right: 10px; flex-shrink: 0; border: 1px solid var(--pk-border); }
+.pk-lp-fallback { background: var(--pk-input-bg); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.pk-lp-content { flex: 1; min-width: 0; text-align: left; }
+.pk-lp-title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: var(--pk-header) !important; font-weight: 600; font-size: 12px; text-decoration: none; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: normal; word-break: break-word;}
+.pk-lp-meta { font-size: 10px; color: var(--pk-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pk-text-link { color: var(--pk-header); text-decoration: underline; word-break: break-all;}
 
-.pk-reactions-display { display: flex; gap: 6px; margin-top: 4px; justify-content: inherit; }
-.pk-react-pill { padding: 2px 8px; background: var(--pk-bg); border: 1px solid var(--pk-border); border-radius: 12px; font-size: 11px; color: var(--pk-text-muted); cursor: pointer; }
+.pk-reactions-display { display: flex; gap: 6px; margin-top: 4px; justify-content: inherit; flex-wrap: wrap; }
+.pk-react-pill { padding: 2px 8px; background: var(--pk-bg); border: 1px solid var(--pk-border); border-radius: 12px; font-size: 11px; color: var(--pk-text-muted); cursor: pointer; transition: all 0.2s;}
+.pk-react-pill:hover { filter: brightness(0.9); }
 .pk-react-pill.active { background: rgba(0, 115, 255, 0.1); border-color: var(--pk-header); color: var(--pk-header); font-weight: bold; }
 
-.pk-redpacket-box { background: linear-gradient(135deg, #ff4d4f, #d9363e); color: white; border-radius: 12px; padding: 10px 15px; margin-top: 5px; cursor: pointer; display: inline-flex; align-items: center; }
-.pk-rp-icon { font-size: 28px; margin-right: 12px; }
+.pk-redpacket-box { background: linear-gradient(135deg, #ff4d4f, #d9363e); color: white; border-radius: 12px; padding: 10px 15px; margin-top: 5px; cursor: pointer; display: inline-flex; align-items: center; max-width:100%; box-sizing:border-box; transition: transform 0.2s;}
+.pk-redpacket-box:hover { transform: scale(1.03); }
+.pk-rp-icon { font-size: 28px; margin-right: 12px; flex-shrink:0;}
+.pk-rp-text { min-width:0; }
 .pk-mention-badge { background: rgba(0, 115, 255, 0.15); color: var(--pk-header); padding: 0 4px; border-radius: 4px; }
 
 #pk-chat-emoji-picker { position: absolute; bottom: 70px; left: 15px; width: 280px; background: var(--pk-bg); border: 1px solid var(--pk-border); border-radius: 12px; padding: 10px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); z-index:10000; }
-.pk-emoji-item { font-size: 22px; cursor: pointer; text-align: center; border-radius: 4px; }
+.pk-emoji-item { font-size: 22px; cursor: pointer; text-align: center; border-radius: 4px; transition: background 0.2s;}
 .pk-emoji-item:hover { background: var(--pk-border); }
 #pk-chat-rp-modal { position: absolute; bottom: 70px; right: 15px; width: 260px; background: var(--pk-bg); border-radius: 12px; padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); z-index:10000;}
 #pk-chat-rp-modal h3 { margin: 0 0 12px 0; color: #d9363e; text-align: center; }
@@ -129,77 +109,3 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 .pk-rp-btn-group { display: flex; justify-content: space-between; }
 #pk-rp-submit { background: #d9363e; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 48%; font-weight:bold; font-size: 14px;}
 #pk-rp-cancel { background: var(--pk-border); color: var(--pk-text); border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 48%; }
-
-/* =========================================
-   5. แก้ไขพรีวิวลิงก์ & รูปภาพให้อยู่ในขนาดมาตรฐาน 🖼️
-========================================= */
-
-/* จัดการกรอบการ์ดให้แสดงผลซ้าย-ขวา */
-.pk-link-preview { 
-    display: flex; 
-    align-items: center; 
-    background: var(--pk-bg); 
-    border: 1px solid var(--pk-border); 
-    border-left: 4px solid var(--pk-header); 
-    border-radius: 8px; 
-    padding: 10px; 
-    margin-top: 5px; 
-    overflow: hidden;
-    max-width: 100%;
-}
-
-/* 📸 บังคับขนาดรูปหน้าปกกระทู้ให้เป็นสี่เหลี่ยมจัตุรัสเล็กๆ */
-.pk-lp-img, .pk-lp-fallback {
-    width: 55px; 
-    height: 55px; 
-    object-fit: cover; 
-    border-radius: 6px; 
-    margin-right: 10px; 
-    flex-shrink: 0; 
-    border: 1px solid var(--pk-border);
-}
-
-/* ไอคอนสำรองกรณีไม่มีรูป */
-.pk-lp-fallback {
-    background: var(--pk-input-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-}
-
-/* จัดการข้อความด้านขวาไม่ให้ล้น */
-.pk-lp-content { 
-    flex: 1; 
-    min-width: 0; 
-    text-align: left;
-}
-.pk-lp-title { 
-    display: block;
-    color: var(--pk-header) !important; 
-    font-weight: 600; 
-    font-size: 13px; 
-    text-decoration: none; 
-    margin-bottom: 4px; 
-    white-space: nowrap; 
-    overflow: hidden; 
-    text-overflow: ellipsis; 
-}
-.pk-lp-meta { 
-    font-size: 11px; 
-    color: var(--pk-text-muted); 
-    white-space: nowrap; 
-    overflow: hidden; 
-    text-overflow: ellipsis; 
-}
-
-/* 📸 ปรับขนาดรูปภาพที่อัปโหลดเข้ามาในแชทให้พอดีตาขึ้น */
-.pk-chat-img { 
-    max-width: 100%; 
-    max-height: 180px; 
-    width: auto;
-    object-fit: contain;
-    border-radius: 8px; 
-    margin-top: 5px; 
-    background: transparent;
-}

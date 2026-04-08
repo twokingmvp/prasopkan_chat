@@ -12,34 +12,33 @@ class plugin_prasopkan_chat {
         
         $enable_rooms = $plugin_config['enable_rooms'];
         $chat_forums = $plugin_config['chat_forums'];
-        
         $enable_image = $plugin_config['enable_image'];
-        $enable_redpacket = $plugin_config['enable_redpacket']; // เพิ่มการดึงค่าอั่งเปา
+        $enable_redpacket = $plugin_config['enable_redpacket'];
+        
+        // 📢 ดึงข้อความประกาศจากแอดมิน
+        $admin_announcement = trim($plugin_config['admin_announcement']);
         
         $rooms_html = '';
         
         if($enable_rooms) {
             if(!is_array($chat_forums)) $chat_forums = @unserialize($chat_forums);
+            if(!is_array($chat_forums)) $chat_forums = array();
             
-            if(!empty($chat_forums) && is_array($chat_forums)) {
-                $fids = implode(',', array_map('intval', $chat_forums));
-                if($fids) {
-                    $query = DB::query("SELECT fid, name FROM ".DB::table('forum_forum')." WHERE fid IN ($fids) ORDER BY displayorder");
-                    $rooms = array();
-                    while($row = DB::fetch($query)) { $rooms[] = $row; }
-
-                    if(!empty($rooms)) {
-                        $rooms_html .= '<div id="pk-chat-rooms">';
-                        $first = true;
-                        foreach($rooms as $r) {
-                            $active = $first ? ' active' : '';
-                            $rooms_html .= '<div class="pk-room-tab'.$active.'" data-room="'.$r['fid'].'">'.strip_tags($r['name']).'</div>';
-                            $first = false;
-                        }
-                        $rooms_html .= '</div>';
-                    }
+            $fids = array_map('intval', $chat_forums);
+            
+            $rooms_html .= '<div id="pk-chat-rooms">';
+            // 📌 ล็อกให้ห้อง 1 (ทั่วไป) แสดงเป็นห้องแรกเสมอ
+            $rooms_html .= '<div class="pk-room-tab active" data-room="1">ทั่วไป</div>';
+            
+            if(!empty($fids)) {
+                $fids_str = implode(',', $fids);
+                $query = DB::query("SELECT fid, name FROM ".DB::table('forum_forum')." WHERE fid IN ($fids_str) ORDER BY displayorder");
+                while($row = DB::fetch($query)) {
+                    if($row['fid'] == 1) continue; // ข้ามห้อง 1 เพราะเราใส่ไปแล้วด้านบน
+                    $rooms_html .= '<div class="pk-room-tab" data-room="'.$row['fid'].'">'.strip_tags($row['name']).'</div>';
                 }
             }
+            $rooms_html .= '</div>';
         }
 
         $is_logged_in = ($_G['uid'] > 0) ? true : false;

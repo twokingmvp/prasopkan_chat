@@ -16,7 +16,6 @@ if($action == 'send') {
     DB::insert('prasopkan_chat_messages', $data);
     echo json_encode(array('status' => 'success')); exit;
 } 
-// --- ระบบ "กำลังพิมพ์..." ---
 elseif($action == 'typing') {
     if($_G['uid']) {
         DB::query("REPLACE INTO ".DB::table('prasopkan_chat_typing')." (room_id, uid, username, dateline) VALUES ('$room_id', '{$_G['uid']}', '{$_G['username']}', '{$_G['timestamp']}')");
@@ -31,7 +30,7 @@ elseif($action == 'get') {
     $enable_bot = $plugin_config['enable_bot'];
     $enable_linkpreview = $plugin_config['enable_linkpreview']; 
     $enable_reaction = $plugin_config['enable_reaction']; 
-    $current_uid = $_G['uid']; // ส่ง UID ปัจจุบันกลับไปให้ JS จัดหน้าจอฝั่งขวา
+    $current_uid = $_G['uid']; 
 
     if($enable_bot) {
         loadcache('prasopkan_chat_last_tid'); $last_tid = intval($_G['cache']['prasopkan_chat_last_tid']);
@@ -50,7 +49,6 @@ elseif($action == 'get') {
         }
     }
 
-    // ล้างและดึงข้อมูลคนกำลังพิมพ์
     DB::query("DELETE FROM ".DB::table('prasopkan_chat_typing')." WHERE dateline < ".($_G['timestamp'] - 6));
     $typing_users = array();
     $q_type = DB::query("SELECT username FROM ".DB::table('prasopkan_chat_typing')." WHERE room_id='$room_id' AND uid != '{$_G['uid']}'");
@@ -75,6 +73,7 @@ elseif($action == 'get') {
                         $img_url = preg_match('/^http/i', $threadimage['attachment']) ? $threadimage['attachment'] : $attachurl.'forum/'.$threadimage['attachment'];
                         $img_html = '<img src="'.$img_url.'" class="pk-lp-img" onerror="this.style.display=\'none\'">';
                     }
+                    // เอา inline style เจ้าปัญหาออกแล้วให้ class จัดการแทน
                     return '<div class="pk-link-preview">'.$img_html.'<div class="pk-lp-content"><a href="'.$url.'" target="_blank" class="pk-lp-title" title="'.strip_tags($thread['subject']).'">📄 '.strip_tags($thread['subject']).'</a><div class="pk-lp-meta">✍️ '.$thread['author'].' &nbsp;|&nbsp; 👁️ '.$thread['views'].' &nbsp;|&nbsp; 💬 '.$thread['replies'].'</div></div></div>';
                 }
                 return '<a href="'.$url.'" target="_blank" class="pk-text-link">'.$text.'</a>';
@@ -87,7 +86,7 @@ elseif($action == 'get') {
         if($enable_mention) $row['message'] = preg_replace('/@([^\s]+)/u', '<strong class="pk-mention-badge">@$1</strong>', $row['message']);
         $row['message'] = preg_replace('/\[redpacket\](\d+)\[\/redpacket\]/i', '<div class="pk-redpacket-box" data-envid="$1"><div class="pk-rp-icon">🧧</div><div class="pk-rp-text"><b>อั่งเปาเครดิต</b><br><span>คลิกลุ้นรับเครดิต!</span></div></div>', $row['message']);
 
-        $row['color'] = ''; // ปล่อยให้ CSS จัดการถ้าไม่ได้กำหนด
+        $row['color'] = '';
         if($row['uid'] == 0) $row['color'] = '#ff6600';
         elseif($enable_color && !empty($row['groupid'])) {
             $group_color = $_G['cache']['usergroups'][$row['groupid']]['color'];
@@ -115,7 +114,7 @@ elseif($action == 'get') {
     echo json_encode(array('status' => 'success', 'data' => $messages, 'is_admin' => $is_admin, 'enable_mention' => $enable_mention, 'enable_reaction' => $enable_reaction, 'current_uid' => $current_uid, 'typing_users' => $typing_users));
     exit;
 }
-elseif($action == 'react') { /* (โค้ดรีแอคชั่นเดิม ปล่อยไว้เลยครับ) */
+elseif($action == 'react') { 
     if(!$_G['uid']) { echo json_encode(array('status'=>'error', 'msg'=>'กรุณาล็อกอิน')); exit; }
     $msg_id = intval($_GET['msg_id']); $reaction = dhtmlspecialchars(trim($_GET['reaction']));
     if(!$msg_id || !$reaction) { echo json_encode(array('status'=>'error')); exit; }

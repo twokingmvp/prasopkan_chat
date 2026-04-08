@@ -8,10 +8,10 @@
 			<item id="name"><![CDATA[Prasopkan Public Chat]]></item>
 			<item id="identifier"><![CDATA[prasopkan_chat]]></item>
 			<item id="description"><![CDATA[ระบบห้องแชทรวมและแยกตามหมวดหมู่ พร้อมฟีเจอร์ขั้นสูง]]></item>
-			<item id="datatables"><![CDATA[prasopkan_chat_messages,prasopkan_chat_envelopes,prasopkan_chat_envlogs]]></item>
+			<item id="datatables"><![CDATA[prasopkan_chat_messages,prasopkan_chat_envelopes,prasopkan_chat_envlogs,prasopkan_chat_reactions]]></item>
 			<item id="directory"><![CDATA[prasopkan_chat/]]></item>
 			<item id="copyright"><![CDATA[Prasopkan]]></item>
-			<item id="version"><![CDATA[1.3.0]]></item>
+			<item id="version"><![CDATA[1.4.0]]></item>
 			<item id="__modules">
 				<item id="0">
 					<item id="name"><![CDATA[chat_hook]]></item>
@@ -33,7 +33,7 @@
 			<item id="1">
 				<item id="displayorder"><![CDATA[2]]></item>
 				<item id="title"><![CDATA[เลือกบอร์ดที่ต้องการทำเป็นห้องแชท]]></item>
-				<item id="description"><![CDATA[เลือกหมวดหมู่ที่ต้องการ (กดปุ่ม Ctrl ค้างไว้เพื่อเลือกหลายห้องพร้อมกัน)]]></item>
+				<item id="description"><![CDATA[เลือกหมวดหมู่ที่ต้องการ (ห้อง 'ทั่วไป' จะถูกสร้างให้อัตโนมัติเสมอ)]]></item>
 				<item id="variable"><![CDATA[chat_forums]]></item>
 				<item id="type"><![CDATA[forums]]></item>
 				<item id="value"><![CDATA[]]></item>
@@ -75,7 +75,6 @@
 				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-
             <item id="6">
 				<item id="displayorder"><![CDATA[7]]></item>
 				<item id="title"><![CDATA[เปิดใช้งาน แจกอั่งเปาเครดิต 🧧]]></item>
@@ -118,7 +117,7 @@
 				<item id="description"><![CDATA[ดึงรูปภาพและหัวข้อกระทู้มาแสดงแบบการ์ดอัตโนมัติเมื่อมีคนส่งลิงก์]]></item>
 				<item id="variable"><![CDATA[enable_linkpreview]]></item>
 				<item id="type"><![CDATA[radio]]></item>
-				<item id="value"><![CDATA[0]]></item>
+				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
             <item id="11">
@@ -127,7 +126,16 @@
 				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้กดปุ่ม Like, Heart ท้ายข้อความของคนอื่นได้]]></item>
 				<item id="variable"><![CDATA[enable_reaction]]></item>
 				<item id="type"><![CDATA[radio]]></item>
-				<item id="value"><![CDATA[0]]></item>
+				<item id="value"><![CDATA[1]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="12">
+				<item id="displayorder"><![CDATA[13]]></item>
+				<item id="title"><![CDATA[ข้อความประกาศจากแอดมิน 📢]]></item>
+				<item id="description"><![CDATA[ข้อความนี้จะถูกตรึงไว้ด้านบนสุดของแชทเสมอ (เว้นว่างไว้หากไม่ต้องการแสดง)]]></item>
+				<item id="variable"><![CDATA[admin_announcement]]></item>
+				<item id="type"><![CDATA[text]]></item>
+				<item id="value"><![CDATA[]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
 		</item>
