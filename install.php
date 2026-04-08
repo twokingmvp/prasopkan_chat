@@ -41,6 +41,16 @@ CREATE TABLE IF NOT EXISTS `pre_prasopkan_chat_envlogs` (
   PRIMARY KEY (`log_id`),
   KEY `env_id` (`env_id`, `uid`)
 ) ENGINE=MyISAM;
+
+DROP TABLE IF EXISTS `pre_prasopkan_chat_reactions`;
+CREATE TABLE IF NOT EXISTS `pre_prasopkan_chat_reactions` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `msg_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `uid` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `reaction` varchar(20) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  KEY `msg_id` (`msg_id`)
+) ENGINE=MyISAM;
 EOF;
 
 runquery($sql);
