@@ -12,7 +12,6 @@ if($action == 'send') {
     if(empty($message)) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาพิมพ์ข้อความ')); exit; }
     if(!$_G['uid']) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาล็อกอินก่อนส่งข้อความ')); exit; }
 
-    // แปลง URL ธรรมดาที่ผู้ใช้พิมพ์ให้เป็น BBCode อัตโนมัติ (เพื่อนำไปทำพรีวิว)
     $message = preg_replace('/(?<!\])(https?:\/\/[^\s<]+)/i', '[url=$1]$1[/url]', $message);
 
     $data = array(
@@ -35,7 +34,7 @@ elseif($action == 'get') {
     $enable_color = $plugin_config['enable_color'];
     $enable_mention = $plugin_config['enable_mention'];
     $enable_bot = $plugin_config['enable_bot'];
-    $enable_linkpreview = $plugin_config['enable_linkpreview']; // ดึงค่าการตั้งค่า พรีวิวลิงก์
+    $enable_linkpreview = $plugin_config['enable_linkpreview']; 
 
     if($enable_bot) {
         loadcache('prasopkan_chat_last_tid');
@@ -45,7 +44,6 @@ elseif($action == 'get') {
         if($latest_thread && $latest_thread['tid'] > $last_tid) {
             savecache('prasopkan_chat_last_tid', $latest_thread['tid']);
             if($last_tid > 0) {
-                // บอทส่งลิงก์กระทู้ธรรมดา เดี๋ยวระบบพรีวิวจะจัดการแปลงเป็นการ์ดเอง
                 $bot_msg = "📢 มีกระทู้ใหม่มาสดๆ ร้อนๆ: [url=forum.php?mod=viewthread&tid=".$latest_thread['tid']."]".$latest_thread['subject']."[/url]";
                 $chat_forums = $plugin_config['chat_forums'];
                 if(!is_array($chat_forums)) $chat_forums = @unserialize($chat_forums);
@@ -66,29 +64,40 @@ elseif($action == 'get') {
         $row['time'] = dgmdate($row['dateline'], 'H:i');
         $row['message'] = preg_replace('/\[img\](.*?)\[\/img\]/i', '<br><img src="$1" style="max-width:100%; border-radius:8px; margin-top:5px; border:1px solid #ddd;" />', $row['message']);
         
-        // --- 🖼️ ระบบแปลงลิงก์เป็นการ์ดพรีวิว ---
+        // --- 🖼️ ระบบแปลงลิงก์เป็นการ์ดพรีวิว (เพิ่มการดึงรูปภาพ) ---
         if($enable_linkpreview) {
-            // ค้นหาลิงก์ที่เป็นกระทู้ (มีคำว่า tid=ตัวเลข)
             $row['message'] = preg_replace_callback('/\[url=(.*?tid=(\d+).*?)\](.*?)\[\/url\]/i', function($matches) {
+                global $_G;
                 $url = $matches[1];
                 $tid = intval($matches[2]);
                 $text = $matches[3];
-                // ดึงข้อมูลกระทู้จากฐานข้อมูล
+                
                 $thread = DB::fetch_first("SELECT subject, author, views, replies FROM ".DB::table('forum_thread')." WHERE tid='$tid'");
                 
                 if($thread) {
-                    return '<div class="pk-link-preview">
-                                <a href="'.$url.'" target="_blank" class="pk-lp-title">📄 '.$thread['subject'].'</a>
-                                <div class="pk-lp-meta">✍️ '.$thread['author'].' &nbsp;|&nbsp; 👁️ '.$thread['views'].' &nbsp;|&nbsp; 💬 '.$thread['replies'].'</div>
+                    // 📸 ค้นหารูปหน้าปกกระทู้ จากตาราง forum_threadimage
+                    $img_html = '';
+                    $threadimage = DB::fetch_first("SELECT attachment FROM ".DB::table('forum_threadimage')." WHERE tid='$tid'");
+                    if($threadimage && !empty($threadimage['attachment'])) {
+                        $img_url = 'data/attachment/forum/'.$threadimage['attachment'];
+                        // จัดรูปภาพให้อยู่ด้านซ้าย
+                        $img_html = '<img src="'.$img_url.'" style="width:55px; height:55px; object-fit:cover; border-radius:4px; margin-right:10px; flex-shrink:0; border:1px solid #eaeaea;" onerror="this.style.display=\'none\'">';
+                    }
+
+                    // ใช้ HTML Flexbox จัดเลย์เอาต์ให้สวยงาม
+                    return '<div class="pk-link-preview" style="display:flex; align-items:center; overflow:hidden;">
+                                '.$img_html.'
+                                <div style="flex:1; min-width:0;">
+                                    <a href="'.$url.'" target="_blank" class="pk-lp-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;" title="'.$thread['subject'].'">📄 '.$thread['subject'].'</a>
+                                    <div class="pk-lp-meta">✍️ '.$thread['author'].' &nbsp;|&nbsp; 👁️ '.$thread['views'].' &nbsp;|&nbsp; 💬 '.$thread['replies'].'</div>
+                                </div>
                             </div>';
                 }
                 return '<a href="'.$url.'" target="_blank" style="color:#0073ff; text-decoration:underline;">'.$text.'</a>';
             }, $row['message']);
             
-            // แปลงลิงก์ทั่วไปที่หลงเหลืออยู่
             $row['message'] = preg_replace('/\[url=(.*?)\](.*?)\[\/url\]/i', '<a href="$1" target="_blank" style="color:#0073ff; text-decoration:underline;">$2</a>', $row['message']);
         } else {
-            // ถ้าปิดระบบพรีวิว ให้แสดงลิงก์ธรรมดา
             $row['message'] = preg_replace('/\[url=(.*?)\](.*?)\[\/url\]/i', '<a href="$1" target="_blank" style="color:#ff6600; text-decoration:underline; font-weight:bold;">$2</a>', $row['message']);
         }
         // ----------------------------------------
