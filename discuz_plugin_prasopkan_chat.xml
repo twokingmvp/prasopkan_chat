@@ -8,10 +8,10 @@
 			<item id="name"><![CDATA[Prasopkan Public Chat]]></item>
 			<item id="identifier"><![CDATA[prasopkan_chat]]></item>
 			<item id="description"><![CDATA[ระบบห้องแชทรวมและแยกตามหมวดหมู่ พร้อมฟีเจอร์ขั้นสูง]]></item>
-			<item id="datatables"><![CDATA[prasopkan_chat_messages]]></item>
+			<item id="datatables"><![CDATA[prasopkan_chat_messages,prasopkan_chat_envelopes,prasopkan_chat_envlogs]]></item>
 			<item id="directory"><![CDATA[prasopkan_chat/]]></item>
 			<item id="copyright"><![CDATA[Prasopkan]]></item>
-			<item id="version"><![CDATA[1.2.0]]></item>
+			<item id="version"><![CDATA[1.3.0]]></item>
 			<item id="__modules">
 				<item id="0">
 					<item id="name"><![CDATA[chat_hook]]></item>
@@ -54,7 +54,7 @@
 				<item id="description"><![CDATA[แสดงสีชื่อของสมาชิกตามกลุ่มผู้ใช้งานของ Discuz]]></item>
 				<item id="variable"><![CDATA[enable_color]]></item>
 				<item id="type"><![CDATA[radio]]></item>
-				<item id="value"><![CDATA[0]]></item>
+				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
             <item id="4">
@@ -63,7 +63,7 @@
 				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้พิมพ์ @ เพื่อแท็กหรือตอบกลับสมาชิกคนอื่น]]></item>
 				<item id="variable"><![CDATA[enable_mention]]></item>
 				<item id="type"><![CDATA[radio]]></item>
-				<item id="value"><![CDATA[0]]></item>
+				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
             <item id="5">
@@ -71,6 +71,61 @@
 				<item id="title"><![CDATA[เปิดใช้งาน บอทแจ้งเตือนกระทู้ใหม่ 🤖]]></item>
 				<item id="description"><![CDATA[ให้ระบบส่งข้อความแจ้งเตือนลงแชทอัตโนมัติเมื่อมีคนตั้งกระทู้ใหม่]]></item>
 				<item id="variable"><![CDATA[enable_bot]]></item>
+				<item id="type"><![CDATA[radio]]></item>
+				<item id="value"><![CDATA[1]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+
+            <item id="6">
+				<item id="displayorder"><![CDATA[7]]></item>
+				<item id="title"><![CDATA[เปิดใช้งาน แจกอั่งเปาเครดิต 🧧]]></item>
+				<item id="description"><![CDATA[อนุญาตให้สมาชิกแจกเครดิตแบบสุ่มในแชทได้]]></item>
+				<item id="variable"><![CDATA[enable_redpacket]]></item>
+				<item id="type"><![CDATA[radio]]></item>
+				<item id="value"><![CDATA[0]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="7">
+				<item id="displayorder"><![CDATA[8]]></item>
+				<item id="title"><![CDATA[ชนิดของเครดิตที่ใช้แจก (extcredits)]]></item>
+				<item id="description"><![CDATA[ระบุหมายเลข 1-8 ของระบบเงินในเว็บ (เช่น 2 สำหรับเหรียญ/เครดิตหลัก)]]></item>
+				<item id="variable"><![CDATA[redpacket_credit_id]]></item>
+				<item id="type"><![CDATA[number]]></item>
+				<item id="value"><![CDATA[2]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="8">
+				<item id="displayorder"><![CDATA[9]]></item>
+				<item id="title"><![CDATA[จำนวนเครดิตแจก ขั้นต่ำ]]></item>
+				<item id="description"><![CDATA[จำนวนเครดิตน้อยที่สุดที่ตั้งแจกซองอั่งเปาได้]]></item>
+				<item id="variable"><![CDATA[redpacket_min]]></item>
+				<item id="type"><![CDATA[number]]></item>
+				<item id="value"><![CDATA[10]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="9">
+				<item id="displayorder"><![CDATA[10]]></item>
+				<item id="title"><![CDATA[จำนวนเครดิตแจก สูงสุด]]></item>
+				<item id="description"><![CDATA[จำนวนเครดิตมากที่สุดที่ตั้งแจกซองอั่งเปาได้]]></item>
+				<item id="variable"><![CDATA[redpacket_max]]></item>
+				<item id="type"><![CDATA[number]]></item>
+				<item id="value"><![CDATA[1000]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="10">
+				<item id="displayorder"><![CDATA[11]]></item>
+				<item id="title"><![CDATA[เปิดใช้งาน พรีวิวลิงก์กระทู้ 🖼️]]></item>
+				<item id="description"><![CDATA[ดึงรูปภาพและหัวข้อกระทู้มาแสดงแบบการ์ดอัตโนมัติเมื่อมีคนส่งลิงก์]]></item>
+				<item id="variable"><![CDATA[enable_linkpreview]]></item>
+				<item id="type"><![CDATA[radio]]></item>
+				<item id="value"><![CDATA[0]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="11">
+				<item id="displayorder"><![CDATA[12]]></item>
+				<item id="title"><![CDATA[เปิดใช้งาน รีแอคชั่นข้อความ 💖]]></item>
+				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้กดปุ่ม Like, Heart ท้ายข้อความของคนอื่นได้]]></item>
+				<item id="variable"><![CDATA[enable_reaction]]></item>
 				<item id="type"><![CDATA[radio]]></item>
 				<item id="value"><![CDATA[0]]></item>
 				<item id="extra"><![CDATA[]]></item>
