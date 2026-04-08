@@ -404,15 +404,16 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
     #pk-chat-tooltip { display: none !important; }
 }
 
-/* 1. จัดการการ์ดพรีวิวลิงก์ให้กว้างขึ้น แต่ไม่ให้ทะลุกรอบแม่ */
+/* 1. จัดการการ์ดพรีวิวลิงก์ให้กว้างพอดี และ "ห้ามโดนบีบเด็ดขาด" */
 .pk-link-preview {
-    width: 260px !important; 
+    min-width: 100% !important; 
     max-width: 100% !important;
     box-sizing: border-box !important;
 }
 
-/* 2. สั่งให้กล่องคำพูด (Bubble) ล็อกของทุกอย่างให้อยู่ข้างใน ห้ามทะลุขอบโค้งออกมา */
+/* 2. สั่งให้กล่องคำพูด (Bubble) ขยายตัวตามการ์ด และล็อกของไม่ให้ทะลุขอบ */
 .pk-bubble {
     overflow: hidden !important; 
     word-break: break-word !important;
+    width: fit-content !important; /* เวทมนตร์ที่สั่งให้กล่องขาวขยายตัวตามการ์ดข้างใน */
 }
