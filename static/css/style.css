@@ -278,3 +278,126 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
     0%, 50%, 100% { opacity: 1; text-shadow: 0px 0px 8px rgba(0,242,254,0.8); }
     25%, 75% { opacity: 0.8; text-shadow: 0px 0px 15px #00f2fe, 0px 0px 25px #00f2fe; }
 }
+
+
+/* =========================================
+   8. 📱 Responsive สำหรับหน้าจอมือถือ (Native App UI)
+========================================= */
+@media screen and (max-width: 768px) {
+    /* 1. ย้ายปุ่ม Chat Head ไปมุมซ้ายล่าง */
+    #pk-chat-head {
+        left: 15px !important;
+        right: auto !important;
+        bottom: 20px !important;
+        width: 56px;
+        height: 56px;
+        box-shadow: 0 5px 15px rgba(0, 115, 255, 0.4);
+    }
+    
+    #pk-chat-badge {
+        left: 40px !important;
+        right: auto !important;
+    }
+
+    /* 2. เปลี่ยนกล่องแชทให้เป็น Bottom Sheet พร้อมฉากกั้น (Backdrop) สีดำ */
+    #pk-chat-box {
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important; /* แก้บั๊กหน้าจอเลื่อนซ้ายขวา */
+        max-width: 100% !important;
+        height: 88vh !important;
+        border-radius: 24px 24px 0 0 !important;
+        border: none !important;
+        /* สร้างเงาสีดำมืดๆ คลุมทั้งจอ ให้แชทโดดเด่นขึ้นมาเหมือน App */
+        box-shadow: 0 -5px 25px rgba(0,0,0,0.15), 0 0 0 2000px rgba(0,0,0,0.5) !important;
+        display: flex;
+        flex-direction: column;
+        /* เพิ่มแอนิเมชันสไลด์ขึ้นจากขอบจอล่างอย่างนุ่มนวล */
+        animation: pk-slide-up 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1) !important;
+    }
+
+    /* แอนิเมชันเลื่อนสไลด์ขึ้น */
+    @keyframes pk-slide-up {
+        from { transform: translateY(100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    #pk-chat-header {
+        padding: 16px 20px;
+        border-radius: 24px 24px 0 0;
+    }
+    .pk-header-title { font-size: 16px; }
+
+    .pk-room-tab {
+        padding: 8px 16px;
+        font-size: 13px;
+        border-radius: 20px;
+    }
+
+    #pk-chat-body {
+        height: auto !important;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    #pk-chat-messages {
+        flex: 1;
+        padding: 15px 15px 20px 15px;
+    }
+
+    /* 3. กล่องพิมพ์ข้อความ */
+    #pk-chat-input-area {
+        padding: 10px 15px;
+        padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* รองรับรอยบาก iPhone */
+        background: var(--pk-bg);
+        border-top: 1px solid var(--pk-border);
+    }
+    #pk-chat-input {
+        font-size: 16px !important; /* ป้องกัน iPhone ซูมจอเวลาแตะพิมพ์ */
+        padding: 10px 16px;
+        border-radius: 24px;
+        background: var(--pk-msg-bg);
+        border: 1px solid var(--pk-border);
+    }
+    
+    /* แก้บั๊กปุ่มส่งและไอคอนโดนบีบจนเบี้ยวเป็นวงรี */
+    .pk-action-btn, #pk-chat-send {
+        flex-shrink: 0 !important; 
+    }
+    
+    .pk-action-btn { width: 36px; height: 36px; font-size: 18px; }
+    #pk-chat-send { width: 40px; height: 40px; }
+
+    /* 4. หน้าต่างร้านค้า และ อั่งเปา */
+    #pk-chat-shop-modal, #pk-chat-emoji-picker, #pk-chat-rp-modal {
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        border-radius: 24px 24px 0 0 !important;
+        border: none !important;
+        box-shadow: 0 -5px 25px rgba(0,0,0,0.2) !important;
+        box-sizing: border-box;
+        max-height: 75vh;
+        /* สไลด์ขึ้นเหมือนแชทหลัก */
+        animation: pk-slide-up 0.25s ease-out !important;
+    }
+
+    /* ปรับปุ่มปิดร้านค้าให้มนๆ โค้งๆ เข้ากับ UI มือถือ */
+    .pk-btn-close {
+        border-radius: 24px !important;
+        padding: 12px !important;
+        font-size: 14px;
+    }
+
+    #pk-chat-settings-menu {
+        right: 15px !important;
+        top: 60px !important;
+    }
+
+    #pk-chat-tooltip {
+        display: none !important; 
+    }
+}

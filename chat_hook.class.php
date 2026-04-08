@@ -3,6 +3,7 @@ if(!defined('IN_DISCUZ')) {
     exit('Access Denied');
 }
 
+// 💻 Class สำหรับเวอร์ชัน PC
 class plugin_prasopkan_chat {
     public function global_footer() {
         global $_G;
@@ -16,7 +17,6 @@ class plugin_prasopkan_chat {
         $enable_redpacket = $plugin_config['enable_redpacket'];
         
         $admin_announcement = trim($plugin_config['admin_announcement']);
-        // 💭 ดึงข้อความบอลลูน
         $welcome_tooltip = trim($plugin_config['welcome_tooltip']);
         
         $rooms_html = '';
@@ -49,6 +49,14 @@ class plugin_prasopkan_chat {
         ob_end_clean();
         
         return $html;
+    }
+}
+
+// 📱 Class สำหรับเวอร์ชัน Mobile (มือถือ)
+class mobileplugin_prasopkan_chat extends plugin_prasopkan_chat {
+    public function global_footer_mobile() {
+        // ให้ดึงฟังก์ชันของ PC มาแสดงผลบนมือถือได้เลย
+        return $this->global_footer();
     }
 }
 ?>
