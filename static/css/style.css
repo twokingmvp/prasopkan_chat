@@ -1,26 +1,26 @@
+/* =========================================
+   1. 🎨 โทนสีและตัวแปรหลัก (Variables)
+========================================= */
 :root { --pk-bg: #ffffff; --pk-header: #4CA1AF; --pk-header-text: #ffffff; --pk-border: #f0f0f0; --pk-msg-bg: #fafafa; --pk-text: #333333; --pk-text-muted: #888888; --pk-bubble-mine: #4CA1AF; --pk-bubble-mine-text: #ffffff; --pk-bubble-other: #ffffff; --pk-bubble-other-border: #e0e0e0; --pk-input-bg: #f9f9f9; }
 .pk-dark-mode { --pk-bg: #1e1e24; --pk-header: #2b2b36; --pk-header-text: #ffffff; --pk-border: #333344; --pk-msg-bg: #121216; --pk-text: #e0e0e0; --pk-text-muted: #aaaaaa; --pk-bubble-mine: #0066cc; --pk-bubble-mine-text: #ffffff; --pk-bubble-other: #2b2b36; --pk-bubble-other-border: #3a3a4a; --pk-input-bg: #2b2b36; }
 
-#pk-chat-head { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: linear-gradient(135deg, #4CA1AF, #0056cc); border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 115, 255, 0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 9999; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+/* =========================================
+   2. 🖼️ โครงสร้างหลักของแชท (Layout)
+========================================= */
+#pk-chat-head { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: linear-gradient(135deg, #4CA1AF, #0056cc); border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 115, 255, 0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 9999; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); animation: pk-pulse 2s infinite; }
 #pk-chat-head:hover { transform: scale(1.1); }
-#pk-chat-box { position: fixed; bottom: 25px; right: 25px; width: 350px !important; max-width: 90vw; background: var(--pk-bg); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column; z-index: 9999; font-family: -apple-system, BlinkMacSystemFont, ""LINE Seed Sans TH" !important", Roboto, Helvetica, sans-serif; overflow: hidden; border: 1px solid var(--pk-border); }
-
+#pk-chat-box { position: fixed; bottom: 25px; right: 25px; width: 350px !important; max-width: 90vw; background: var(--pk-bg); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column; z-index: 9999; font-family: -apple-system, BlinkMacSystemFont, "LINE Seed Sans TH", Roboto, Helvetica, sans-serif; overflow: hidden; border: 1px solid var(--pk-border); }
 #pk-chat-header { background: var(--pk-header); color: var(--pk-header-text); padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
 .pk-header-title { font-weight: bold; font-size: 15px; }
 
-/* 🔔 สไตล์ปุ่มบน Header (PM, Notice, Settings) */
+/* ปุ่มบน Header */
 .pk-header-actions { display: flex; align-items: center; gap: 10px; }
-.pk-header-icon, #pk-chat-settings-btn, #pk-chat-close-btn { color: var(--pk-header-text); text-decoration: none; display: flex; align-items: center; cursor: pointer; opacity: 0.75; transition: opacity 0.2s, transform 0.2s; }
-.pk-header-icon, #pk-chat-settings-btn, #pk-chat-close-btn, #pk-chat-shop-btn { 
-    color: var(--pk-header-text) !important; 
-    opacity: 0.75; 
-    transition: all 0.2s; 
-}
-.pk-header-icon:hover, #pk-chat-settings-btn:hover, #pk-chat-close-btn:hover, #pk-chat-shop-btn:hover { 
-    opacity: 1 !important; 
-    transform: scale(1.1); 
-}
+.pk-header-icon, #pk-chat-settings-btn, #pk-chat-close-btn, #pk-chat-shop-btn { color: var(--pk-header-text) !important; opacity: 0.75; transition: all 0.2s; cursor: pointer; }
+.pk-header-icon:hover, #pk-chat-settings-btn:hover, #pk-chat-close-btn:hover, #pk-chat-shop-btn:hover { opacity: 1 !important; transform: scale(1.1); }
+#pk-chat-shop-btn { color: #ffeb3b !important; }
+#pk-chat-shop-btn:hover { transform: scale(1.1) rotate(-10deg); }
 
+/* เมนูตั้งค่า */
 #pk-chat-settings-menu { position: absolute; top: 50px; right: 15px; background: var(--pk-bg); border: 1px solid var(--pk-border); border-radius: 8px; padding: 12px 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 10002; color: var(--pk-text); min-width: 160px; }
 .pk-setting-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 500;}
 .pk-switch { position: relative; display: inline-block; width: 34px; height: 20px; }
@@ -30,14 +30,15 @@
 input:checked + .pk-slider { background-color: #4CA1AF; }
 input:checked + .pk-slider:before { transform: translateX(14px); }
 
+/* =========================================
+   3. 💬 ส่วนแชทและข้อความ
+========================================= */
 #pk-chat-rooms { display: flex; background: var(--pk-msg-bg); overflow-x: auto; padding: 10px; gap: 8px; border-bottom: 1px solid var(--pk-border); }
 #pk-chat-rooms::-webkit-scrollbar { display: none; }
 .pk-room-tab { padding: 6px 12px; font-size: 12px; font-weight: 500; background: var(--pk-bg); color: var(--pk-text-muted); border: 1px solid var(--pk-border); border-radius: 20px; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
 .pk-room-tab.active { background: var(--pk-header); color: var(--pk-header-text); border-color: var(--pk-header); }
 
 #pk-chat-body { display: flex; flex-direction: column; height: 400px; position: relative; }
-
-/* 📢 แถบประกาศจากแอดมิน */
 #pk-chat-announcement { background: #fff3cd; color: #856404; padding: 8px 12px; font-size: 12px; display: flex; align-items: center; border-bottom: 1px solid #ffeeba; }
 .pk-dark-mode #pk-chat-announcement { background: #332b00; color: #ffdb4d; border-color: #4d4000; }
 .pk-announce-icon { margin-right: 8px; font-size: 14px; }
@@ -53,11 +54,10 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 .pk-msg-info { font-size: 11px; color: var(--pk-text-muted); margin-bottom: 5px; display: flex; gap: 6px; }
 
 .pk-bubble-wrapper { display: flex; align-items: flex-end; gap: 6px; max-width: 85%; min-width: 0; }
-.pk-bubble { padding: 10px 14px; border-radius: 18px; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.05); color: var(--pk-text); max-width: 100%; min-width: 0; word-break: break-word; overflow-wrap: break-word; }
+.pk-bubble { padding: 10px 14px; border-radius: 18px; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.05); color: var(--pk-text); max-width: 100%; min-width: 0; word-break: break-word; overflow-wrap: break-word; overflow: hidden !important; width: fit-content !important; }
 .pk-msg-mine .pk-bubble { background: var(--pk-bubble-mine); color: var(--pk-bubble-mine-text); border-bottom-right-radius: 4px; }
 .pk-msg-other .pk-bubble { background: var(--pk-bubble-other); border: 1px solid var(--pk-bubble-other-border); border-bottom-left-radius: 4px; }
 
-/* 🤖 ดึงข้อความบอทให้เต็มจอและอยู่ตรงกลาง */
 .pk-msg-bot { align-items: center; margin-bottom: 20px; }
 .pk-msg-bot .pk-bubble-wrapper { max-width: 95%; width: 95%; justify-content: center; }
 .pk-msg-bot .pk-bubble { background: rgba(255, 102, 0, 0.08); border: 1px dashed #ff6600; color: #cc5200; width: 100%; text-align: center; font-size: 12.5px; border-radius: 8px; }
@@ -65,22 +65,27 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 
 .pk-chat-img { max-width: 100%; max-height: 180px; width: auto; object-fit: contain; border-radius: 8px; margin-top: 5px; background: transparent; }
 
-.pk-msg-actions-inline { display: flex; gap: 6px; opacity: 0; transition: opacity 0.2s; padding-bottom: 5px; }
-.pk-msg-row:hover .pk-msg-actions-inline { opacity: 1; }
-.pk-msg-action-btn { cursor: pointer; font-size: 13px; filter: grayscale(100%); transition: all 0.2s; }
-.pk-msg-action-btn:hover { filter: grayscale(0%); transform: scale(1.2); }
-
-#pk-chat-input-area { display: flex; padding: 12px; background: var(--pk-bg); border-top: 1px solid var(--pk-border); align-items: center; gap: 6px; }
-
-/* 🎨 ปรับ UI ปุ่มกดส่งอีโมจิ/ภาพ/ซอง ให้น่ากด */
-.pk-action-btn { 
-    background: var(--pk-border) !important; border: none; border-radius: 50%; 
-    width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; 
-    font-size: 16px; cursor: pointer; transition: all 0.2s ease; padding: 0; outline: none; 
+/* 🛡️ ป้องกัน Safari คลุมดำข้อความและปิดไฮไลต์สีเทาเวลากด (ใช้ร่วมกับเมนูกดค้าง) */
+.pk-bubble, .pk-bubble * {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -khtml-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
 }
+
+/* ลบกล่อง Action อันเก่าที่ไม่ใช้แล้วทิ้งไป */
+.pk-msg-actions-inline { display: none !important; }
+
+/* =========================================
+   4. ⌨️ ส่วนพิมพ์ข้อความ
+========================================= */
+#pk-chat-input-area { display: flex; padding: 12px; background: var(--pk-bg); border-top: 1px solid var(--pk-border); align-items: center; gap: 6px; }
+.pk-action-btn { background: var(--pk-border) !important; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; font-size: 16px; cursor: pointer; transition: all 0.2s ease; padding: 0; outline: none; }
 .pk-action-btn:hover { background: #e0e0e0 !important; transform: scale(1.1); }
 .pk-dark-mode .pk-action-btn:hover { background: #444 !important; }
-
 #pk-chat-input { flex: 1; padding: 10px 14px; background: var(--pk-input-bg); border: 1px solid var(--pk-border); border-radius: 20px; outline: none; color: var(--pk-text); font-size: 13.5px; min-width:0; }
 #pk-chat-send { background: var(--pk-header) !important; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s;}
 #pk-chat-send:hover { transform: scale(1.1); }
@@ -89,7 +94,10 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 .pk-dot-typing { animation: typing 1.5s infinite; }
 @keyframes typing { 0% { content: "."; } 33% { content: ".."; } 66% { content: "..."; } }
 
-.pk-link-preview { display: flex; align-items: center; background: var(--pk-bg); border: 1px solid var(--pk-border); border-left: 4px solid var(--pk-header); border-radius: 8px; padding: 8px; margin-top: 5px; overflow: hidden; width: 100%; box-sizing: border-box;}
+/* =========================================
+   5. 🔗 ส่วนขยาย (Link Preview, Reactions, อั่งเปา)
+========================================= */
+.pk-link-preview { display: flex; align-items: center; background: var(--pk-bg); border: 1px solid var(--pk-border); border-left: 4px solid var(--pk-header); border-radius: 8px; padding: 8px; margin-top: 5px; overflow: hidden; min-width: 240px !important; max-width: 100% !important; box-sizing: border-box !important; }
 .pk-lp-img, .pk-lp-fallback { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; margin-right: 10px; flex-shrink: 0; border: 1px solid var(--pk-border); }
 .pk-lp-fallback { background: var(--pk-input-bg); display: flex; align-items: center; justify-content: center; font-size: 20px; }
 .pk-lp-content { flex: 1; min-width: 0; text-align: left; }
@@ -111,6 +119,7 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 #pk-chat-emoji-picker { position: absolute; bottom: 70px; left: 15px; width: 280px; background: var(--pk-bg); border: 1px solid var(--pk-border); border-radius: 12px; padding: 10px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); z-index:10000; }
 .pk-emoji-item { font-size: 22px; cursor: pointer; text-align: center; border-radius: 4px; transition: background 0.2s;}
 .pk-emoji-item:hover { background: var(--pk-border); }
+
 #pk-chat-rp-modal { position: absolute; bottom: 70px; right: 15px; width: 260px; background: var(--pk-bg); border-radius: 12px; padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); z-index:10000;}
 #pk-chat-rp-modal h3 { margin: 0 0 12px 0; color: #d9363e; text-align: center; }
 .pk-rp-input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--pk-border); border-radius: 6px; box-sizing: border-box; background: var(--pk-input-bg); color: var(--pk-text); }
@@ -118,142 +127,33 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 #pk-rp-submit { background: #d9363e; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 48%; font-weight:bold; font-size: 14px;}
 #pk-rp-cancel { background: var(--pk-border); color: var(--pk-text); border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 48%; }
 
-/* ทำให้ปุ่มแชทกระเพื่อม (Pulse) เรียกแขก */
-#pk-chat-head {
-    animation: pk-pulse 2s infinite;
-}
-@keyframes pk-pulse {
-    0% { box-shadow: 0 0 0 0 rgba(0, 115, 255, 0.7); }
-    70% { box-shadow: 0 0 0 15px rgba(0, 115, 255, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(0, 115, 255, 0); }
-}
+/* =========================================
+   6. 🔴 แจ้งเตือน (Badge & Tooltip)
+========================================= */
+@keyframes pk-pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 115, 255, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(0, 115, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 115, 255, 0); } }
+@keyframes pk-bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-3px); } }
+
+#pk-chat-badge { position: absolute; top: -2px; right: -2px; background: #ff3b30; color: white; border-radius: 50%; min-width: 18px; height: 18px; line-height: 18px; text-align: center; font-size: 11px; font-weight: bold; border: 2px solid var(--pk-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.2); animation: pk-bounce 1s infinite alternate; z-index: 2; }
+#pk-chat-tooltip { position: absolute; right: 75px; top: 12px; background: var(--pk-bg); color: var(--pk-text); padding: 8px 14px; border-radius: 12px; font-size: 13px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.15); white-space: nowrap; pointer-events: none; border: 1px solid var(--pk-border); opacity: 0; transform: translateX(10px); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+#pk-chat-tooltip::after { content: ''; position: absolute; right: -6px; top: 50%; transform: translateY(-50%); border-width: 6px 0 6px 6px; border-style: solid; border-color: transparent transparent transparent var(--pk-bg); }
+.pk-dark-mode #pk-chat-tooltip { background: var(--pk-input-bg); border-color: var(--pk-border); }
+.pk-dark-mode #pk-chat-tooltip::after { border-color: transparent transparent transparent var(--pk-input-bg); }
+.pk-tooltip-show { opacity: 1 !important; transform: translateX(0) !important; }
 
 /* =========================================
-   6. 🔴 ป้ายแจ้งเตือน (Badge) & 💭 บอลลูนคำพูด (Tooltip)
+   7. 🛒 ระบบร้านค้า (Chat Shop UI)
 ========================================= */
-
-/* ป้ายแจ้งเตือนสีแดงมุมขวาบนของปุ่มลอย */
-#pk-chat-badge {
-    position: absolute; 
-    top: -2px; 
-    right: -2px;
-    background: #ff3b30; 
-    color: white; 
-    border-radius: 50%;
-    min-width: 18px; 
-    height: 18px; 
-    line-height: 18px;
-    text-align: center; 
-    font-size: 11px; 
-    font-weight: bold;
-    border: 2px solid var(--pk-bg); 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    /* แอนิเมชันเด้งดุ๊กดิ๊กเบาๆ */
-    animation: pk-bounce 1s infinite alternate; 
-    z-index: 2;
-}
-
-@keyframes pk-bounce { 
-    0% { transform: translateY(0); } 
-    100% { transform: translateY(-3px); } 
-}
-
-/* บอลลูนคำพูดทักทาย */
-#pk-chat-tooltip {
-    position: absolute; 
-    right: 75px; 
-    top: 12px;
-    background: var(--pk-bg); 
-    color: var(--pk-text);
-    padding: 8px 14px; 
-    border-radius: 12px; 
-    font-size: 13px; 
-    font-weight: bold;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
-    white-space: nowrap; 
-    pointer-events: none;
-    border: 1px solid var(--pk-border);
-    
-    /* ตั้งค่าเริ่มต้นให้ซ่อนและเลื่อนหลบไปทางขวา */
-    opacity: 0; 
-    transform: translateX(10px); 
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-/* ลูกศรชี้ไปทางปุ่มแชท */
-#pk-chat-tooltip::after {
-    content: ''; 
-    position: absolute; 
-    right: -6px; 
-    top: 50%; 
-    transform: translateY(-50%);
-    border-width: 6px 0 6px 6px; 
-    border-style: solid; 
-    border-color: transparent transparent transparent var(--pk-bg);
-}
-
-/* สีลูกศรและกล่องในโหมดมืด */
-.pk-dark-mode #pk-chat-tooltip { 
-    background: var(--pk-input-bg); 
-    border-color: var(--pk-border); 
-}
-.pk-dark-mode #pk-chat-tooltip::after { 
-    border-color: transparent transparent transparent var(--pk-input-bg); 
-}
-
-/* คลาสสำหรับสลับแสดงผลบอลลูน */
-.pk-tooltip-show { 
-    opacity: 1 !important; 
-    transform: translateX(0) !important; 
-}
-
-/* =========================================
-   7. 🛒 ระบบร้านค้า (Chat Shop UI) & Animations
-========================================= */
-
-#pk-chat-shop-btn { cursor: pointer; opacity: 0.8; transition: all 0.2s; display:flex; color: #ffeb3b; }
-#pk-chat-shop-btn:hover { opacity: 1; transform: scale(1.1) rotate(-10deg); }
-
-/* หน้าต่างร้านค้า */
-#pk-chat-shop-modal { 
-    position: absolute; bottom: 70px; left: 10px; right: 10px; 
-    background: var(--pk-bg); border-radius: 12px; padding: 15px; 
-    box-shadow: 0 10px 25px rgba(0,0,0,0.25); z-index: 10005; border: 1px solid var(--pk-border);
-}
+#pk-chat-shop-modal { position: absolute; bottom: 70px; left: 10px; right: 10px; background: var(--pk-bg); border-radius: 12px; padding: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); z-index: 10005; border: 1px solid var(--pk-border); }
 .pk-shop-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--pk-border); padding-bottom: 8px;}
 .pk-shop-header h3 { margin: 0; color: var(--pk-header); font-size: 15px; }
 #pk-shop-credit { font-size: 12px; color: var(--pk-text-muted); background: var(--pk-input-bg); padding: 4px 8px; border-radius: 12px; }
 #pk-user-balance { color: #ff9900; font-weight: bold; }
 
-/* แท็บหมวดหมู่ */
-/* แท็บหมวดหมู่ (แก้ไขให้ไม่ตกบรรทัด) */
-.pk-shop-tabs { 
-    display: flex; 
-    gap: 8px; 
-    margin-bottom: 12px; 
-    overflow-x: auto; 
-    white-space: nowrap; 
-    padding-bottom: 4px;
-}
+.pk-shop-tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px; }
 .pk-shop-tabs::-webkit-scrollbar { display: none; }
+.pk-shop-tab { padding: 6px 10px; cursor: pointer; border-bottom: 2px solid transparent; font-size: 12px; color: var(--pk-text-muted); font-weight: 500; transition: all 0.2s; flex-shrink: 0; }
+.pk-shop-tab.active { border-color: var(--pk-header); color: var(--pk-header); font-weight: bold; }
 
-.pk-shop-tab { 
-    padding: 6px 10px; 
-    cursor: pointer; 
-    border-bottom: 2px solid transparent; 
-    font-size: 12px; 
-    color: var(--pk-text-muted); 
-    font-weight: 500; 
-    transition: all 0.2s; 
-    flex-shrink: 0; /* ห้ามหดตัวเด็ดขาด */
-}
-.pk-shop-tab.active { 
-    border-color: var(--pk-header); 
-    color: var(--pk-header); 
-    font-weight: bold; 
-}
-
-/* Grid สินค้า */
 .pk-shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 220px; overflow-y: auto; padding-right: 5px;}
 .pk-shop-grid::-webkit-scrollbar { width: 4px; }
 .pk-shop-grid::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
@@ -263,7 +163,6 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 .pk-shop-item-preview { font-size: 14px; padding: 12px 5px; background: var(--pk-bg); border-radius: 6px; border: 1px dashed var(--pk-border); word-break: break-all;}
 .pk-shop-item-name { font-size: 11px; color: var(--pk-text); font-weight: 600;}
 
-/* ปุ่มซื้อ / สวมใส่ */
 .pk-btn-buy, .pk-btn-equip, .pk-btn-equipped { width: 100%; padding: 6px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; transition: all 0.2s; }
 .pk-btn-buy { background: #ff9900; color: #fff; }
 .pk-btn-buy:hover { background: #e68a00; transform: scale(1.05); }
@@ -271,227 +170,134 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 .pk-btn-equip:hover { opacity: 0.9; transform: scale(1.05); }
 .pk-btn-equipped { background: var(--pk-border); color: var(--pk-text-muted); cursor: default; }
 .pk-btn-close { width: 100%; padding: 8px; background: var(--pk-border); color: var(--pk-text); border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-
-/* ไอคอนฉายาหน้าชื่อ */
 .pk-chat-badge-icon { font-size: 14px; margin-right: 2px; }
 
-/* แอนิเมชันสำหรับสีชื่อรุ้งนีออน */
-@keyframes pk-hue { 
-    from { filter: hue-rotate(0deg); } 
-    to { filter: hue-rotate(360deg); } 
-}
-
-/* แอนิเมชันสำหรับสีชื่อเทพสายฟ้า ⚡ */
-@keyframes pk-flash {
-    0%, 50%, 100% { opacity: 1; text-shadow: 0px 0px 8px rgba(0,242,254,0.8); }
-    25%, 75% { opacity: 0.8; text-shadow: 0px 0px 15px #00f2fe, 0px 0px 25px #00f2fe; }
-}
-
+@keyframes pk-hue { from { filter: hue-rotate(0deg); } to { filter: hue-rotate(360deg); } }
+@keyframes pk-flash { 0%, 50%, 100% { opacity: 1; text-shadow: 0px 0px 8px rgba(0,242,254,0.8); } 25%, 75% { opacity: 0.8; text-shadow: 0px 0px 15px #00f2fe, 0px 0px 25px #00f2fe; } }
 
 /* =========================================
-   8. 📱 Responsive สำหรับหน้าจอมือถือ (Native App UI)
+   8. 💬 ระบบเมนูกดค้าง (Messenger Action Menu)
+========================================= */
+#pk-chat-action-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); z-index: 1000005; display: flex; align-items: flex-end; }
+#pk-chat-action-menu { width: 100%; background: var(--pk-bg); border-radius: 20px 20px 0 0; padding: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.2); animation: pk-slide-up 0.2s ease-out; box-sizing: border-box; }
+.pk-menu-react-bar { display: flex; justify-content: space-around; background: var(--pk-input-bg); padding: 12px 15px; border-radius: 30px; margin-bottom: 15px; border: 1px solid var(--pk-border); }
+.pk-msg-menu-react { font-size: 26px; cursor: pointer; transition: transform 0.2s; }
+.pk-msg-menu-react:hover { transform: scale(1.3); }
+.pk-menu-actions { display: flex; flex-direction: column; gap: 8px; }
+.pk-menu-btn { padding: 12px 15px; border-radius: 12px; background: var(--pk-msg-bg); font-size: 15px; font-weight: bold; color: var(--pk-text); cursor: pointer; display: flex; align-items: center; gap: 10px; border: 1px solid var(--pk-border); }
+.pk-menu-btn:hover { filter: brightness(0.9); }
+.pk-menu-btn .icon { font-size: 18px; }
+
+/* =========================================
+   9. 📱 Responsive สำหรับหน้าจอมือถือ (Mobile UI)
 ========================================= */
 @media screen and (max-width: 768px) {
-    #pk-chat-head {
-        left: 15px !important;
-        right: auto !important;
-        bottom: 85px !important; 
-        width: 56px;
-        height: 56px;
-        box-shadow: 0 5px 15px rgba(0, 115, 255, 0.4);
-        z-index: 999999 !important; 
-    }
+    #pk-chat-head { left: 15px !important; right: auto !important; bottom: 85px !important; width: 56px; height: 56px; box-shadow: 0 5px 15px rgba(0, 115, 255, 0.4); z-index: 999999 !important; }
+    #pk-chat-badge { left: 40px !important; right: auto !important; }
+    #pk-chat-box { left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100% !important; max-width: 100% !important; height: 85vh !important; max-height: 85vh !important; border-radius: 20px 20px 0 0 !important; border: none !important; box-shadow: 0 -5px 25px rgba(0,0,0,0.15), 0 0 0 2000px rgba(0,0,0,0.6) !important; z-index: 999999 !important; animation: pk-slide-up 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1); }
     
-    #pk-chat-badge {
-        left: 40px !important;
-        right: auto !important;
-    }
+    @keyframes pk-slide-up { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-    #pk-chat-box {
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        width: 100% !important; 
-        max-width: 100% !important;
-        height: 85vh !important; 
-        max-height: 85vh !important; 
-        border-radius: 20px 20px 0 0 !important;
-        border: none !important;
-        box-shadow: 0 -5px 25px rgba(0,0,0,0.15), 0 0 0 2000px rgba(0,0,0,0.6) !important;
-        /* 🛠️ ลบคำสั่ง display: flex !important; ตัวปัญหาออกแล้ว */
-        z-index: 999999 !important; 
-        animation: pk-slide-up 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
-    }
-
-    @keyframes pk-slide-up {
-        from { transform: translateY(100%); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-    }
-
-    #pk-chat-header {
-        padding: 12px 16px !important;
-        border-radius: 20px 20px 0 0 !important;
-        flex-shrink: 0 !important; 
-    }
-    
+    #pk-chat-header { padding: 12px 16px !important; border-radius: 20px 20px 0 0 !important; flex-shrink: 0 !important; }
     #pk-chat-rooms { flex-shrink: 0 !important; }
     .pk-room-tab { padding: 8px 16px; font-size: 13px; border-radius: 20px; }
 
-    #pk-chat-body {
-        flex: 1 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        min-height: 0 !important; 
-        height: 100% !important;
-    }
-    
-    #pk-chat-messages {
-        flex: 1 !important;
-        padding: 15px 15px 20px 15px !important;
-        overflow-y: auto !important; 
-        -webkit-overflow-scrolling: touch !important; 
-        overscroll-behavior-y: contain !important; 
-    }
+    #pk-chat-body { flex: 1 !important; display: flex !important; flex-direction: column !important; min-height: 0 !important; height: 100% !important; }
+    #pk-chat-messages { flex: 1 !important; padding: 15px 15px 20px 15px !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; overscroll-behavior-y: contain !important; }
 
-    #pk-chat-input-area {
-        padding: 10px 15px !important;
-        padding-bottom: calc(10px + env(safe-area-inset-bottom)) !important; 
-        background: var(--pk-bg) !important;
-        border-top: 1px solid var(--pk-border) !important;
-        flex-shrink: 0 !important; 
-    }
-    #pk-chat-input {
-        font-size: 16px !important; 
-        padding: 10px 16px !important;
-        border-radius: 24px !important;
-        background: var(--pk-msg-bg) !important;
-        border: 1px solid var(--pk-border) !important;
-        flex: 1 !important;
-        min-width: 0 !important;
-    }
+    #pk-chat-input-area { padding: 10px 15px !important; padding-bottom: calc(10px + env(safe-area-inset-bottom)) !important; background: var(--pk-bg) !important; border-top: 1px solid var(--pk-border) !important; flex-shrink: 0 !important; }
+    #pk-chat-input { font-size: 16px !important; padding: 10px 16px !important; border-radius: 24px !important; background: var(--pk-msg-bg) !important; border: 1px solid var(--pk-border) !important; flex: 1 !important; min-width: 0 !important; }
+    
     .pk-action-btn, #pk-chat-send { flex-shrink: 0 !important; }
     .pk-action-btn { width: 36px; height: 36px; font-size: 18px; }
     #pk-chat-send { width: 40px; height: 40px; }
 
-    #pk-chat-shop-modal, #pk-chat-emoji-picker, #pk-chat-rp-modal {
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        width: 100% !important;
-        border-radius: 20px 20px 0 0 !important;
-        border: none !important;
-        box-shadow: 0 -5px 25px rgba(0,0,0,0.2) !important;
-        box-sizing: border-box !important;
-        max-height: 80vh !important;
-        z-index: 1000000 !important;
-        animation: pk-slide-up 0.25s ease-out !important;
-    }
-    
-    .pk-shop-grid {
-        max-height: 50vh !important;
-        overflow-y: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        overscroll-behavior-y: contain !important; 
-    }
-
+    #pk-chat-shop-modal, #pk-chat-emoji-picker, #pk-chat-rp-modal { left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100% !important; border-radius: 20px 20px 0 0 !important; border: none !important; box-shadow: 0 -5px 25px rgba(0,0,0,0.2) !important; box-sizing: border-box !important; max-height: 80vh !important; z-index: 1000000 !important; animation: pk-slide-up 0.25s ease-out !important; }
+    .pk-shop-grid { max-height: 50vh !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; overscroll-behavior-y: contain !important; }
     .pk-btn-close { border-radius: 24px !important; padding: 12px !important; font-size: 14px; }
-
-    #pk-chat-settings-menu {
-        right: 15px !important;
-        top: 55px !important;
-        z-index: 1000000 !important;
-    }
+    #pk-chat-settings-menu { right: 15px !important; top: 55px !important; z-index: 1000000 !important; }
     #pk-chat-tooltip { display: none !important; }
+    
+    /* ขยายฟอนต์หลังบ้านบนมือถือ */
+    div.container table td { font-size: 14px !important; line-height: 1.5 !important; padding-left: 5px !important; padding-right: 5px !important; }
 }
-
-/* 1. จัดการการ์ดพรีวิวลิงก์ให้กว้างพอดี และ "ห้ามโดนบีบเด็ดขาด" */
-.pk-link-preview {
-    min-width: 100% !important; 
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-}
-
-/* 2. สั่งให้กล่องคำพูด (Bubble) ขยายตัวตามการ์ด และล็อกของไม่ให้ทะลุขอบ */
-.pk-bubble {
-    overflow: hidden !important; 
-    word-break: break-word !important;
-    width: fit-content !important; /* เวทมนตร์ที่สั่งให้กล่องขาวขยายตัวตามการ์ดข้างใน */
-}
-
 
 /* =========================================
-   9. 💬 ระบบเมนูกดค้าง (Messenger Action Menu)
+   🌟 10. แอนิเมชันสำหรับไอเทมร้านค้าระดับพรีเมียม (ใช้งานได้ทั้ง PC และ มือถือ)
 ========================================= */
-#pk-chat-action-overlay {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-    z-index: 1000005;
-    display: flex;
-    align-items: flex-end; /* ให้เมนูอยู่ด้านล่างสไตล์ Bottom Sheet */
+@keyframes pk-wave-text { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes pk-float-bubble { 0% { transform: translateY(0px); } 50% { transform: translateY(-4px); } 100% { transform: translateY(0px); } }
+@keyframes pk-glow-ice { 0% { box-shadow: 0 0 5px #00f2fe, inset 0 0 5px #00f2fe; } 50% { box-shadow: 0 0 15px #4facfe, inset 0 0 10px #4facfe; } 100% { box-shadow: 0 0 5px #00f2fe, inset 0 0 5px #00f2fe; } }
+@keyframes pk-autumn-shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(1deg); } 75% { transform: rotate(-1deg); } 100% { transform: rotate(0deg); } }
+
+/* =========================================
+   11. 🎁 ปรับปรุง Modal อั่งเปา (ตรงกลาง) & ระบบแจ้งเตือน (Toast)
+========================================= */
+
+/* บังคับหน้าต่างแจกอั่งเปาให้อยู่ตรงกลางจอ พร้อมฉากหลังสีดำดรอปลง */
+#pk-chat-rp-modal {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    bottom: auto !important;
+    right: auto !important;
+    width: 85% !important;
+    max-width: 320px !important;
+    background: var(--pk-bg) !important;
+    border-radius: 20px !important;
+    padding: 24px !important;
+    /* เวทมนตร์สร้างฉากหลังสีดำทับแชทโดยไม่ต้องใช้ Div เพิ่ม */
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3), 0 0 0 2000px rgba(0,0,0,0.5) !important;
+    z-index: 1000006 !important;
+    text-align: center;
+    border: none !important;
 }
 
-#pk-chat-action-menu {
-    width: 100%;
-    background: var(--pk-bg);
-    border-radius: 20px 20px 0 0;
-    padding: 20px;
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
-    animation: pk-slide-up 0.2s ease-out;
+#pk-chat-rp-modal h3 { font-size: 18px; margin-top: 0; margin-bottom: 15px; }
+
+/* 🛡️ แก้บั๊ก iOS Zoom: บังคับฟอนต์ 16px และปรับดีไซน์ให้สวยขึ้น */
+.pk-rp-input {
+    font-size: 16px !important; 
+    text-align: center;
+    padding: 12px !important;
+    border-radius: 12px !important;
+    margin-bottom: 15px !important;
+    width: 100% !important;
     box-sizing: border-box;
+    border: 2px solid var(--pk-border) !important;
+    background: var(--pk-input-bg) !important;
+    color: var(--pk-text) !important;
+    transition: border-color 0.2s;
 }
+.pk-rp-input:focus { border-color: #d9363e !important; outline: none; }
 
-.pk-menu-react-bar {
-    display: flex;
-    justify-content: space-around;
-    background: var(--pk-input-bg);
-    padding: 12px 15px;
+.pk-rp-btn-group { display: flex; gap: 10px; }
+#pk-rp-submit, #pk-rp-cancel { flex: 1; padding: 12px !important; border-radius: 12px !important; font-size: 15px !important; font-weight: bold; }
+
+/* 🍞 Custom Toast Notification (แทนที่หน้าต่าง Alert สีขาวๆ ของเบราว์เซอร์) */
+#pk-chat-toast {
+    position: fixed;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
     border-radius: 30px;
-    margin-bottom: 15px;
-    border: 1px solid var(--pk-border);
-}
-
-.pk-msg-menu-react {
-    font-size: 26px;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-.pk-msg-menu-react:hover { transform: scale(1.3); }
-
-.pk-menu-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.pk-menu-btn {
-    padding: 12px 15px;
-    border-radius: 12px;
-    background: var(--pk-msg-bg);
-    font-size: 15px;
+    font-size: 14px;
     font-weight: bold;
-    color: var(--pk-text);
-    cursor: pointer;
-    display: flex;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    z-index: 1000010;
+    display: none;
     align-items: center;
-    gap: 10px;
-    border: 1px solid var(--pk-border);
+    gap: 8px;
+    white-space: nowrap;
+    animation: pk-toast-slide 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.pk-menu-btn:hover { filter: brightness(0.9); }
-.pk-menu-btn .icon { font-size: 18px; }
+#pk-chat-toast.toast-error { background: #ff3b30; color: white; }
+#pk-chat-toast.toast-success { background: #34c759; color: white; }
+#pk-chat-toast.toast-info { background: #007aff; color: white; }
 
-/* 🛡️ ป้องกัน Safari คลุมดำข้อความและปิดไฮไลต์สีเทาเวลากด */
-.pk-bubble, .pk-bubble * {
-    -webkit-touch-callout: none !important;
-    -webkit-user-select: none !important;
-    -khtml-user-select: none !important;
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
-    user-select: none !important;
-    -webkit-tap-highlight-color: transparent !important; /* ปิดสีเทากะพริบเวลาแตะบน iOS */
+@keyframes pk-toast-slide {
+    from { transform: translate(-50%, -20px); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
 }
-
-/* ลบกล่อง Action อันเก่าที่ไม่ใช้แล้วทิ้งไป */
-.pk-msg-actions-inline { display: none !important; }
