@@ -123,6 +123,54 @@ function renderShopItems(type) {
         chatHead.on('click', toggleChat); $('#pk-chat-close-btn').on('click', toggleChat);
         if(chatState === 'open') { chatBoxContainer.css('display', 'flex'); chatHead.hide(); } else { chatBoxContainer.hide(); chatHead.show(); }
 
+// --- ⏱️ ระบบ Snooze Logic ---
+
+// 1. ตรวจสอบสถานะ Snooze ทันทีที่โหลดหน้าเว็บ
+var snoozeUntil = localStorage.getItem('pk_chat_snooze_until');
+var now = Math.floor(Date.now() / 1000);
+
+if (snoozeUntil) {
+    if (snoozeUntil === 'permanent' || now < parseInt(snoozeUntil)) {
+        $('#pk-chat-head, #pk-chat-box').hide(); // ซ่อนทิ้งทั้งหมด
+    } else {
+        localStorage.removeItem('pk_chat_snooze_until'); // หมดเวลาแล้ว ลบทิ้ง
+    }
+}
+
+// 2. เมื่อกดปุ่ม 'X' บนหัวแชท
+$('#pk-chat-close-btn').off('click').on('click', function(e) {
+    e.stopPropagation();
+    $('#pk-chat-snooze-modal').fadeIn(200);
+});
+
+// 3. จัดการการเลือกเวลา
+$(document).on('click', '.pk-snooze-btn', function() {
+    var time = $(this).data('time');
+    var expiry = '';
+
+    if (time === 'permanent') {
+        expiry = 'permanent';
+    } else {
+        expiry = Math.floor(Date.now() / 1000) + parseInt(time);
+    }
+
+    localStorage.setItem('pk_chat_snooze_until', expiry);
+    localStorage.setItem('prasopkan_chat_state', 'closed');
+    
+    // ปิดหน้าจอทั้งหมด
+    $('#pk-chat-snooze-modal').fadeOut(150);
+    $('#pk-chat-box').fadeOut(200, function() {
+        $('#pk-chat-head').fadeOut(200); // หายวับไปทั้งปุ่มลอย
+    });
+    
+    showToast('🤫 ซ่อนแชทเรียบร้อยแล้ว', 'success');
+});
+
+// 4. ปุ่มยกเลิก (ปิดเมนู Snooze แต่ไม่ซ่อนปุ่มแชท)
+$('#pk-snooze-cancel').on('click', function() {
+    $('#pk-chat-snooze-modal').fadeOut(150);
+});
+
         var typingTimer; $('#pk-chat-input').on('input', function() { clearTimeout(typingTimer); typingTimer = setTimeout(function() { $.ajax({url: apiUrl + '&action=typing&room_id=' + currentRoomId}); }, 1000); });
         $('.pk-room-tab').on('click', function() { $('.pk-room-tab').removeClass('active'); $(this).addClass('active'); currentRoomId = $(this).data('room'); chatBox.html('<div style="text-align:center; padding:15px; color:var(--pk-text-muted);">กำลังโหลด...</div>'); fetchMessages(true); });
 

@@ -12,6 +12,9 @@ while($s = DB::fetch($q_shop)) {
 }
 
 if($action == 'send') {
+	// ลบข้อความที่เก่ากว่า 7 วันอัตโนมัติ (7 วัน = 604800 วินาที)
+    $seven_days_ago = $_G['timestamp'] - 604800;
+    DB::query("DELETE FROM ".DB::table('prasopkan_chat_messages')." WHERE dateline < $seven_days_ago");
     $message = dhtmlspecialchars(trim($_GET['message']));
     if(empty($message)) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาพิมพ์ข้อความ')); exit; }
     if(!$_G['uid']) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาล็อกอินก่อนส่งข้อความ')); exit; }
@@ -41,6 +44,31 @@ elseif($action == 'get') {
             }
         }
     }
+	
+	// --- 💡 ระบบบอทสุ่มกระทู้เก่ามาแนะนำ (ทำงานทุกๆ 1 ชั่วโมง) ---
+    loadcache('prasopkan_chat_random_bot_time');
+    $last_random_time = intval($_G['cache']['prasopkan_chat_random_bot_time']);
+    $random_interval = 3600; // ตั้งเวลา: 3600 วินาที = 1 ชั่วโมง (ปรับตัวเลขได้ตามต้องการ)
+
+    if($_G['timestamp'] - $last_random_time > $random_interval) {
+        savecache('prasopkan_chat_random_bot_time', $_G['timestamp']);
+        
+        // สุ่มหยิบกระทู้ 1 อันจากฐานข้อมูล
+        $random_thread = DB::fetch_first("SELECT tid, subject, author FROM ".DB::table('forum_thread')." WHERE displayorder >= 0 ORDER BY RAND() LIMIT 1");
+        
+        if($random_thread) {
+            $bot_msg = "💡 แวะมาป้ายยากระทู้น่าสนใจ: [url=forum.php?mod=viewthread&tid=".$random_thread['tid']."]".$random_thread['subject']."[/url] (โดยคุณ ".$random_thread['author'].")";
+            
+            $chat_forums = @unserialize($plugin_config['chat_forums']); 
+            if(!is_array($chat_forums)) $chat_forums = array(1);
+            
+            // ส่งข้อความลงแชท
+            foreach($chat_forums as $r_id) { 
+                DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🤖 System Bot', 'message' => $bot_msg, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => intval($r_id))); 
+            }
+        }
+    }
+    // -----------------------------------------------------
 
     DB::query("DELETE FROM ".DB::table('prasopkan_chat_typing')." WHERE dateline < ".($_G['timestamp'] - 6));
     $typing_users = array(); $q_type = DB::query("SELECT username FROM ".DB::table('prasopkan_chat_typing')." WHERE room_id='$room_id' AND uid != '{$_G['uid']}'");

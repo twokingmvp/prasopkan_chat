@@ -76,4 +76,17 @@
             <button id="pk-chat-send" title="ส่งข้อความ"><svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg></button>
         </div>
     </div>
+	
+	<div id="pk-chat-snooze-modal" style="display:none;">
+    <div class="pk-snooze-content">
+        <h4>ปิดการแจ้งเตือนแชท?</h4>
+        <p>ปุ่มแชทจะถูกซ่อนไว้ชั่วคราวตามเวลาที่เลือก</p>
+        <div class="pk-snooze-options">
+            <button class="pk-snooze-btn" data-time="3600">1 ชั่วโมง</button>
+            <button class="pk-snooze-btn" data-time="86400">24 ชั่วโมง</button>
+            <button class="pk-snooze-btn" data-time="permanent">ปิดถาวร (จนกว่าจะเปิดเอง)</button>
+        </div>
+        <button id="pk-snooze-cancel">ยกเลิก</button>
+    </div>
+</div>
 </div>
