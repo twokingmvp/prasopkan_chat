@@ -1,11 +1,10 @@
-<div id="pk-chat-head">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-    <div id="pk-chat-badge" style="display:none;">1</div>
+<div id="pk-chat-head-container">
+    <div id="pk-chat-head">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <div id="pk-chat-badge" style="display:none;">1</div>
+    </div>
+    <div id="pk-chat-tooltip" class="pk-tooltip-show">{$welcome_tooltip}</div>
 </div>
-
-<div id="pk-chat-head-close" title="ซ่อนปุ่มแชทชั่วคราว" style="display:none;">✖</div>
-
-<div id="pk-chat-tooltip" class="pk-tooltip-show">{$welcome_tooltip}</div>
 
 <div id="pk-chat-box" style="display:none;">
     <div id="pk-chat-header">
@@ -13,7 +12,7 @@
         <div class="pk-header-actions">
             <span id="pk-chat-shop-btn" title="ร้านค้าไอเทม">🛒</span>
             <span id="pk-chat-settings-btn" title="ตั้งค่า">⚙️</span>
-            <span id="pk-chat-close-btn" title="ย่อแชท">🔽</span> 
+            <span id="pk-chat-close-btn" title="ปิดแชท">✖</span> 
         </div>
     </div>
 
@@ -79,17 +78,4 @@
     </div>
     
     <div id="pk-chat-emoji-picker" style="display:none;"></div>
-</div>
-
-<div id="pk-chat-snooze-modal" style="display:none;">
-    <div class="pk-snooze-content">
-        <h4>ปิดการแจ้งเตือนแชท?</h4>
-        <p>ปุ่มแชทจะถูกซ่อนไว้ชั่วคราวตามเวลาที่เลือก</p>
-        <div class="pk-snooze-options">
-            <button class="pk-snooze-btn" data-time="3600">ซ่อน 1 ชั่วโมง</button>
-            <button class="pk-snooze-btn" data-time="86400">ซ่อน 24 ชั่วโมง</button>
-            <button class="pk-snooze-btn" data-time="permanent">ซ่อนถาวร (จนกว่าจะเปิดเอง)</button>
-        </div>
-        <button id="pk-snooze-cancel">ยกเลิก</button>
-    </div>
 </div>

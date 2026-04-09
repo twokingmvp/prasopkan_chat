@@ -1,34 +1,18 @@
 (function($) {
     $(document).ready(function() {
         
-        // 🚨 โค้ดกู้ชีพ: บังคับล้างค่า Snooze ที่ค้างในความจำเบราว์เซอร์ 1 ครั้ง
-        if (!localStorage.getItem('pk_chat_rescued_v3')) {
-            localStorage.removeItem('pk_chat_snooze_until');
-            localStorage.setItem('prasopkan_chat_state', 'closed');
-            localStorage.setItem('pk_chat_rescued_v3', '1');
-        }
-
         // --- 🍞 ระบบแจ้งเตือน (Toast Notification) ---
         if($('#pk-chat-toast').length === 0) { $('body').append('<div id="pk-chat-toast"></div>'); }
         function showToast(msg, type) {
-            type = type || 'info'; // แก้ Syntax Error สำหรับมือถือรุ่นเก่า
+            type = type || 'info'; 
             var toast = $('#pk-chat-toast');
             toast.removeClass('toast-error toast-success toast-info').addClass('toast-' + type);
             toast.html(msg).show();
             setTimeout(function() { toast.fadeOut(300); }, 3000);
         }
 
-        var chatBox = $('#pk-chat-messages'); 
-        var chatBody = $('#pk-chat-body'); 
-        var chatHead = $('#pk-chat-head'); 
-        var chatHeadClose = $('#pk-chat-head-close');
-        var chatBoxContainer = $('#pk-chat-box');
-        var badge = $('#pk-chat-badge'); 
-        var tooltip = $('#pk-chat-tooltip');
-
-        var isFetching = false; 
-        var apiUrl = 'plugin.php?id=prasopkan_chat:api'; 
-        var currentRoomId = 1; 
+        var chatBox = $('#pk-chat-messages'); var chatBody = $('#pk-chat-body'); var chatHead = $('#pk-chat-head'); var chatBoxContainer = $('#pk-chat-box');
+        var isFetching = false; var apiUrl = 'plugin.php?id=prasopkan_chat:api'; var currentRoomId = 1; 
         if ($('.pk-room-tab.active').length > 0) currentRoomId = $('.pk-room-tab.active').data('room');
 
         var savedTheme = localStorage.getItem('prasopkan_chat_theme');
@@ -98,106 +82,31 @@
         
         $(document).on('click', '.pk-btn-equip', function() { $.ajax({ url: apiUrl + '&action=shop_equip&item_key='+$(this).data('key')+'&item_type='+$(this).data('type'), type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') { loadShop(); fetchMessages(); } else { showToast('❌ ' + res.msg, 'error'); } } }); });
 
-        // --- ⏱️ ระบบตรวจสอบการปิดแชท (Snooze Logic) ---
-        var snoozeUntil = localStorage.getItem('pk_chat_snooze_until');
-        var now = Math.floor(Date.now() / 1000);
-        var isSnoozed = false;
-
-        if (snoozeUntil && (snoozeUntil === 'permanent' || now < parseInt(snoozeUntil, 10))) {
-            isSnoozed = true;
-        } else {
-            localStorage.removeItem('pk_chat_snooze_until');
-        }
-
-        // --- ฟังก์ชันจัดระเบียบการแสดงผล ---
-        function updateChatVisibility() {
-            if (isSnoozed) {
-                chatBoxContainer.hide();
-                chatHead.hide();
-                chatHeadClose.hide();
-                tooltip.hide();
-                return;
-            }
-
-            if (localStorage.getItem('prasopkan_chat_state') === 'open') {
-                chatBoxContainer.css('display', 'flex');
-                chatHead.hide();
-                chatHeadClose.hide();
-            } else {
-                chatBoxContainer.hide();
-                chatHead.show();
-                chatHeadClose.show();
-                if(badge.text() === '') badge.text(Math.floor(Math.random() * 3) + 1);
-                badge.show();
+        var badge = $('#pk-chat-badge'); var tooltip = $('#pk-chat-tooltip');
+        var chatState = localStorage.getItem('prasopkan_chat_state');
+        if(chatState !== 'open') { badge.text(Math.floor(Math.random() * 3) + 1).show(); }
+        
+        if (tooltip.length > 0) { function showTooltip() { if (chatBoxContainer.is(':hidden')) { tooltip.addClass('pk-tooltip-show'); setTimeout(function() { tooltip.removeClass('pk-tooltip-show'); }, 5000); } } setTimeout(showTooltip, 3000); setInterval(showTooltip, 45000); }
+        
+        function toggleChat() {
+            if(chatBoxContainer.is(':hidden')) { 
+                chatHead.hide(); badge.hide(); tooltip.removeClass('pk-tooltip-show'); 
+                chatBoxContainer.css('display', 'flex').hide().fadeIn(200);
+                localStorage.setItem('prasopkan_chat_state', 'open'); fetchMessages(true); setTimeout(function(){ $('#pk-chat-input').focus(); }, 200); 
+            } 
+            else { 
+                chatBoxContainer.fadeOut(200, function() { chatHead.fadeIn(200); }); 
+                localStorage.setItem('prasopkan_chat_state', 'closed'); setTimeout(function() { badge.text(Math.floor(Math.random() * 2) + 1).fadeIn(); }, 15000); 
             }
         }
-        updateChatVisibility();
-
-        if (tooltip.length > 0) { 
-            var showTooltip = function() { 
-                if (chatBoxContainer.is(':hidden') && !isSnoozed) { 
-                    tooltip.addClass('pk-tooltip-show'); 
-                    setTimeout(function() { tooltip.removeClass('pk-tooltip-show'); }, 5000); 
-                } 
-            };
-            setTimeout(showTooltip, 3000); 
-            setInterval(showTooltip, 45000); 
-        }
-
-        $('#pk-chat-close-btn').off('click').on('click', function(e) {
-            e.stopPropagation();
-            localStorage.setItem('prasopkan_chat_state', 'closed');
-            chatBoxContainer.fadeOut(200, function() {
-                if(!isSnoozed) { 
-                    chatHead.fadeIn(200); 
-                    chatHeadClose.fadeIn(200); 
-                }
-            });
-            setTimeout(function() { badge.text(Math.floor(Math.random() * 2) + 1).fadeIn(); }, 15000);
-        });
-
-        chatHead.off('click').on('click', function() {
-            localStorage.setItem('prasopkan_chat_state', 'open');
-            chatHead.hide();
-            chatHeadClose.hide();
-            badge.hide(); 
-            tooltip.removeClass('pk-tooltip-show');
-            chatBoxContainer.css('display', 'flex').hide().fadeIn(200);
-            fetchMessages(true); 
-            setTimeout(function(){ $('#pk-chat-input').focus(); }, 200);
-        });
-
-        chatHeadClose.off('click').on('click', function(e) {
-            e.stopPropagation();
-            $('#pk-chat-snooze-modal').fadeIn(200);
-        });
-
-        $(document).on('click', '.pk-snooze-btn', function() {
-            var time = $(this).data('time');
-            if (time === 'permanent') {
-                localStorage.setItem('pk_chat_snooze_until', 'permanent');
-            } else {
-                localStorage.setItem('pk_chat_snooze_until', Math.floor(Date.now() / 1000) + parseInt(time, 10));
-            }
-            
-            isSnoozed = true; 
-            $('#pk-chat-snooze-modal').fadeOut(150);
-            chatHead.fadeOut(200);
-            chatHeadClose.fadeOut(200);
-            tooltip.hide();
-            
-            showToast('🤫 ซ่อนแชทเรียบร้อยแล้ว แชทจะไม่กวนใจคุณอีก!', 'success');
-        });
-
-        $('#pk-snooze-cancel').on('click', function() {
-            $('#pk-chat-snooze-modal').fadeOut(150);
-        });
+        chatHead.on('click', toggleChat); $('#pk-chat-close-btn').on('click', toggleChat);
+        if(chatState === 'open') { chatBoxContainer.css('display', 'flex'); chatHead.hide(); } else { chatBoxContainer.hide(); chatHead.show(); }
 
         var typingTimer; $('#pk-chat-input').on('input', function() { clearTimeout(typingTimer); typingTimer = setTimeout(function() { $.ajax({url: apiUrl + '&action=typing&room_id=' + currentRoomId}); }, 1000); });
         $('.pk-room-tab').on('click', function() { $('.pk-room-tab').removeClass('active'); $(this).addClass('active'); currentRoomId = $(this).data('room'); chatBox.html('<div style="text-align:center; padding:15px; color:var(--pk-text-muted);">กำลังโหลด...</div>'); fetchMessages(true); });
 
         function fetchMessages(forceScroll) {
-            if(typeof forceScroll === 'undefined') forceScroll = false; // แก้ Syntax
+            if(typeof forceScroll === 'undefined') forceScroll = false; 
             if(isFetching) return; isFetching = true;
             $.ajax({
                 url: apiUrl + '&action=get&room_id=' + currentRoomId, type: 'GET', dataType: 'json', cache: false,
