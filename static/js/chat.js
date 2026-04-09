@@ -1,9 +1,17 @@
 (function($) {
     $(document).ready(function() {
         
+        // 🚨 โค้ดกู้ชีพ: บังคับล้างค่า Snooze ที่ค้างในความจำเบราว์เซอร์ 1 ครั้ง
+        if (!localStorage.getItem('pk_chat_rescued_v3')) {
+            localStorage.removeItem('pk_chat_snooze_until');
+            localStorage.setItem('prasopkan_chat_state', 'closed');
+            localStorage.setItem('pk_chat_rescued_v3', '1');
+        }
+
         // --- 🍞 ระบบแจ้งเตือน (Toast Notification) ---
         if($('#pk-chat-toast').length === 0) { $('body').append('<div id="pk-chat-toast"></div>'); }
-        function showToast(msg, type = 'info') {
+        function showToast(msg, type) {
+            type = type || 'info'; // แก้ Syntax Error สำหรับมือถือรุ่นเก่า
             var toast = $('#pk-chat-toast');
             toast.removeClass('toast-error toast-success toast-info').addClass('toast-' + type);
             toast.html(msg).show();
@@ -33,24 +41,7 @@
         });
 
         if($('#pk-chat-action-overlay').length === 0) {
-            $('#pk-chat-box').append(`
-                <div id="pk-chat-action-overlay" style="display:none;">
-                    <div id="pk-chat-action-menu">
-                        <div class="pk-menu-react-bar">
-                            <span class="pk-msg-menu-react" data-emoji="👍">👍</span>
-                            <span class="pk-msg-menu-react" data-emoji="❤️">❤️</span>
-                            <span class="pk-msg-menu-react" data-emoji="😂">😂</span>
-                            <span class="pk-msg-menu-react" data-emoji="😮">😮</span>
-                            <span class="pk-msg-menu-react" data-emoji="😢">😢</span>
-                            <span class="pk-msg-menu-react" data-emoji="😡">😡</span>
-                        </div>
-                        <div class="pk-menu-actions">
-                            <div class="pk-menu-btn" id="pk-menu-reply"><span class="icon">↩️</span> ตอบกลับ</div>
-                            <div class="pk-menu-btn" id="pk-menu-delete" style="color: #ff3b30;"><span class="icon">🗑️</span> ลบข้อความ</div>
-                        </div>
-                    </div>
-                </div>
-            `);
+            $('#pk-chat-box').append('<div id="pk-chat-action-overlay" style="display:none;"><div id="pk-chat-action-menu"><div class="pk-menu-react-bar"><span class="pk-msg-menu-react" data-emoji="👍">👍</span><span class="pk-msg-menu-react" data-emoji="❤️">❤️</span><span class="pk-msg-menu-react" data-emoji="😂">😂</span><span class="pk-msg-menu-react" data-emoji="😮">😮</span><span class="pk-msg-menu-react" data-emoji="😢">😢</span><span class="pk-msg-menu-react" data-emoji="😡">😡</span></div><div class="pk-menu-actions"><div class="pk-menu-btn" id="pk-menu-reply"><span class="icon">↩️</span> ตอบกลับ</div><div class="pk-menu-btn" id="pk-menu-delete" style="color: #ff3b30;"><span class="icon">🗑️</span> ลบข้อความ</div></div></div></div>');
         }
 
         var shopModal = $('#pk-chat-shop-modal'); var currentShopType = 'name_style'; var shopDataCache = null;
@@ -105,26 +96,20 @@
             }
         });
         
-        $(document).on('click', '.pk-btn-equip', function() { $.ajax({ url: apiUrl + '&action=shop_equip&item_key='+$(this).data('key')+'&item_type='+$(this).data('type'), type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') { loadShop(); fetchMessages(false); } else { showToast('❌ ' + res.msg, 'error'); } } }); });
-// --- 🚨 ระบบฉุกเฉิน: พิมพ์ ?reset_chat=1 ต่อท้าย URL เพื่อเรียกระบบกลับมา ---
-        if (window.location.search.indexOf('reset_chat=1') !== -1) {
-            localStorage.removeItem('pk_chat_snooze_until');
-            localStorage.removeItem('prasopkan_chat_state');
-            alert('✅ ระบบ: ล้างค่าการซ่อนแชทให้กลับมาเป็นปกติแล้ว!');
-            window.history.replaceState({}, document.title, window.location.pathname); // ลบ URL ส่วนเกินออก
-        }
+        $(document).on('click', '.pk-btn-equip', function() { $.ajax({ url: apiUrl + '&action=shop_equip&item_key='+$(this).data('key')+'&item_type='+$(this).data('type'), type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') { loadShop(); fetchMessages(); } else { showToast('❌ ' + res.msg, 'error'); } } }); });
+
         // --- ⏱️ ระบบตรวจสอบการปิดแชท (Snooze Logic) ---
         var snoozeUntil = localStorage.getItem('pk_chat_snooze_until');
         var now = Math.floor(Date.now() / 1000);
         var isSnoozed = false;
 
-        if (snoozeUntil && (snoozeUntil === 'permanent' || now < parseInt(snoozeUntil))) {
+        if (snoozeUntil && (snoozeUntil === 'permanent' || now < parseInt(snoozeUntil, 10))) {
             isSnoozed = true;
         } else {
             localStorage.removeItem('pk_chat_snooze_until');
         }
 
-        // --- ฟังก์ชันจัดระเบียบการแสดงผล (ควบคุมปุ่มทั้งหมด) ---
+        // --- ฟังก์ชันจัดระเบียบการแสดงผล ---
         function updateChatVisibility() {
             if (isSnoozed) {
                 chatBoxContainer.hide();
@@ -148,19 +133,17 @@
         }
         updateChatVisibility();
 
-        // 💬 แสดง Tooltip เฉพาะตอนที่ไม่ได้ซ่อนแชท
         if (tooltip.length > 0) { 
-            function showTooltip() { 
+            var showTooltip = function() { 
                 if (chatBoxContainer.is(':hidden') && !isSnoozed) { 
                     tooltip.addClass('pk-tooltip-show'); 
                     setTimeout(function() { tooltip.removeClass('pk-tooltip-show'); }, 5000); 
                 } 
-            } 
+            };
             setTimeout(showTooltip, 3000); 
             setInterval(showTooltip, 45000); 
         }
 
-        // 🔘 1. ปุ่ม 'ย่อหน้าต่าง (🔽)' ในกล่องแชท -> พับแชทกลับเป็นวงกลม
         $('#pk-chat-close-btn').off('click').on('click', function(e) {
             e.stopPropagation();
             localStorage.setItem('prasopkan_chat_state', 'closed');
@@ -173,7 +156,6 @@
             setTimeout(function() { badge.text(Math.floor(Math.random() * 2) + 1).fadeIn(); }, 15000);
         });
 
-        // 🔘 2. ปุ่มวงกลม Chat Head -> เปิดหน้าต่างแชทขึ้นมา
         chatHead.off('click').on('click', function() {
             localStorage.setItem('prasopkan_chat_state', 'open');
             chatHead.hide();
@@ -185,19 +167,17 @@
             setTimeout(function(){ $('#pk-chat-input').focus(); }, 200);
         });
 
-        // 🔘 3. ปุ่ม 'X สีแดง' ที่เกาะอยู่ข้างๆ -> เปิดเมนูเลือกซ่อน (Snooze)
         chatHeadClose.off('click').on('click', function(e) {
             e.stopPropagation();
             $('#pk-chat-snooze-modal').fadeIn(200);
         });
 
-        // 🔘 4. ยืนยันการเลือกเวลาซ่อนแชท (Snooze)
         $(document).on('click', '.pk-snooze-btn', function() {
             var time = $(this).data('time');
             if (time === 'permanent') {
                 localStorage.setItem('pk_chat_snooze_until', 'permanent');
             } else {
-                localStorage.setItem('pk_chat_snooze_until', Math.floor(Date.now() / 1000) + parseInt(time));
+                localStorage.setItem('pk_chat_snooze_until', Math.floor(Date.now() / 1000) + parseInt(time, 10));
             }
             
             isSnoozed = true; 
@@ -209,7 +189,6 @@
             showToast('🤫 ซ่อนแชทเรียบร้อยแล้ว แชทจะไม่กวนใจคุณอีก!', 'success');
         });
 
-        // 🔘 5. ยกเลิกหน้าต่าง Snooze
         $('#pk-snooze-cancel').on('click', function() {
             $('#pk-chat-snooze-modal').fadeOut(150);
         });
@@ -217,7 +196,8 @@
         var typingTimer; $('#pk-chat-input').on('input', function() { clearTimeout(typingTimer); typingTimer = setTimeout(function() { $.ajax({url: apiUrl + '&action=typing&room_id=' + currentRoomId}); }, 1000); });
         $('.pk-room-tab').on('click', function() { $('.pk-room-tab').removeClass('active'); $(this).addClass('active'); currentRoomId = $(this).data('room'); chatBox.html('<div style="text-align:center; padding:15px; color:var(--pk-text-muted);">กำลังโหลด...</div>'); fetchMessages(true); });
 
-        function fetchMessages(forceScroll = false) {
+        function fetchMessages(forceScroll) {
+            if(typeof forceScroll === 'undefined') forceScroll = false; // แก้ Syntax
             if(isFetching) return; isFetching = true;
             $.ajax({
                 url: apiUrl + '&action=get&room_id=' + currentRoomId, type: 'GET', dataType: 'json', cache: false,
@@ -251,7 +231,7 @@
                 }, error: function() { isFetching = false; }
             });
         }
-        fetchMessages(true); setInterval(function() { fetchMessages(false); }, 3000);
+        fetchMessages(true); setInterval(function() { fetchMessages(); }, 3000);
 
         var pressTimer; var isLongPress = false;
         $(document).on('contextmenu', '.pk-bubble', function(e) { e.preventDefault(); return false; }); 
@@ -271,10 +251,10 @@
         $(document).on('touchend mouseup', '.pk-bubble', function(e) { clearTimeout(pressTimer); if(isLongPress) { e.preventDefault(); e.stopPropagation(); } });
         $('#pk-chat-box').on('click', '#pk-chat-action-overlay', function(e) { if(e.target.id === 'pk-chat-action-overlay') { $(this).fadeOut(150); } });
 
-        $(document).on('click', '.pk-msg-menu-react', function() { var msgId = $(this).attr('data-id'); var emoji = $(this).attr('data-emoji'); $('#pk-chat-action-overlay').fadeOut(150); $.ajax({ url: apiUrl + '&action=react&msg_id=' + msgId + '&reaction=' + encodeURIComponent(emoji), type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') fetchMessages(false); } }); });
+        $(document).on('click', '.pk-msg-menu-react', function() { var msgId = $(this).attr('data-id'); var emoji = $(this).attr('data-emoji'); $('#pk-chat-action-overlay').fadeOut(150); $.ajax({ url: apiUrl + '&action=react&msg_id=' + msgId + '&reaction=' + encodeURIComponent(emoji), type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') fetchMessages(); } }); });
         $(document).on('click', '#pk-menu-reply', function() { var user = $(this).attr('data-user'); $('#pk-chat-action-overlay').fadeOut(150); var input = $('#pk-chat-input'); var currentVal = input.val(); if(currentVal.indexOf('@' + user) === -1) input.val('@' + user + ' ' + currentVal).focus(); else input.focus(); });
-        $(document).on('click', '#pk-menu-delete', function() { var msgId = $(this).attr('data-id'); $('#pk-chat-action-overlay').fadeOut(150); if(confirm('ต้องการลบข้อความนี้?')) { $.ajax({ url: apiUrl + '&action=delete&msg_id=' + msgId, type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') fetchMessages(false); else showToast('❌ ' + res.msg, 'error'); } }); } });
-        $(document).on('click', '.pk-react-pill', function() { $.ajax({ url: apiUrl + '&action=react&msg_id=' + $(this).data('id') + '&reaction=' + encodeURIComponent($(this).data('emoji')), type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') fetchMessages(false); } }); });
+        $(document).on('click', '#pk-menu-delete', function() { var msgId = $(this).attr('data-id'); $('#pk-chat-action-overlay').fadeOut(150); if(confirm('ต้องการลบข้อความนี้?')) { $.ajax({ url: apiUrl + '&action=delete&msg_id=' + msgId, type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') fetchMessages(); else showToast('❌ ' + res.msg, 'error'); } }); } });
+        $(document).on('click', '.pk-react-pill', function() { $.ajax({ url: apiUrl + '&action=react&msg_id=' + $(this).data('id') + '&reaction=' + encodeURIComponent($(this).data('emoji')), type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') fetchMessages(); } }); });
 
         $(document).on('click', function(e) { if (!$(e.target).closest('#pk-chat-emoji-picker, #pk-chat-emoji-btn, #pk-chat-rp-modal, #pk-chat-rp-btn, #pk-chat-settings-btn, #pk-chat-settings-menu, #pk-chat-shop-btn, #pk-chat-shop-modal').length) { $('#pk-chat-emoji-picker, #pk-chat-rp-modal, #pk-chat-settings-menu, #pk-chat-shop-modal').fadeOut(150); } });
         
