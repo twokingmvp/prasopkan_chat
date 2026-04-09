@@ -106,7 +106,13 @@
         });
         
         $(document).on('click', '.pk-btn-equip', function() { $.ajax({ url: apiUrl + '&action=shop_equip&item_key='+$(this).data('key')+'&item_type='+$(this).data('type'), type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') { loadShop(); fetchMessages(false); } else { showToast('❌ ' + res.msg, 'error'); } } }); });
-
+// --- 🚨 ระบบฉุกเฉิน: พิมพ์ ?reset_chat=1 ต่อท้าย URL เพื่อเรียกระบบกลับมา ---
+        if (window.location.search.indexOf('reset_chat=1') !== -1) {
+            localStorage.removeItem('pk_chat_snooze_until');
+            localStorage.removeItem('prasopkan_chat_state');
+            alert('✅ ระบบ: ล้างค่าการซ่อนแชทให้กลับมาเป็นปกติแล้ว!');
+            window.history.replaceState({}, document.title, window.location.pathname); // ลบ URL ส่วนเกินออก
+        }
         // --- ⏱️ ระบบตรวจสอบการปิดแชท (Snooze Logic) ---
         var snoozeUntil = localStorage.getItem('pk_chat_snooze_until');
         var now = Math.floor(Date.now() / 1000);
