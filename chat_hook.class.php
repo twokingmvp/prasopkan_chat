@@ -8,7 +8,7 @@ class plugin_prasopkan_chat {
     public function global_footer() {
         global $_G;
         
-        loadcache('plugin');
+loadcache('plugin');
         $plugin_config = $_G['cache']['plugin']['prasopkan_chat'];
         
         $enable_rooms = $plugin_config['enable_rooms'];
@@ -16,10 +16,18 @@ class plugin_prasopkan_chat {
         $enable_image = $plugin_config['enable_image'];
         $enable_redpacket = $plugin_config['enable_redpacket'];
         
+        // 🛠️ เพิ่มตัวแปรเช็กอีโมจิ
+        $enable_emoji = isset($plugin_config['enable_emoji']) ? $plugin_config['enable_emoji'] : 1; 
+        
         $admin_announcement = trim($plugin_config['admin_announcement']);
         $welcome_tooltip = trim($plugin_config['welcome_tooltip']);
         
         $rooms_html = '';
+
+        // 🛡️ ถ้าตั้งค่าปิดอีโมจิ ให้แทรก CSS ซ่อนปุ่มไปเลย
+        if(!$enable_emoji) {
+            $rooms_html .= '<style>#pk-chat-emoji-btn { display: none !important; }</style>';
+        }
         
         if($enable_rooms) {
             if(!is_array($chat_forums)) $chat_forums = @unserialize($chat_forums);

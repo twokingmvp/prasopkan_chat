@@ -48,7 +48,7 @@
         var shopModal = $('#pk-chat-shop-modal'); var currentShopType = 'name_style'; var shopDataCache = null;
         function loadShop() { $.ajax({ url: apiUrl + '&action=shop_info', type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') { shopDataCache = res; $('#pk-user-balance').text(res.credit + ' ' + res.credit_name); renderShopItems(currentShopType); } } }); }
         
-        function renderShopItems(type) {
+function renderShopItems(type) {
             if(!shopDataCache) return; var html = ''; var items = shopDataCache.items[type]; var inv = shopDataCache.inventory; var eq = shopDataCache.equipment[type];
             $.each(items, function(key, val) {
                 var isOwned = inv.indexOf(key) !== -1; var isEquipped = (eq === key);
@@ -58,11 +58,22 @@
                 else if (type === 'bubble_skin') { html += '<div class="pk-shop-item-preview" style="padding:10px; background:var(--pk-bg); border:none;"><div class="pk-bubble" style="'+val.css+'; display:inline-block; font-size:12px;">สวัสดี!</div></div>'; } 
                 else { html += '<div class="pk-shop-item-preview">'+val.icon+' ชื่อคุณ</div>'; }
                 html += '<div class="pk-shop-item-name">'+val.name+'</div>';
-                if(type === 'gacha') { html += '<button class="pk-btn-buy" style="background:#d9363e;" data-key="'+key+'" data-type="'+type+'" data-price="'+val.price+'">สุ่มลุ้นโชค! ('+val.price+')</button>'; } 
+                
+                // 💎 แก้ไขข้อความปุ่มตรงนี้! (สุ่มกาชา)
+                if(type === 'gacha') { 
+                    html += '<button class="pk-btn-buy" style="background:#d9363e;" data-key="'+key+'" data-type="'+type+'" data-price="'+val.price+'">สุ่มลุ้นโชค! '+val.price+' '+shopDataCache.credit_name+'</button>'; 
+                } 
                 else {
-                    if(isEquipped) { html += '<button class="pk-btn-equip" style="background: #ff3b30; color: #ffffff; border: 1px solid #d32f2f;" data-key="" data-type="'+type+'">ถอดออก</button>'; } 
-                    else if(isOwned) { html += '<button class="pk-btn-equip" data-key="'+key+'" data-type="'+type+'">ใช้งาน</button>'; } 
-                    else { html += '<button class="pk-btn-buy" data-key="'+key+'" data-type="'+type+'" data-price="'+val.price+'">ซื้อ ('+val.price+')</button>'; }
+                    if(isEquipped) { 
+                        html += '<button class="pk-btn-equip" style="background: #ff3b30; color: #ffffff; border: 1px solid #d32f2f;" data-key="" data-type="'+type+'">ถอดออก</button>'; 
+                    } 
+                    else if(isOwned) { 
+                        html += '<button class="pk-btn-equip" data-key="'+key+'" data-type="'+type+'">ใช้งาน</button>'; 
+                    } 
+                    else { 
+                        // 💎 แก้ไขข้อความปุ่มตรงนี้! (ซื้อสินค้า)
+                        html += '<button class="pk-btn-buy" data-key="'+key+'" data-type="'+type+'" data-price="'+val.price+'">ซื้อ '+val.price+' '+shopDataCache.credit_name+'</button>'; 
+                    }
                 }
                 html += '</div>';
             });

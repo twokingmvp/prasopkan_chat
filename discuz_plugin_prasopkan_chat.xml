@@ -11,7 +11,7 @@
 			<item id="datatables"><![CDATA[prasopkan_chat_messages,prasopkan_chat_envelopes,prasopkan_chat_envlogs,prasopkan_chat_reactions,prasopkan_chat_inventory,prasopkan_chat_equipment,prasopkan_chat_shop_items]]></item>
 			<item id="directory"><![CDATA[prasopkan_chat/]]></item>
 			<item id="copyright"><![CDATA[Prasopkan]]></item>
-			<item id="version"><![CDATA[1.8.0]]></item>
+			<item id="version"><![CDATA[1.8.1]]></item>
 			<item id="__modules">
 				<item id="0">
 					<item id="name"><![CDATA[chat_hook]]></item>
@@ -165,6 +165,15 @@
 				<item id="variable"><![CDATA[shop_credit_id]]></item>
 				<item id="type"><![CDATA[number]]></item>
 				<item id="value"><![CDATA[2]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+			<item id="15">
+				<item id="displayorder"><![CDATA[16]]></item>
+				<item id="title"><![CDATA[เปิดใช้งาน ปุ่มส่งอีโมจิ 😀]]></item>
+				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้เปิดหน้าต่างส่งอีโมจิจากกล่องข้อความได้]]></item>
+				<item id="variable"><![CDATA[enable_emoji]]></item>
+				<item id="type"><![CDATA[radio]]></item>
+				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
 		</item>
