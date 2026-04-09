@@ -125,51 +125,82 @@ function renderShopItems(type) {
 
 // --- ⏱️ ระบบ Snooze Logic ---
 
-// 1. ตรวจสอบสถานะ Snooze ทันทีที่โหลดหน้าเว็บ
-var snoozeUntil = localStorage.getItem('pk_chat_snooze_until');
-var now = Math.floor(Date.now() / 1000);
+// --- ⏱️ ระบบตรวจสอบการปิดแชท (Snooze Logic) ---
+        var snoozeUntil = localStorage.getItem('pk_chat_snooze_until');
+        var now = Math.floor(Date.now() / 1000);
+        var isSnoozed = false;
 
-if (snoozeUntil) {
-    if (snoozeUntil === 'permanent' || now < parseInt(snoozeUntil)) {
-        $('#pk-chat-head, #pk-chat-box').hide(); // ซ่อนทิ้งทั้งหมด
-    } else {
-        localStorage.removeItem('pk_chat_snooze_until'); // หมดเวลาแล้ว ลบทิ้ง
-    }
-}
+        // เช็กว่าโดนสั่งปิดอยู่หรือเปล่าตอนโหลดหน้าเว็บ
+        if (snoozeUntil && (snoozeUntil === 'permanent' || now < parseInt(snoozeUntil))) {
+            isSnoozed = true;
+        } else {
+            localStorage.removeItem('pk_chat_snooze_until'); // หมดเวลา ซ่อนทิ้ง
+        }
 
-// 2. เมื่อกดปุ่ม 'X' บนหัวแชท
-$('#pk-chat-close-btn').off('click').on('click', function(e) {
-    e.stopPropagation();
-    $('#pk-chat-snooze-modal').fadeIn(200);
-});
+        // ฟังก์ชันจัดระเบียบการแสดงผล
+        function updateChatVisibility() {
+            if (isSnoozed) {
+                $('#pk-chat-box, #pk-chat-head, #pk-chat-head-close').hide();
+                return;
+            }
 
-// 3. จัดการการเลือกเวลา
-$(document).on('click', '.pk-snooze-btn', function() {
-    var time = $(this).data('time');
-    var expiry = '';
+            if (localStorage.getItem('prasopkan_chat_state') === 'open') {
+                $('#pk-chat-box').css('display', 'flex');
+                $('#pk-chat-head, #pk-chat-head-close').hide();
+            } else {
+                $('#pk-chat-box').hide();
+                $('#pk-chat-head, #pk-chat-head-close').show();
+            }
+        }
+        
+        // เรียกใช้งานครั้งแรก
+        updateChatVisibility();
 
-    if (time === 'permanent') {
-        expiry = 'permanent';
-    } else {
-        expiry = Math.floor(Date.now() / 1000) + parseInt(time);
-    }
+        // 🔘 1. ปุ่ม 'ย่อหน้าต่าง (🔽)' ในกล่องแชท -> พับแชทกลับเป็นวงกลม
+        $('#pk-chat-close-btn').off('click').on('click', function(e) {
+            e.stopPropagation();
+            localStorage.setItem('prasopkan_chat_state', 'closed');
+            $('#pk-chat-box').fadeOut(200, function() {
+                if(!isSnoozed) { $('#pk-chat-head, #pk-chat-head-close').fadeIn(200); }
+            });
+            setTimeout(function() { badge.text(Math.floor(Math.random() * 2) + 1).fadeIn(); }, 15000);
+        });
 
-    localStorage.setItem('pk_chat_snooze_until', expiry);
-    localStorage.setItem('prasopkan_chat_state', 'closed');
-    
-    // ปิดหน้าจอทั้งหมด
-    $('#pk-chat-snooze-modal').fadeOut(150);
-    $('#pk-chat-box').fadeOut(200, function() {
-        $('#pk-chat-head').fadeOut(200); // หายวับไปทั้งปุ่มลอย
-    });
-    
-    showToast('🤫 ซ่อนแชทเรียบร้อยแล้ว', 'success');
-});
+        // 🔘 2. ปุ่มวงกลม Chat Head -> เปิดหน้าต่างแชทขึ้นมา
+        chatHead.off('click').on('click', function() {
+            localStorage.setItem('prasopkan_chat_state', 'open');
+            $('#pk-chat-head, #pk-chat-head-close').hide();
+            badge.hide(); tooltip.removeClass('pk-tooltip-show');
+            $('#pk-chat-box').css('display', 'flex').hide().fadeIn(200);
+            fetchMessages(true); setTimeout(function(){ $('#pk-chat-input').focus(); }, 200);
+        });
 
-// 4. ปุ่มยกเลิก (ปิดเมนู Snooze แต่ไม่ซ่อนปุ่มแชท)
-$('#pk-snooze-cancel').on('click', function() {
-    $('#pk-chat-snooze-modal').fadeOut(150);
-});
+        // 🔘 3. ปุ่ม 'X สีแดง' ที่ลอยติด Chat Head -> เปิดหน้าต่าง Snooze
+        $('#pk-chat-head-close').off('click').on('click', function(e) {
+            e.stopPropagation();
+            $('#pk-chat-snooze-modal').fadeIn(200);
+        });
+
+        // 🔘 4. ยืนยันการเลือกเวลาปิดแชท (Snooze)
+        $(document).on('click', '.pk-snooze-btn', function() {
+            var time = $(this).data('time');
+            if (time === 'permanent') {
+                localStorage.setItem('pk_chat_snooze_until', 'permanent');
+            } else {
+                localStorage.setItem('pk_chat_snooze_until', Math.floor(Date.now() / 1000) + parseInt(time));
+            }
+            
+            isSnoozed = true; // สถานะถูกสั่งปิดแล้ว
+            $('#pk-chat-snooze-modal').fadeOut(150);
+            $('#pk-chat-head, #pk-chat-head-close').fadeOut(200);
+            
+            showToast('🤫 ซ่อนแชทเรียบร้อยแล้ว แชทจะไม่กวนใจคุณอีก!', 'success');
+        });
+
+        // 🔘 5. ยกเลิกหน้าต่าง Snooze
+        $('#pk-snooze-cancel').on('click', function() {
+            $('#pk-chat-snooze-modal').fadeOut(150);
+        });
 
         var typingTimer; $('#pk-chat-input').on('input', function() { clearTimeout(typingTimer); typingTimer = setTimeout(function() { $.ajax({url: apiUrl + '&action=typing&room_id=' + currentRoomId}); }, 1000); });
         $('.pk-room-tab').on('click', function() { $('.pk-room-tab').removeClass('active'); $(this).addClass('active'); currentRoomId = $(this).data('room'); chatBox.html('<div style="text-align:center; padding:15px; color:var(--pk-text-muted);">กำลังโหลด...</div>'); fetchMessages(true); });
