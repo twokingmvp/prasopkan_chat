@@ -29,8 +29,6 @@ if($action == 'send') {
         }
 
         $masked = substr($key, 0, 5) . '***' . substr($key, -4);
-        
-        // 🚀 เวอร์ชันเสถียรที่ Google รองรับ
         $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $key;
         
         $post_data = array("contents" => array(array("parts" => array(array("text" => "ตอบกลับมาสั้นๆ ว่า '✅ ระบบ AI เชื่อมต่อสำเร็จแล้ว!'")))));
@@ -208,7 +206,7 @@ elseif($action == 'get') {
                     $system_prompt .= "หัวข้อหลักที่เว็บนี้ชอบคุยกันคือ: {$selected_topic}\n";
                     $system_prompt .= "กฎข้อบังคับ (สำคัญมาก):\n";
                     $system_prompt .= "1. ห้ามบอกเด็ดขาดว่าคุณเป็น AI หรือ Assistant คุณคือคนจริงๆ ที่กำลังพิมพ์แชท\n";
-                    $system_prompt .= "2. พิมพ์ตอบสไตล์การพิมพ์แชท โดยมีความยาวประมาณ {$target_len} ประโยค (ไม่ต้องเขียนเป็นเรียงความ)\n"; // 🔥 อัปเดตความยาว
+                    $system_prompt .= "2. พิมพ์ตอบสไตล์การพิมพ์แชท โดยมีความยาวประมาณ {$target_len} ประโยค (ไม่ต้องเขียนเป็นเรียงความ)\n";
                     $system_prompt .= "3. ใช้คำศัพท์วัยรุ่น หรือคำสร้อยแบบธรรมชาติ ตามบุคลิก\n";
                     $system_prompt .= "4. พิมพ์เฉพาะข้อความที่คุณจะตอบ ห้ามพิมพ์ชื่อตัวเองนำหน้า\n";
                     $system_prompt .= "5. อ่านประวัติแชทด้านล่าง แล้วพิจารณาว่าจะ 'ตอบกลับเพื่อน' หรือ 'ชวนคุยเรื่องใหม่' ให้เข้ากับหัวข้อหลักที่กำหนดไว้ให้เนียนที่สุด\n\n";
@@ -222,7 +220,7 @@ elseif($action == 'get') {
                         ),
                         "generationConfig" => array(
                             "temperature" => 0.8,
-                            "maxOutputTokens" => 150
+                            "maxOutputTokens" => 200
                         )
                     );
 
@@ -426,7 +424,6 @@ elseif($action == 'react') {
     if($exists) DB::delete('prasopkan_chat_reactions', "id='{$exists['id']}'"); else DB::insert('prasopkan_chat_reactions', array('msg_id'=>$msg_id, 'uid'=>$_G['uid'], 'reaction'=>$reaction));
     echo json_encode(array('status'=>'success')); exit;
 }
-
 elseif($action == 'delete') {
     if(!$_G['uid'] || $_G['adminid'] <= 0) { echo json_encode(array('status' => 'error', 'msg' => 'ไม่มีสิทธิ์ในการลบข้อความ')); exit; }
     $msg_id = isset($_GET['msg_id']) ? intval($_GET['msg_id']) : 0;
