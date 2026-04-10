@@ -21,7 +21,6 @@ if($action == 'send') {
         $ai_config = $_G['setting']['prasopkan_chat_aibots'];
         if(is_string($ai_config)) { $ai_config = @unserialize($ai_config); }
         
-        // 🧹 สแกนและล้างตัวอักษรล่องหน/ช่องว่าง ให้เหลือแต่ A-Z, 0-9 และขีด
         $key = isset($ai_config['gemini_api_key']) ? preg_replace('/[^a-zA-Z0-9_-]/', '', $ai_config['gemini_api_key']) : '';
         
         if(empty($key)) {
@@ -30,29 +29,40 @@ if($action == 'send') {
         }
 
         $masked = substr($key, 0, 5) . '***' . substr($key, -4);
-        
-        // 🔥 ยัด Key ลงใน URL ตรงๆ ป้องกันโฮสติ้งบล็อก Headers
         $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $key;
         $post_data = array("contents" => array(array("parts" => array(array("text" => "ตอบกลับมาสั้นๆ ว่า '✅ ระบบ AI เชื่อมต่อสำเร็จแล้ว!'")))));
         
+        // 1. ลองยิงด้วย cURL ก่อน
         $ch = curl_init($api_url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json',
-            'Referer: ' . $_G['siteurl'] 
-        ));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Referer: ' . $_G['siteurl'] ));
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         $response = curl_exec($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $err = curl_error($ch);
         curl_close($ch);
 
+        // 🛡️ ไม้ตาย: ถ้า cURL ดื้อดึงตรวจ SSL ให้ใช้ file_get_contents แทน
+        if($response === false && stripos($err, 'SSL') !== false) {
+            $ctx = stream_context_create(array(
+                'http' => array('method' => 'POST', 'header' => "Content-Type: application/json\r\nReferer: " . $_G['siteurl'] . "\r\n", 'content' => json_encode($post_data), 'timeout' => 15, 'ignore_errors' => true),
+                'ssl' => array('verify_peer' => false, 'verify_peer_name' => false)
+            ));
+            $response = @file_get_contents($api_url, false, $ctx);
+            if($response !== false) {
+                $err = ''; $httpcode = 200;
+                if(isset($http_response_header)) {
+                    foreach($http_response_header as $h) { if(preg_match('/^HTTP\/\d+\.\d+\s+(\d+)/', $h, $m)) { $httpcode = intval($m[1]); break; } }
+                }
+            }
+        }
+
         if($response === false) {
-            $msg = "cURL Error: " . $err;
+            $msg = "cURL & Stream Error: " . $err;
         } elseif($httpcode != 200) {
             $err_json = json_decode($response, true);
             $reason = isset($err_json['error']['message']) ? $err_json['error']['message'] : $response;
@@ -61,7 +71,7 @@ if($action == 'send') {
             $res_json = json_decode($response, true);
             $ans = isset($res_json['candidates'][0]['content']['parts'][0]['text']) ? trim($res_json['candidates'][0]['content']['parts'][0]['text']) : 'ไม่สามารถอ่านข้อความได้';
             $msg = "เชื่อมต่อสำเร็จ! Key [$masked] \nAI ตอบว่า: " . $ans;
-            savecache('prasopkan_chat_ai_last_talk', 0); // รีเซ็ตเวลาให้ AI คุยได้เลยเมื่อมีคนพิมพ์รอบถัดไป
+            savecache('prasopkan_chat_ai_last_talk', 0);
         }
 
         DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ API Test', 'message' => $msg, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $room_id, 'badge_icon' => '⚡'));
@@ -70,7 +80,6 @@ if($action == 'send') {
 
     $message = preg_replace('/(?<!\])(https?:\/\/[^\s<]+)/i', '[url=$1]$1[/url]', $message);
 
-    // 🧹 1. ระบบลบประวัติแชทอัตโนมัติ
     loadcache('plugin');
     $plugin_config = $_G['cache']['plugin']['prasopkan_chat'];
     $auto_cleanup_days = isset($plugin_config['auto_cleanup_days']) ? intval($plugin_config['auto_cleanup_days']) : 7;
@@ -105,7 +114,6 @@ elseif($action == 'get') {
         }
     }
 
-    // 🤖 2. ระบบบอทสุ่มกระทู้เก่ามาแนะนำ
     $enable_random_bot = isset($plugin_config['enable_random_bot']) ? intval($plugin_config['enable_random_bot']) : 0;
     if($enable_random_bot) {
         loadcache('prasopkan_chat_random_bot_time');
@@ -134,7 +142,7 @@ elseif($action == 'get') {
     }
 
     // ==========================================
-    // 🧠 3. ระบบ AI Seed Bots (Gemini API) พร้อม Debug Mode
+    // 🧠 3. ระบบ AI Seed Bots (Gemini API) 
     // ==========================================
     $ai_config = $_G['setting']['prasopkan_chat_aibots'];
     if(is_string($ai_config)) { $ai_config = @unserialize($ai_config); }
@@ -159,7 +167,6 @@ elseif($action == 'get') {
             $ai_allowed_forums = array_map('intval', $raw_allowed_forums);
             $current_room_id = intval($room_id);
 
-            // บังคับให้บอทพูดทันทีถ้าพึ่งตั้งค่าเสร็จ
             $is_time_to_talk = ($last_talk_time == 0) || ($_G['timestamp'] - $last_talk_time > ($ai_interval_minutes * 60));
 
             if($is_time_to_talk && in_array($current_room_id, $ai_allowed_forums)) {
@@ -213,20 +220,29 @@ elseif($action == 'get') {
 
                     $ch = curl_init($api_url);
                     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                        'Content-Type: application/json',
-                        'Referer: ' . $_G['siteurl']
-                    ));
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Referer: ' . $_G['siteurl'] ));
                     curl_setopt($ch, CURLOPT_POST, true);
                     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
                     curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
-                    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0); 
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
                     $response = curl_exec($ch);
                     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                     $curlerror = curl_error($ch);
                     curl_close($ch);
+
+                    // 🛡️ ไม้ตาย: สลับไปใช้ Stream ถ้า cURL โดนบล็อกเรื่อง SSL
+                    if($response === false && stripos($curlerror, 'SSL') !== false) {
+                        $ctx = stream_context_create(array(
+                            'http' => array('method' => 'POST', 'header' => "Content-Type: application/json\r\nReferer: " . $_G['siteurl'] . "\r\n", 'content' => json_encode($post_data), 'timeout' => 15, 'ignore_errors' => true),
+                            'ssl' => array('verify_peer' => false, 'verify_peer_name' => false)
+                        ));
+                        $response = @file_get_contents($api_url, false, $ctx);
+                        if($response !== false) { 
+                            $curlerror = ''; $httpcode = 200;
+                            if(isset($http_response_header)) { foreach($http_response_header as $h) { if(preg_match('/^HTTP\/\d+\.\d+\s+(\d+)/', $h, $m)) { $httpcode = intval($m[1]); break; } } }
+                        }
+                    }
 
                     if($response === false) {
                         DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ Debug Bot', 'message' => "[ระบบขัดข้อง] ยิง API ไม่ผ่าน (cURL Error): " . $curlerror, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $current_room_id, 'badge_icon' => '❌'));
@@ -321,7 +337,6 @@ elseif($action == 'get') {
     
     echo json_encode(array('status' => 'success', 'data' => $messages, 'is_admin' => $is_admin, 'enable_mention' => $enable_mention, 'enable_reaction' => $enable_reaction, 'current_uid' => $current_uid, 'typing_users' => $typing_users)); exit;
 }
-// 🛒 --- ระบบร้านค้า (Shop APIs) ---
 elseif($action == 'shop_info') {
     if(!$_G['uid']) exit;
     loadcache('plugin'); $config = $_G['cache']['plugin']['prasopkan_chat'];
@@ -399,7 +414,6 @@ elseif($action == 'shop_equip') {
     if(in_array($item_type, array('name_style', 'badge', 'bubble_skin'))) { DB::update('prasopkan_chat_equipment', array($item_type => $item_key), "uid='{$_G['uid']}'"); }
     echo json_encode(['status'=>'success']); exit;
 }
-// --- 🧧 ฟังก์ชันอั่งเปา ---
 elseif($action == 'react') { 
     if(!$_G['uid']) { echo json_encode(array('status'=>'error', 'msg'=>'กรุณาล็อกอิน')); exit; }
     $msg_id = intval($_GET['msg_id']); $reaction = dhtmlspecialchars(trim($_GET['reaction']));
