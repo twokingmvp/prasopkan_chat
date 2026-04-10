@@ -280,4 +280,118 @@ elseif($action == 'claim_redpacket') {
         echo json_encode(['status'=>'success', 'amount'=>$get_amount]);
     } else { echo json_encode(['status'=>'error', 'msg'=>'ซองอั่งเปาหมดพอดี!']); } exit;
 }
+
+// ==========================================
+// 🧠 ระบบ AI Seed Bots (Gemini API)
+// ==========================================
+$enable_ai_bots = isset($plugin_config['enable_ai_bots']) ? intval($plugin_config['enable_ai_bots']) : 0;
+$gemini_api_key = isset($plugin_config['gemini_api_key']) ? trim($plugin_config['gemini_api_key']) : '';
+
+if($enable_ai_bots && !empty($gemini_api_key) && $action == 'get') {
+    
+    // ตรวจสอบโควต้าการพิมพ์ต่อวัน (Daily Limit)
+    $today_date = date('Y-m-d', $_G['timestamp']);
+    loadcache('prasopkan_chat_ai_usage_'.$today_date);
+    $daily_usage = intval($_G['cache']['prasopkan_chat_ai_usage_'.$today_date]);
+    $daily_limit = isset($plugin_config['ai_daily_limit']) ? intval($plugin_config['ai_daily_limit']) : 50;
+
+    if($daily_usage < $daily_limit) {
+        
+        // ตรวจสอบว่าถึงเวลาที่กำหนดให้คุยหรือยัง (Interval)
+        loadcache('prasopkan_chat_ai_last_talk');
+        $last_talk_time = intval($_G['cache']['prasopkan_chat_ai_last_talk']);
+        $ai_interval_minutes = isset($plugin_config['ai_chat_interval']) ? intval($plugin_config['ai_chat_interval']) : 20;
+        
+        // ตรวจสอบห้องที่อนุญาต
+        $ai_allowed_forums = @unserialize($plugin_config['ai_allowed_forums']);
+        if(!is_array($ai_allowed_forums)) $ai_allowed_forums = array(1);
+
+        if(($_G['timestamp'] - $last_talk_time > ($ai_interval_minutes * 60)) && in_array($room_id, $ai_allowed_forums)) {
+            
+            // ล็อกเวลาไว้ก่อนเลย กันการเรียกซ้ำซ้อนขณะรอ API ตอบกลับ
+            savecache('prasopkan_chat_ai_last_talk', $_G['timestamp']);
+            savecache('prasopkan_chat_ai_usage_'.$today_date, $daily_usage + 1);
+
+            // แยกรายชื่อและบุคลิกบอท
+            $ai_bot_list_raw = explode("\n", str_replace("\r", "", $plugin_config['ai_bot_list']));
+            $bots = array();
+            foreach($ai_bot_list_raw as $b) {
+                $parts = explode("|", $b);
+                if(count($parts) >= 3) { $bots[] = array('name' => trim($parts[0]), 'icon' => trim($parts[1]), 'persona' => trim($parts[2])); }
+            }
+
+            if(!empty($bots)) {
+                // สุ่มเลือกบอท 1 ตัวมาเป็นคนตอบ
+                $selected_bot = $bots[array_rand($bots)];
+                $topic = isset($plugin_config['ai_chat_topic']) ? trim($plugin_config['ai_chat_topic']) : 'เรื่องทั่วไป';
+                
+                // ดึงประวัติแชทล่าสุด 5 ข้อความมาให้ AI อ่านบริบท (เพื่อความเนียน)
+                $context = "ประวัติการสนทนาล่าสุดในห้องแชท (ให้คุณอ่านเพื่อทำความเข้าใจ ไม่ต้องตอบซ้ำ):\n";
+                $q_history = DB::query("SELECT username, message FROM ".DB::table('prasopkan_chat_messages')." WHERE room_id='$room_id' AND uid != 0 ORDER BY dateline DESC LIMIT 5");
+                $chat_history = array();
+                while($h = DB::fetch($q_history)) { $chat_history[] = $h['username'].": ".$h['message']; }
+                if(!empty($chat_history)) { $context .= implode("\n", array_reverse($chat_history)); } 
+                else { $context .= "(ยังไม่มีใครคุยกันเลย คุณเริ่มเปิดประเด็นได้เลย)"; }
+
+                // 📝 สร้าง Prompt ขั้นเทพ ส่งให้ Gemini 1.5 Flash
+                $system_prompt = "คุณคือผู้ใช้งานเว็บบอร์ดชาวไทย ชื่อของคุณคือ '{$selected_bot['name']}' บุคลิกของคุณคือ: {$selected_bot['persona']}\n\n";
+                $system_prompt .= "หัวข้อหลักที่เว็บนี้ชอบคุยกันคือ: {$topic}\n";
+                $system_prompt .= "กฎข้อบังคับ (สำคัญมาก):\n";
+                $system_prompt .= "1. ห้ามบอกเด็ดขาดว่าคุณเป็น AI หรือ Assistant คุณคือคนจริงๆ ที่กำลังพิมพ์แชท\n";
+                $system_prompt .= "2. พิมพ์ตอบสั้นๆ สไตล์การพิมพ์แชท (ความยาว 1-3 ประโยค) ไม่ต้องเขียนเรียงความ\n";
+                $system_prompt .= "3. ใช้คำศัพท์วัยรุ่น หรือคำสร้อยแบบธรรมชาติ (เช่น เนอะ, ค้าบ, จ้า, อะ) ตามบุคลิก\n";
+                $system_prompt .= "4. พิมพ์เฉพาะข้อความที่คุณจะตอบ ห้ามพิมพ์ชื่อตัวเองนำหน้า\n";
+                $system_prompt .= "5. อ่านบริบทแชทด้านล่าง แล้วพิจารณาว่าจะ 'ตอบกลับเพื่อน' หรือ 'ชวนคุยเรื่องใหม่' ให้เนียนที่สุด\n\n";
+                $system_prompt .= $context;
+
+                // ยิง API ไปหา Gemini
+                $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' . $gemini_api_key;
+                
+                $post_data = array(
+                    "contents" => array(
+                        array("parts" => array( array("text" => $system_prompt) ))
+                    ),
+                    "generationConfig" => array(
+                        "temperature" => 0.8, // ความคิดสร้างสรรค์ (0.0 - 1.0)
+                        "maxOutputTokens" => 100 // บังคับให้ตอบสั้นๆ (ประหยัดค่าใช้จ่าย)
+                    )
+                );
+
+                $ch = curl_init($api_url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
+                curl_setopt($ch, CURLOPT_TIMEOUT, 10); // รอคำตอบไม่เกิน 10 วินาที
+
+                $response = curl_exec($ch);
+                curl_close($ch);
+
+                if($response) {
+                    $res_json = json_decode($response, true);
+                    if(isset($res_json['candidates'][0]['content']['parts'][0]['text'])) {
+                        $ai_reply = trim($res_json['candidates'][0]['content']['parts'][0]['text']);
+                        
+                        // ป้องกัน AI พิมพ์ชื่อตัวเองติดมา (เช่น "แม่บ้านรีวิว: สวัสดีจ้า")
+                        $ai_reply = preg_replace('/^'.$selected_bot['name'].'\s*:\s*/i', '', $ai_reply);
+
+                        if(!empty($ai_reply)) {
+                            // ใช้ UID = 0 (เพื่อให้ระบบรู้ว่าเป็นบอท)
+                            // แทรกไอคอนไว้หน้าชื่อ เพื่อความสวยงาม
+                            DB::insert('prasopkan_chat_messages', array(
+                                'uid' => 0, 
+                                'username' => $selected_bot['name'], 
+                                'message' => $ai_reply, 
+                                'dateline' => $_G['timestamp'], 
+                                'ip' => '127.0.0.1', 
+                                'room_id' => $room_id,
+                                'badge_icon' => $selected_bot['icon']
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 ?>

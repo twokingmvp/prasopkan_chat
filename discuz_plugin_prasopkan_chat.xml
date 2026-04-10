@@ -10,11 +10,11 @@
 			<item id="adminid"><![CDATA[1]]></item>
 			<item id="name"><![CDATA[Prasopkan Chat]]></item>
 			<item id="identifier"><![CDATA[prasopkan_chat]]></item>
-			<item id="description"><![CDATA[ระบบแชทพรีเมียม สไตล์แอปพลิเคชัน สำหรับบอร์ด Prasopkan.com]]></item>
+			<item id="description"><![CDATA[ระบบแชทพรีเมียม สไตล์แอปพลิเคชัน พร้อม AI Bots อัจฉริยะ]]></item>
 			<item id="datatables"><![CDATA[]]></item>
 			<item id="directory"><![CDATA[prasopkan_chat/]]></item>
 			<item id="copyright"><![CDATA[Prasopkan.com]]></item>
-			<item id="version"><![CDATA[1.8.2]]></item>
+			<item id="version"><![CDATA[2.0]]></item>
 			<item id="__modules">
 				<item id="0">
 					<item id="name"><![CDATA[chat_hook]]></item>
@@ -46,7 +46,7 @@
 		</item>
 		<item id="version"><![CDATA[X3.4]]></item>
 		<item id="var">
-			<item id="0">
+            <item id="0">
 				<item id="displayorder"><![CDATA[1]]></item>
 				<item id="title"><![CDATA[เปิดใช้งาน แชทแยกตามหมวดหมู่]]></item>
 				<item id="description"><![CDATA[หากเปิด ระบบจะแยกห้องแชทตามบอร์ดที่ตั้งค่าไว้]]></item>
@@ -91,43 +91,43 @@
 				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-			<item id="5">
+            <item id="5">
 				<item id="displayorder"><![CDATA[6]]></item>
-				<item id="title"><![CDATA[เปิดใช้งาน แจกอั่งเปา 🧧]]></item>
-				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้แจกเครดิตอั่งเปาในแชทได้]]></item>
-				<item id="variable"><![CDATA[enable_redpacket]]></item>
+				<item id="title"><![CDATA[เปิดใช้งาน การแท็กชื่อ (@Mention)]]></item>
+				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้แท็กเรียกชื่อกันในแชทได้]]></item>
+				<item id="variable"><![CDATA[enable_mention]]></item>
 				<item id="type"><![CDATA[radio]]></item>
 				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
             <item id="6">
 				<item id="displayorder"><![CDATA[7]]></item>
-				<item id="title"><![CDATA[ระบบคะแนน/เครดิต ที่ใช้ซื้อไอเทม (ID)]]></item>
-				<item id="description"><![CDATA[ระบุ ID ของเครดิตที่ใช้ซื้อของ (เช่น 1 =威望, 2 = 金钱)]]></item>
-				<item id="variable"><![CDATA[shop_credit_id]]></item>
-				<item id="type"><![CDATA[number]]></item>
-				<item id="value"><![CDATA[2]]></item>
-				<item id="extra"><![CDATA[]]></item>
-			</item>
-			<item id="7">
-				<item id="displayorder"><![CDATA[8]]></item>
-				<item id="title"><![CDATA[ระบบคะแนน/เครดิต ที่ใช้อั่งเปา (ID)]]></item>
-				<item id="description"><![CDATA[ระบุ ID ของเครดิตที่ใช้แจกอั่งเปา (เช่น 1 =威望, 2 = 金钱)]]></item>
-				<item id="variable"><![CDATA[rp_credit_id]]></item>
-				<item id="type"><![CDATA[number]]></item>
-				<item id="value"><![CDATA[2]]></item>
-				<item id="extra"><![CDATA[]]></item>
-			</item>
-			<item id="8">
-				<item id="displayorder"><![CDATA[9]]></item>
-				<item id="title"><![CDATA[เปิดใช้งาน ระบบร้านค้า (Shop) 🛒]]></item>
-				<item id="description"><![CDATA[เปิดให้ผู้ใช้สามารถซื้อสีชื่อ และกรอบคำพูดได้]]></item>
-				<item id="variable"><![CDATA[enable_shop]]></item>
+				<item id="title"><![CDATA[เปิดใช้งาน กดรีแอคชั่น (Reaction)]]></item>
+				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้กดอีโมจิแสดงความรู้สึกใต้ข้อความได้]]></item>
+				<item id="variable"><![CDATA[enable_reaction]]></item>
 				<item id="type"><![CDATA[radio]]></item>
 				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-			<item id="9">
+            <item id="7">
+				<item id="displayorder"><![CDATA[8]]></item>
+				<item id="title"><![CDATA[เปิดใช้งาน ระบบพรีวิวลิงก์อัตโนมัติ]]></item>
+				<item id="description"><![CDATA[ดึงข้อมูลรูปภาพและชื่อเรื่องของลิงก์มาแสดงแบบการ์ด]]></item>
+				<item id="variable"><![CDATA[enable_linkpreview]]></item>
+				<item id="type"><![CDATA[radio]]></item>
+				<item id="value"><![CDATA[1]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="8">
+				<item id="displayorder"><![CDATA[9]]></item>
+				<item id="title"><![CDATA[เปิดใช้งาน ปุ่มส่งอีโมจิ 😀]]></item>
+				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้เปิดหน้าต่างส่งอีโมจิจากกล่องข้อความได้]]></item>
+				<item id="variable"><![CDATA[enable_emoji]]></item>
+				<item id="type"><![CDATA[radio]]></item>
+				<item id="value"><![CDATA[1]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="9">
 				<item id="displayorder"><![CDATA[10]]></item>
 				<item id="title"><![CDATA[จำนวนข้อความที่แสดงล่าสุด]]></item>
 				<item id="description"><![CDATA[ระบุจำนวนข้อความที่ต้องการดึงมาแสดงตอนเปิดแชท]]></item>
@@ -138,92 +138,150 @@
 			</item>
             <item id="10">
 				<item id="displayorder"><![CDATA[11]]></item>
-				<item id="title"><![CDATA[เปิดใช้งาน การแท็กชื่อ (@Mention)]]></item>
-				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้แท็กเรียกชื่อกันในแชทได้]]></item>
-				<item id="variable"><![CDATA[enable_mention]]></item>
-				<item id="type"><![CDATA[radio]]></item>
-				<item id="value"><![CDATA[1]]></item>
+				<item id="title"><![CDATA[ระยะเวลาลบประวัติแชทอัตโนมัติ (วัน)]]></item>
+				<item id="description"><![CDATA[ระบบจะลบข้อความที่เก่าเกินจำนวนวันที่กำหนด (ใส่ 0 เพื่อปิดระบบนี้)]]></item>
+				<item id="variable"><![CDATA[auto_cleanup_days]]></item>
+				<item id="type"><![CDATA[number]]></item>
+				<item id="value"><![CDATA[7]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
             <item id="11">
 				<item id="displayorder"><![CDATA[12]]></item>
-				<item id="title"><![CDATA[เปิดใช้งาน กดรีแอคชั่น (Reaction)]]></item>
-				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้กดอีโมจิแสดงความรู้สึกใต้ข้อความได้]]></item>
-				<item id="variable"><![CDATA[enable_reaction]]></item>
-				<item id="type"><![CDATA[radio]]></item>
-				<item id="value"><![CDATA[1]]></item>
+				<item id="title"><![CDATA[ระบบคะแนน/เครดิตหลัก (ID)]]></item>
+				<item id="description"><![CDATA[ระบุ ID ของเครดิตที่ใช้แจกอั่งเปาและซื้อของ (เช่น 1 =威望, 2 = 金钱)]]></item>
+				<item id="variable"><![CDATA[shop_credit_id]]></item>
+				<item id="type"><![CDATA[number]]></item>
+				<item id="value"><![CDATA[2]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
+            
             <item id="12">
-				<item id="displayorder"><![CDATA[13]]></item>
-				<item id="title"><![CDATA[เปิดใช้งาน ระบบพรีวิวลิงก์อัตโนมัติ]]></item>
-				<item id="description"><![CDATA[ดึงข้อมูลรูปภาพและชื่อเรื่องของลิงก์มาแสดงแบบการ์ด]]></item>
-				<item id="variable"><![CDATA[enable_link_preview]]></item>
+				<item id="displayorder"><![CDATA[20]]></item>
+				<item id="title"><![CDATA[เปิดใช้งาน แจกอั่งเปา 🧧]]></item>
+				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้แจกเครดิตอั่งเปาในแชทได้]]></item>
+				<item id="variable"><![CDATA[enable_redpacket]]></item>
 				<item id="type"><![CDATA[radio]]></item>
 				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
             <item id="13">
-				<item id="displayorder"><![CDATA[14]]></item>
-				<item id="title"><![CDATA[เปิดใช้งาน ปุ่มส่งอีโมจิ 😀]]></item>
-				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้เปิดหน้าต่างส่งอีโมจิจากกล่องข้อความได้]]></item>
-				<item id="variable"><![CDATA[enable_emoji]]></item>
-				<item id="type"><![CDATA[radio]]></item>
-				<item id="value"><![CDATA[1]]></item>
+				<item id="displayorder"><![CDATA[21]]></item>
+				<item id="title"><![CDATA[ขั้นต่ำการแจกอั่งเปา (เครดิต)]]></item>
+				<item id="description"><![CDATA[]]></item>
+				<item id="variable"><![CDATA[redpacket_min]]></item>
+				<item id="type"><![CDATA[number]]></item>
+				<item id="value"><![CDATA[10]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
             <item id="14">
-				<item id="displayorder"><![CDATA[15]]></item>
-				<item id="title"><![CDATA[เปิดใช้งาน บอทแจ้งเตือนกระทู้ใหม่ 🤖]]></item>
+				<item id="displayorder"><![CDATA[22]]></item>
+				<item id="title"><![CDATA[สูงสุดการแจกอั่งเปา (เครดิต)]]></item>
+				<item id="description"><![CDATA[]]></item>
+				<item id="variable"><![CDATA[redpacket_max]]></item>
+				<item id="type"><![CDATA[number]]></item>
+				<item id="value"><![CDATA[1000]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+
+            <item id="15">
+				<item id="displayorder"><![CDATA[30]]></item>
+				<item id="title"><![CDATA[เปิดใช้งาน บอทแจ้งเตือนกระทู้ใหม่ 📢]]></item>
 				<item id="description"><![CDATA[ให้ System Bot แจ้งเตือนเมื่อมีคนตั้งกระทู้ใหม่]]></item>
 				<item id="variable"><![CDATA[enable_bot]]></item>
 				<item id="type"><![CDATA[radio]]></item>
 				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-            <item id="15">
-				<item id="displayorder"><![CDATA[16]]></item>
-				<item id="title"><![CDATA[ข้อความบอทแจ้งเตือนกระทู้ใหม่]]></item>
-				<item id="description"><![CDATA[ใช้ {subject} แทนชื่อกระทู้ และ {url} แทนลิงก์]]></item>
-				<item id="variable"><![CDATA[bot_msg_newthread]]></item>
-				<item id="type"><![CDATA[text]]></item>
-				<item id="value"><![CDATA[📢 มีกระทู้ใหม่มาสดๆ ร้อนๆ: [url={url}]{subject}[/url] ลองเข้าไปอ่านกันดูนะครับ!]]></item>
-				<item id="extra"><![CDATA[]]></item>
-			</item>
-			<item id="16">
-				<item id="displayorder"><![CDATA[17]]></item>
+            <item id="16">
+				<item id="displayorder"><![CDATA[31]]></item>
 				<item id="title"><![CDATA[เปิดใช้งาน บอทป้ายยากระทู้เก่า 🤖]]></item>
-				<item id="description"><![CDATA[บอทจะคัดเลือกกระทู้คุณภาพมาแชร์ในแชทอัตโนมัติ]]></item>
+				<item id="description"><![CDATA[บอทจะคัดเลือกกระทู้คุณภาพ (คนตอบเยอะ) มาแชร์ในแชทอัตโนมัติ]]></item>
 				<item id="variable"><![CDATA[enable_random_bot]]></item>
 				<item id="type"><![CDATA[radio]]></item>
 				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-			<item id="17">
-				<item id="displayorder"><![CDATA[18]]></item>
+            <item id="17">
+				<item id="displayorder"><![CDATA[32]]></item>
 				<item id="title"><![CDATA[ความถี่ของบอทป้ายยา (นาที)]]></item>
-				<item id="description"><![CDATA[ตั้งเวลาให้บอททำงานทุกๆ กี่นาที (แนะนำ: 60)]]></item>
+				<item id="description"><![CDATA[ตั้งเวลาให้บอทสุ่มกระทู้มาแชร์ (แนะนำ: 60)]]></item>
 				<item id="variable"><![CDATA[bot_interval]]></item>
 				<item id="type"><![CDATA[number]]></item>
 				<item id="value"><![CDATA[60]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
 			<item id="18">
-				<item id="displayorder"><![CDATA[19]]></item>
-				<item id="title"><![CDATA[ความฉลาดบอท: ขั้นต่ำการตอบกลับ]]></item>
-				<item id="description"><![CDATA[บอทจะเลือกเฉพาะกระทู้ที่มีคนตอบเกินจำนวนนี้ เพื่อรับประกันว่าเป็นกระทู้ที่มีคุณภาพ (แนะนำ: 5)]]></item>
+				<item id="displayorder"><![CDATA[33]]></item>
+				<item id="title"><![CDATA[บอทป้ายยา: ขั้นต่ำการตอบกลับ (Replies)]]></item>
+				<item id="description"><![CDATA[เลือกระทู้ที่มีคนตอบเกินจำนวนนี้ เพื่อรับประกันคุณภาพ (แนะนำ: 5)]]></item>
 				<item id="variable"><![CDATA[bot_min_replies]]></item>
 				<item id="type"><![CDATA[number]]></item>
 				<item id="value"><![CDATA[5]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-			<item id="19">
-				<item id="displayorder"><![CDATA[20]]></item>
-				<item id="title"><![CDATA[ระยะเวลาลบประวัติแชทอัตโนมัติ (วัน)]]></item>
-				<item id="description"><![CDATA[ระบบจะลบข้อความที่เก่าเกินจำนวนวันที่กำหนด (ใส่ 0 เพื่อปิดระบบนี้)]]></item>
-				<item id="variable"><![CDATA[auto_cleanup_days]]></item>
+
+            <item id="19">
+				<item id="displayorder"><![CDATA[40]]></item>
+				<item id="title"><![CDATA[--- AI BOTS --- เปิดใช้งาน AI คุยกันเอง 🧠]]></item>
+				<item id="description"><![CDATA[เปิดระบบให้หน้าม้า AI พิมพ์คุยโต้ตอบกันในแชทเพื่อสร้างความครึกครื้น]]></item>
+				<item id="variable"><![CDATA[enable_ai_bots]]></item>
+				<item id="type"><![CDATA[radio]]></item>
+				<item id="value"><![CDATA[0]]></item> <item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="20">
+				<item id="displayorder"><![CDATA[41]]></item>
+				<item id="title"><![CDATA[Gemini API Key 🔑]]></item>
+				<item id="description"><![CDATA[ใส่ API Key ของคุณที่ได้จาก Google AI Studio]]></item>
+				<item id="variable"><![CDATA[gemini_api_key]]></item>
+				<item id="type"><![CDATA[text]]></item>
+				<item id="value"><![CDATA[]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="21">
+				<item id="displayorder"><![CDATA[42]]></item>
+				<item id="title"><![CDATA[ลิมิตข้อความ AI ต่อวัน (ป้องกันงบบานปลาย) 💰]]></item>
+				<item id="description"><![CDATA[อนุญาตให้ AI พิมพ์คุยได้สูงสุดกี่ข้อความต่อวัน (เช่น 50)]]></item>
+				<item id="variable"><![CDATA[ai_daily_limit]]></item>
 				<item id="type"><![CDATA[number]]></item>
-				<item id="value"><![CDATA[7]]></item>
+				<item id="value"><![CDATA[50]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="22">
+				<item id="displayorder"><![CDATA[43]]></item>
+				<item id="title"><![CDATA[ความถี่ในการให้ AI คุยกัน (นาที) ⏱️]]></item>
+				<item id="description"><![CDATA[ระยะห่างระหว่างแต่ละข้อความของ AI (แนะนำ 15-30 นาที)]]></item>
+				<item id="variable"><![CDATA[ai_chat_interval]]></item>
+				<item id="type"><![CDATA[number]]></item>
+				<item id="value"><![CDATA[20]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="23">
+				<item id="displayorder"><![CDATA[44]]></item>
+				<item id="title"><![CDATA[รายชื่อและบุคลิกของ AI Bots 👥]]></item>
+				<item id="description"><![CDATA[รูปแบบ: ชื่อ|ไอคอน|บุคลิก (คั่นแต่ละตัวด้วย Enter)]]></item>
+				<item id="variable"><![CDATA[ai_bot_list]]></item>
+				<item id="type"><![CDATA[textarea]]></item>
+				<item id="value"><![CDATA[แม่บ้านรีวิว|👩‍🍳|เป็นแม่บ้านชอบทำอาหารและแชร์ของใช้ในบ้าน พูดจาเป็นกันเอง
+ทาสแมว|🐱|รักแมวมาก ชอบถามและคุยเรื่องสัตว์เลี้ยง ใช้ภาษาวัยรุ่น
+ช่างไม้ใจดี|🛠️|มีความรู้เรื่องซ่อมบ้าน ช่างสังเกต ชอบให้คำแนะนำสั้นๆ ได้ใจความ]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="24">
+				<item id="displayorder"><![CDATA[45]]></item>
+				<item id="title"><![CDATA[หัวข้อสนทนาหลัก (Topic) 💬]]></item>
+				<item id="description"><![CDATA[พิมพ์เรื่องที่คุณอยากให้ AI ชวนคุย (เช่น: รีวิวของใช้จุกจิกมินิมอล, ไอเดียแต่งบ้าน, ข่าวสารทั่วไป)]]></item>
+				<item id="variable"><![CDATA[ai_chat_topic]]></item>
+				<item id="type"><![CDATA[text]]></item>
+				<item id="value"><![CDATA[พูดคุยเรื่องไอเดียแต่งบ้าน ของใช้มินิมอล และไลฟ์สไตล์การใช้ชีวิตประจำวัน]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+            <item id="25">
+				<item id="displayorder"><![CDATA[46]]></item>
+				<item id="title"><![CDATA[อนุญาตให้ AI คุยในห้องไหนบ้าง? 🚪]]></item>
+				<item id="description"><![CDATA[เลือกห้อง(Forums)ที่ให้ AI โผล่ไปคุย (เช่น ห้องพูดคุยทั่วไป)]]></item>
+				<item id="variable"><![CDATA[ai_allowed_forums]]></item>
+				<item id="type"><![CDATA[forums]]></item>
+				<item id="value"><![CDATA[]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
 		</item>
