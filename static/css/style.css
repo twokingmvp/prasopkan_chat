@@ -268,8 +268,8 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
    9. 📱 Responsive สำหรับหน้าจอมือถือ (Mobile UI)
 ========================================= */
 @media screen and (max-width: 768px) {
-    /* เอาโค้ดล็อกปุ่มออก ปล่อยให้ Inline CSS ในไฟล์ HTML จัดการเอง */
-    
+    #pk-chat-head { left: 15px !important; right: auto !important; bottom: 85px !important; width: 56px; height: 56px; box-shadow: 0 5px 15px rgba(0, 115, 255, 0.4); z-index: 999999 !important; }
+    #pk-chat-badge { left: 40px !important; right: auto !important; }
     #pk-chat-box { left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100% !important; max-width: 100% !important; height: 85vh !important; max-height: 85vh !important; border-radius: 20px 20px 0 0 !important; border: none !important; box-shadow: 0 -5px 25px rgba(0,0,0,0.15), 0 0 0 2000px rgba(0,0,0,0.6) !important; z-index: 999999 !important; animation: pk-slide-up 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1); }
     
     @keyframes pk-slide-up { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -281,18 +281,58 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
     #pk-chat-body { flex: 1 !important; display: flex !important; flex-direction: column !important; min-height: 0 !important; height: 100% !important; }
     #pk-chat-messages { flex: 1 !important; padding: 15px 15px 20px 15px !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; overscroll-behavior-y: contain !important; }
 
-    #pk-chat-input-area { padding: 8px 12px !important; padding-bottom: calc(8px + env(safe-area-inset-bottom)) !important; background: var(--pk-bg) !important; border-top: 1px solid var(--pk-border) !important; flex-shrink: 0 !important; display: flex; align-items: center; gap: 6px; }
-    #pk-chat-input { font-size: 16px !important; padding: 10px 14px !important; border-radius: 20px !important; background: var(--pk-input-bg) !important; border: 1px solid var(--pk-border) !important; flex: 1 !important; min-width: 0 !important; }
+/* จัดการ Input Area บนมือถือให้ดูเหมือนแอปมากขึ้น */
+    #pk-chat-input-area { 
+        padding: 8px 12px !important; /* ลด Padding ให้กระชับขึ้น */
+        padding-bottom: calc(8px + env(safe-area-inset-bottom)) !important; 
+        background: var(--pk-bg) !important; 
+        border-top: 1px solid var(--pk-border) !important; 
+        flex-shrink: 0 !important; 
+        display: flex; 
+        align-items: center;
+        gap: 6px; /* ลดระยะห่างระหว่างปุ่ม */
+    }
+
+    /* ปรับแต่งกล่องข้อความบนมือถือ */
+    #pk-chat-input { 
+        font-size: 16px !important; /* ป้องกัน iOS ซูม */
+        padding: 10px 14px !important; 
+        border-radius: 20px !important; 
+        background: var(--pk-input-bg) !important; 
+        border: 1px solid var(--pk-border) !important; 
+        flex: 1 !important; 
+        min-width: 0 !important; 
+    }
     
-    .pk-action-btn, #pk-chat-send { flex-shrink: 0 !important; }
-    .pk-action-btn { width: 36px; height: 36px; font-size: 20px; background: transparent !important; color: var(--pk-text-muted); }
-    #pk-chat-send { width: 40px; height: 40px; background: var(--pk-header) !important; color: white; }
+    /* ซ่อนปุ่มที่ไม่จำเป็นบนมือถือ (เช่น อีโมจิ หรือ อั่งเปา ถ้าระยะไม่พอ) */
+    /* แต่ในกรณีนี้เราจะพยายามจัดให้พอดี */
+    .pk-action-btn, #pk-chat-send { 
+        flex-shrink: 0 !important; 
+    }
+    
+    /* ขยายปุ่ม Action ให้แตะง่ายขึ้นบนมือถือ */
+    .pk-action-btn { 
+        width: 36px; 
+        height: 36px; 
+        font-size: 20px; /* ไอคอนใหญ่ขึ้น */
+        background: transparent !important; 
+        color: var(--pk-text-muted);
+    }
+    
+    #pk-chat-send { 
+        width: 40px; 
+        height: 40px; 
+        background: var(--pk-header) !important;
+        color: white;
+    }
 
     #pk-chat-shop-modal, #pk-chat-emoji-picker, #pk-chat-rp-modal { left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100% !important; border-radius: 20px 20px 0 0 !important; border: none !important; box-shadow: 0 -5px 25px rgba(0,0,0,0.2) !important; box-sizing: border-box !important; max-height: 80vh !important; z-index: 1000000 !important; animation: pk-slide-up 0.25s ease-out !important; }
     .pk-shop-grid { max-height: 50vh !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; overscroll-behavior-y: contain !important; }
     .pk-btn-close { border-radius: 24px !important; padding: 12px !important; font-size: 14px; }
     #pk-chat-settings-menu { right: 15px !important; top: 55px !important; z-index: 1000000 !important; }
     #pk-chat-tooltip { display: none !important; }
+    
+    /* ขยายฟอนต์หลังบ้านบนมือถือ */
     div.container table td { font-size: 14px !important; line-height: 1.5 !important; padding-left: 5px !important; padding-right: 5px !important; }
 }
 
@@ -308,6 +348,7 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
    11. 🎁 ปรับปรุง Modal อั่งเปา (ตรงกลาง) & ระบบแจ้งเตือน (Toast)
 ========================================= */
 
+/* บังคับหน้าต่างแจกอั่งเปาให้อยู่ตรงกลางจอ พร้อมฉากหลังสีดำดรอปลง */
 #pk-chat-rp-modal {
     position: fixed !important;
     top: 50% !important;
@@ -320,6 +361,7 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
     background: var(--pk-bg) !important;
     border-radius: 20px !important;
     padding: 24px !important;
+    /* เวทมนตร์สร้างฉากหลังสีดำทับแชทโดยไม่ต้องใช้ Div เพิ่ม */
     box-shadow: 0 15px 40px rgba(0,0,0,0.3), 0 0 0 2000px rgba(0,0,0,0.5) !important;
     z-index: 1000006 !important;
     text-align: center;
@@ -328,6 +370,7 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 
 #pk-chat-rp-modal h3 { font-size: 18px; margin-top: 0; margin-bottom: 15px; }
 
+/* 🛡️ แก้บั๊ก iOS Zoom: บังคับฟอนต์ 16px และปรับดีไซน์ให้สวยขึ้น */
 .pk-rp-input {
     font-size: 16px !important; 
     text-align: center;
@@ -346,6 +389,7 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 .pk-rp-btn-group { display: flex; gap: 10px; }
 #pk-rp-submit, #pk-rp-cancel { flex: 1; padding: 12px !important; border-radius: 12px !important; font-size: 15px !important; font-weight: bold; }
 
+/* 🍞 Custom Toast Notification (แทนที่หน้าต่าง Alert สีขาวๆ ของเบราว์เซอร์) */
 #pk-chat-toast {
     position: fixed;
     top: 40px;

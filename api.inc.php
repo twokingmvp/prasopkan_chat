@@ -15,67 +15,14 @@ if($action == 'send') {
     $message = dhtmlspecialchars(trim($_GET['message']));
     if(empty($message)) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาพิมพ์ข้อความ')); exit; }
     if(!$_G['uid']) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาล็อกอินก่อนส่งข้อความ')); exit; }
-
-    // 🔥 คำสั่งลับสำหรับแอดมิน เพื่อทดสอบ API แบบยิงสด (Live Test) - แก้ไขวิธีส่ง Key
-    if($message === '!testbot' && $_G['adminid'] == 1) {
-        $ai_config = $_G['setting']['prasopkan_chat_aibots'];
-        if(is_string($ai_config)) { $ai_config = @unserialize($ai_config); }
-        
-        // 🧹 สแกนและล้างตัวอักษรล่องหน/ช่องว่าง ให้เหลือแต่ A-Z, 0-9 และขีด
-        $key = isset($ai_config['gemini_api_key']) ? preg_replace('/[^a-zA-Z0-9_-]/', '', $ai_config['gemini_api_key']) : '';
-        
-        if(empty($key)) {
-            DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ System', 'message' => 'ไม่พบ API Key กรุณาตั้งค่าหลังบ้านก่อน', 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $room_id, 'badge_icon' => '❌'));
-            echo json_encode(array('status' => 'success')); exit;
-        }
-
-        $masked = substr($key, 0, 5) . '***' . substr($key, -4);
-        
-        // 🔥 ยัด Key ลงใน URL ตรงๆ ป้องกันโฮสติ้งบล็อก Headers
-        $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $key;
-        $post_data = array("contents" => array(array("parts" => array(array("text" => "ตอบกลับมาสั้นๆ ว่า '✅ ระบบ AI เชื่อมต่อสำเร็จแล้ว!'")))));
-        
-        $ch = curl_init($api_url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json',
-            'Referer: ' . $_G['siteurl'] 
-        ));
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-        $response = curl_exec($ch);
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $err = curl_error($ch);
-        curl_close($ch);
-
-        if($response === false) {
-            $msg = "cURL Error: " . $err;
-        } elseif($httpcode != 200) {
-            $err_json = json_decode($response, true);
-            $reason = isset($err_json['error']['message']) ? $err_json['error']['message'] : $response;
-            $msg = "[เชื่อมต่อล้มเหลว รหัส $httpcode] Google ปฏิเสธคีย์ ($masked): " . $reason;
-        } else {
-            $res_json = json_decode($response, true);
-            $ans = isset($res_json['candidates'][0]['content']['parts'][0]['text']) ? trim($res_json['candidates'][0]['content']['parts'][0]['text']) : 'ไม่สามารถอ่านข้อความได้';
-            $msg = "เชื่อมต่อสำเร็จ! Key [$masked] \nAI ตอบว่า: " . $ans;
-            savecache('prasopkan_chat_ai_last_talk', 0); // รีเซ็ตเวลาให้ AI คุยได้เลย
-        }
-
-        DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ API Test', 'message' => $msg, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $room_id, 'badge_icon' => '⚡'));
-        echo json_encode(array('status' => 'success')); exit;
-    }
-
     $message = preg_replace('/(?<!\])(https?:\/\/[^\s<]+)/i', '[url=$1]$1[/url]', $message);
 
-    // 🧹 1. ระบบลบประวัติแชทอัตโนมัติ
+    // 🧹 1. ระบบลบประวัติแชทอัตโนมัติ (ดึงจากตั้งค่าหลังบ้าน)
     loadcache('plugin');
     $plugin_config = $_G['cache']['plugin']['prasopkan_chat'];
     $auto_cleanup_days = isset($plugin_config['auto_cleanup_days']) ? intval($plugin_config['auto_cleanup_days']) : 7;
     if($auto_cleanup_days > 0) {
-        $cleanup_time = $_G['timestamp'] - ($auto_cleanup_days * 86400); 
+        $cleanup_time = $_G['timestamp'] - ($auto_cleanup_days * 86400); // 86400 วินาที = 1 วัน
         DB::query("DELETE FROM ".DB::table('prasopkan_chat_messages')." WHERE dateline < $cleanup_time");
     }
 
@@ -105,7 +52,7 @@ elseif($action == 'get') {
         }
     }
 
-    // 🤖 2. ระบบบอทสุ่มกระทู้เก่ามาแนะนำ (ป้ายยา)
+    // 🤖 2. ระบบบอทสุ่มกระทู้เก่ามาแนะนำ (แบบอัจฉริยะ)
     $enable_random_bot = isset($plugin_config['enable_random_bot']) ? intval($plugin_config['enable_random_bot']) : 0;
     if($enable_random_bot) {
         loadcache('prasopkan_chat_random_bot_time');
@@ -117,6 +64,7 @@ elseif($action == 'get') {
             savecache('prasopkan_chat_random_bot_time', $_G['timestamp']);
             $min_replies = isset($plugin_config['bot_min_replies']) ? intval($plugin_config['bot_min_replies']) : 5;
 
+            // เลือกเฉพาะกระทู้ปกติ ไม่โดนปิด และมีคนตอบเยอะ เพื่อการันตีคุณภาพ
             $random_thread = DB::fetch_first("SELECT tid, subject, author, views, replies FROM ".DB::table('forum_thread')."
                 WHERE displayorder = 0 AND closed = 0 AND replies >= $min_replies
                 ORDER BY RAND() LIMIT 1");
@@ -132,134 +80,6 @@ elseif($action == 'get') {
             }
         }
     }
-
-    // ==========================================
-    // 🧠 3. ระบบ AI Seed Bots (Gemini API)
-    // ==========================================
-    $ai_config = $_G['setting']['prasopkan_chat_aibots'];
-    if(is_string($ai_config)) { $ai_config = @unserialize($ai_config); }
-
-    $enable_ai_bots = isset($ai_config['enable_ai_bots']) ? intval($ai_config['enable_ai_bots']) : 0;
-    // 🧹 ล้างอักขระล่องหนจาก API Key
-    $gemini_api_key = isset($ai_config['gemini_api_key']) ? preg_replace('/[^a-zA-Z0-9_-]/', '', $ai_config['gemini_api_key']) : '';
-
-    if($enable_ai_bots && !empty($gemini_api_key)) {
-        
-        $today_date = date('Y-m-d', $_G['timestamp']);
-        loadcache('prasopkan_chat_ai_usage_'.$today_date);
-        $daily_usage = intval($_G['cache']['prasopkan_chat_ai_usage_'.$today_date]);
-        $daily_limit = isset($ai_config['ai_daily_limit']) ? intval($ai_config['ai_daily_limit']) : 50;
-
-        if($daily_usage < $daily_limit) {
-            
-            loadcache('prasopkan_chat_ai_last_talk');
-            $last_talk_time = intval($_G['cache']['prasopkan_chat_ai_last_talk']);
-            $ai_interval_minutes = isset($ai_config['ai_chat_interval']) ? intval($ai_config['ai_chat_interval']) : 20;
-            
-            $raw_allowed_forums = isset($ai_config['ai_allowed_forums']) && is_array($ai_config['ai_allowed_forums']) ? $ai_config['ai_allowed_forums'] : array(1);
-            $ai_allowed_forums = array_map('intval', $raw_allowed_forums);
-            $current_room_id = intval($room_id);
-
-            $is_time_to_talk = ($last_talk_time == 0) || ($_G['timestamp'] - $last_talk_time > ($ai_interval_minutes * 60));
-
-            if($is_time_to_talk && in_array($current_room_id, $ai_allowed_forums)) {
-                
-                savecache('prasopkan_chat_ai_last_talk', $_G['timestamp']);
-                savecache('prasopkan_chat_ai_usage_'.$today_date, $daily_usage + 1);
-
-                $ai_bot_list_raw = explode("\n", str_replace("\r", "", $ai_config['ai_bot_list']));
-                $bots = array();
-                foreach($ai_bot_list_raw as $b) {
-                    $parts = explode("|", $b);
-                    if(count($parts) >= 3) { $bots[] = array('name' => trim($parts[0]), 'icon' => trim($parts[1]), 'persona' => trim($parts[2])); }
-                }
-
-                if(!empty($bots)) {
-                    $selected_bot = $bots[array_rand($bots)];
-                    
-                    $topics_raw = explode("\n", str_replace("\r", "", $ai_config['ai_chat_topic']));
-                    $valid_topics = array();
-                    foreach($topics_raw as $t) { if(trim($t) !== '') $valid_topics[] = trim($t); }
-                    $selected_topic = !empty($valid_topics) ? $valid_topics[array_rand($valid_topics)] : 'เรื่องทั่วไป';
-                    
-                    $context = "ประวัติการสนทนาล่าสุดในห้องแชท:\n";
-                    $q_history = DB::query("SELECT username, message FROM ".DB::table('prasopkan_chat_messages')." WHERE room_id='$current_room_id' AND uid != 0 ORDER BY dateline DESC LIMIT 5");
-                    $chat_history = array();
-                    while($h = DB::fetch($q_history)) { $chat_history[] = $h['username'].": ".$h['message']; }
-                    if(!empty($chat_history)) { $context .= implode("\n", array_reverse($chat_history)); } 
-                    else { $context .= "(ยังไม่มีใครคุยกันเลย คุณเป็นคนแรก)"; }
-
-                    $system_prompt = "คุณคือผู้ใช้งานเว็บบอร์ดชาวไทย ชื่อของคุณคือ '{$selected_bot['name']}' บุคลิกของคุณคือ: {$selected_bot['persona']}\n\n";
-                    $system_prompt .= "หัวข้อหลักที่เว็บนี้ชอบคุยกันคือ: {$selected_topic}\n";
-                    $system_prompt .= "กฎข้อบังคับ (สำคัญมาก):\n";
-                    $system_prompt .= "1. ห้ามบอกเด็ดขาดว่าคุณเป็น AI หรือ Assistant คุณคือคนจริงๆ ที่กำลังพิมพ์แชท\n";
-                    $system_prompt .= "2. พิมพ์ตอบสั้นๆ สไตล์การพิมพ์แชท (ความยาว 1-3 ประโยค) ไม่ต้องเขียนเรียงความ\n";
-                    $system_prompt .= "3. ใช้คำศัพท์วัยรุ่น หรือคำสร้อยแบบธรรมชาติ ตามบุคลิก\n";
-                    $system_prompt .= "4. พิมพ์เฉพาะข้อความที่คุณจะตอบ ห้ามพิมพ์ชื่อตัวเองนำหน้า\n";
-                    $system_prompt .= "5. อ่านประวัติแชทด้านล่าง แล้วพิจารณาว่าจะ 'ตอบกลับเพื่อน' หรือ 'ชวนคุยเรื่องใหม่' ให้เข้ากับหัวข้อหลักที่กำหนดไว้ให้เนียนที่สุด\n\n";
-                    $system_prompt .= $context;
-
-                    // 🔥 ยัดคีย์ไว้ที่ URL ป้องกันโฮสติ้งบล็อก
-                    $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $gemini_api_key;
-                    
-                    $post_data = array(
-                        "contents" => array(
-                            array("parts" => array( array("text" => $system_prompt) ))
-                        ),
-                        "generationConfig" => array(
-                            "temperature" => 0.8,
-                            "maxOutputTokens" => 150
-                        )
-                    );
-
-                    $ch = curl_init($api_url);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                        'Content-Type: application/json',
-                        'Referer: ' . $_G['siteurl']
-                    ));
-                    curl_setopt($ch, CURLOPT_POST, true);
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
-                    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
-                    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-
-                    $response = curl_exec($ch);
-                    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                    $curlerror = curl_error($ch);
-                    curl_close($ch);
-
-                    if($response === false) {
-                        DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ Debug Bot', 'message' => "[ระบบขัดข้อง] โฮสติ้งของคุณยิง API ไม่ไป (cURL Error): " . $curlerror, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $current_room_id, 'badge_icon' => '❌'));
-                    } elseif ($httpcode != 200) {
-                        $err_data = json_decode($response, true);
-                        $err_msg = isset($err_data['error']['message']) ? $err_data['error']['message'] : "เกิดข้อผิดพลาดรหัส ($httpcode)";
-                        DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ Debug Bot', 'message' => "[API Error] Google ปฏิเสธ: " . $err_msg, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $current_room_id, 'badge_icon' => '❌'));
-                    } else {
-                        $res_json = json_decode($response, true);
-                        if(isset($res_json['candidates'][0]['content']['parts'][0]['text'])) {
-                            $ai_reply = trim($res_json['candidates'][0]['content']['parts'][0]['text']);
-                            $ai_reply = preg_replace('/^'.$selected_bot['name'].'\s*:\s*/i', '', $ai_reply);
-                            $ai_reply = preg_replace('/^\[\s*'.$selected_bot['name'].'\s*\]\s*/i', '', $ai_reply);
-
-                            if(!empty($ai_reply)) {
-                                DB::insert('prasopkan_chat_messages', array(
-                                    'uid' => 0, 
-                                    'username' => $selected_bot['name'], 
-                                    'message' => $ai_reply, 
-                                    'dateline' => $_G['timestamp'], 
-                                    'ip' => '127.0.0.1', 
-                                    'room_id' => $current_room_id,
-                                    'badge_icon' => $selected_bot['icon']
-                                ));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    // ==========================================
 
     DB::query("DELETE FROM ".DB::table('prasopkan_chat_typing')." WHERE dateline < ".($_G['timestamp'] - 6));
     $typing_users = array(); $q_type = DB::query("SELECT username FROM ".DB::table('prasopkan_chat_typing')." WHERE room_id='$room_id' AND uid != '{$_G['uid']}'");
@@ -459,5 +279,112 @@ elseif($action == 'claim_redpacket') {
         updatemembercount($_G['uid'], array('extcredits'.$credit_id => $get_amount));
         echo json_encode(['status'=>'success', 'amount'=>$get_amount]);
     } else { echo json_encode(['status'=>'error', 'msg'=>'ซองอั่งเปาหมดพอดี!']); } exit;
+}
+
+// ==========================================
+// 🧠 ระบบ AI Seed Bots (Gemini API) - โหลดจากการตั้งค่าแท็บแยก
+// ==========================================
+$ai_config = $_G['setting']['prasopkan_chat_aibots'];
+if(is_string($ai_config)) { $ai_config = @unserialize($ai_config); }
+
+$enable_ai_bots = isset($ai_config['enable_ai_bots']) ? intval($ai_config['enable_ai_bots']) : 0;
+$gemini_api_key = isset($ai_config['gemini_api_key']) ? trim($ai_config['gemini_api_key']) : '';
+
+if($enable_ai_bots && !empty($gemini_api_key) && $action == 'get') {
+    
+    $today_date = date('Y-m-d', $_G['timestamp']);
+    loadcache('prasopkan_chat_ai_usage_'.$today_date);
+    $daily_usage = intval($_G['cache']['prasopkan_chat_ai_usage_'.$today_date]);
+    $daily_limit = isset($ai_config['ai_daily_limit']) ? intval($ai_config['ai_daily_limit']) : 50;
+
+    if($daily_usage < $daily_limit) {
+        
+        loadcache('prasopkan_chat_ai_last_talk');
+        $last_talk_time = intval($_G['cache']['prasopkan_chat_ai_last_talk']);
+        $ai_interval_minutes = isset($ai_config['ai_chat_interval']) ? intval($ai_config['ai_chat_interval']) : 20;
+        $ai_allowed_forums = isset($ai_config['ai_allowed_forums']) ? $ai_config['ai_allowed_forums'] : array(1);
+
+        if(($_G['timestamp'] - $last_talk_time > ($ai_interval_minutes * 60)) && in_array($room_id, $ai_allowed_forums)) {
+            
+            savecache('prasopkan_chat_ai_last_talk', $_G['timestamp']);
+            savecache('prasopkan_chat_ai_usage_'.$today_date, $daily_usage + 1);
+
+            $ai_bot_list_raw = explode("\n", str_replace("\r", "", $ai_config['ai_bot_list']));
+            $bots = array();
+            foreach($ai_bot_list_raw as $b) {
+                $parts = explode("|", $b);
+                if(count($parts) >= 3) { $bots[] = array('name' => trim($parts[0]), 'icon' => trim($parts[1]), 'persona' => trim($parts[2])); }
+            }
+
+            if(!empty($bots)) {
+                $selected_bot = $bots[array_rand($bots)];
+                
+                // 🌟 ระบบสุ่มหัวข้อสนทนา (Topics)
+                $topics_raw = explode("\n", str_replace("\r", "", $ai_config['ai_chat_topic']));
+                $valid_topics = array();
+                foreach($topics_raw as $t) { if(trim($t) !== '') $valid_topics[] = trim($t); }
+                $selected_topic = !empty($valid_topics) ? $valid_topics[array_rand($valid_topics)] : 'เรื่องทั่วไป';
+                
+                $context = "ประวัติการสนทนาล่าสุดในห้องแชท:\n";
+                $q_history = DB::query("SELECT username, message FROM ".DB::table('prasopkan_chat_messages')." WHERE room_id='$room_id' AND uid != 0 ORDER BY dateline DESC LIMIT 5");
+                $chat_history = array();
+                while($h = DB::fetch($q_history)) { $chat_history[] = $h['username'].": ".$h['message']; }
+                if(!empty($chat_history)) { $context .= implode("\n", array_reverse($chat_history)); } 
+                else { $context .= "(ยังไม่มีใครคุยกันเลย คุณเป็นคนแรก)"; }
+
+                $system_prompt = "คุณคือผู้ใช้งานเว็บบอร์ดชาวไทย ชื่อของคุณคือ '{$selected_bot['name']}' บุคลิกของคุณคือ: {$selected_bot['persona']}\n\n";
+                $system_prompt .= "หัวข้อหลักที่เว็บนี้ชอบคุยกันคือ: {$selected_topic}\n";
+                $system_prompt .= "กฎข้อบังคับ (สำคัญมาก):\n";
+                $system_prompt .= "1. ห้ามบอกเด็ดขาดว่าคุณเป็น AI หรือ Assistant คุณคือคนจริงๆ ที่กำลังพิมพ์แชท\n";
+                $system_prompt .= "2. พิมพ์ตอบสั้นๆ สไตล์การพิมพ์แชท (ความยาว 1-3 ประโยค) ไม่ต้องเขียนเรียงความ\n";
+                $system_prompt .= "3. ใช้คำศัพท์วัยรุ่น หรือคำสร้อยแบบธรรมชาติ ตามบุคลิก\n";
+                $system_prompt .= "4. พิมพ์เฉพาะข้อความที่คุณจะตอบ ห้ามพิมพ์ชื่อตัวเองนำหน้า\n";
+                $system_prompt .= "5. อ่านประวัติแชทด้านล่าง แล้วพิจารณาว่าจะ 'ตอบกลับเพื่อน' หรือ 'ชวนคุยเรื่องใหม่' ให้เข้ากับหัวข้อหลักที่กำหนดไว้ให้เนียนที่สุด\n\n";
+                $system_prompt .= $context;
+
+                $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' . $gemini_api_key;
+                
+                $post_data = array(
+                    "contents" => array(
+                        array("parts" => array( array("text" => $system_prompt) ))
+                    ),
+                    "generationConfig" => array(
+                        "temperature" => 0.8,
+                        "maxOutputTokens" => 100
+                    )
+                );
+
+                $ch = curl_init($api_url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
+                curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+                $response = curl_exec($ch);
+                curl_close($ch);
+
+                if($response) {
+                    $res_json = json_decode($response, true);
+                    if(isset($res_json['candidates'][0]['content']['parts'][0]['text'])) {
+                        $ai_reply = trim($res_json['candidates'][0]['content']['parts'][0]['text']);
+                        $ai_reply = preg_replace('/^'.$selected_bot['name'].'\s*:\s*/i', '', $ai_reply);
+
+                        if(!empty($ai_reply)) {
+                            DB::insert('prasopkan_chat_messages', array(
+                                'uid' => 0, 
+                                'username' => $selected_bot['name'], 
+                                'message' => $ai_reply, 
+                                'dateline' => $_G['timestamp'], 
+                                'ip' => '127.0.0.1', 
+                                'room_id' => $room_id,
+                                'badge_icon' => $selected_bot['icon']
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 ?>

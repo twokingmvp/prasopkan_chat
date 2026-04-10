@@ -8,7 +8,7 @@ class plugin_prasopkan_chat {
     public function global_footer() {
         global $_G;
         
-loadcache('plugin');
+        loadcache('plugin');
         $plugin_config = $_G['cache']['plugin']['prasopkan_chat'];
         
         $enable_rooms = $plugin_config['enable_rooms'];
@@ -60,11 +60,10 @@ loadcache('plugin');
     }
 }
 
-// 📱 Class สำหรับเวอร์ชัน Mobile (มือถือ)
+// 📱 Class สำหรับเวอร์ชัน Mobile (สำคัญมาก ห้ามลบ!)
 class mobileplugin_prasopkan_chat extends plugin_prasopkan_chat {
     public function global_footer_mobile() {
-        // ให้ดึงฟังก์ชันของ PC มาแสดงผลบนมือถือได้เลย
-        return $this->global_footer();
+        return parent::global_footer();
     }
 }
 ?>
