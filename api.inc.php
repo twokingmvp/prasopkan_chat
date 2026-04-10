@@ -16,7 +16,7 @@ if($action == 'send') {
     if(empty($message)) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาพิมพ์ข้อความ')); exit; }
     if(!$_G['uid']) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาล็อกอินก่อนส่งข้อความ')); exit; }
 
-    // 🔥 คำสั่งลับสำหรับแอดมิน เพื่อทดสอบ API แบบยิงสด (Live Test)
+    // 🔥 คำสั่งลับสำหรับแอดมิน (ใช้โครงสร้าง cURL แบบเดียวกับ Botnoi เป๊ะๆ)
     if($message === '!testbot' && $_G['adminid'] == 1) {
         $ai_config = $_G['setting']['prasopkan_chat_aibots'];
         if(is_string($ai_config)) { $ai_config = @unserialize($ai_config); }
@@ -32,37 +32,23 @@ if($action == 'send') {
         $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $key;
         $post_data = array("contents" => array(array("parts" => array(array("text" => "ตอบกลับมาสั้นๆ ว่า '✅ ระบบ AI เชื่อมต่อสำเร็จแล้ว!'")))));
         
-        // 1. ลองยิงด้วย cURL ก่อน
+        // 🛠️ ถอดแบบโครงสร้าง cURL มาจาก Botnoi Plugin
         $ch = curl_init($api_url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Referer: ' . $_G['siteurl'] ));
-        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+            'Referer: ' . $_G['siteurl'] 
+        ));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // ใช้แค่บรรทัดนี้ตามแบบ Botnoi
         $response = curl_exec($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $err = curl_error($ch);
         curl_close($ch);
 
-        // 🛡️ ไม้ตาย: ถ้า cURL ดื้อดึงตรวจ SSL ให้ใช้ file_get_contents แทน
-        if($response === false && stripos($err, 'SSL') !== false) {
-            $ctx = stream_context_create(array(
-                'http' => array('method' => 'POST', 'header' => "Content-Type: application/json\r\nReferer: " . $_G['siteurl'] . "\r\n", 'content' => json_encode($post_data), 'timeout' => 15, 'ignore_errors' => true),
-                'ssl' => array('verify_peer' => false, 'verify_peer_name' => false)
-            ));
-            $response = @file_get_contents($api_url, false, $ctx);
-            if($response !== false) {
-                $err = ''; $httpcode = 200;
-                if(isset($http_response_header)) {
-                    foreach($http_response_header as $h) { if(preg_match('/^HTTP\/\d+\.\d+\s+(\d+)/', $h, $m)) { $httpcode = intval($m[1]); break; } }
-                }
-            }
-        }
-
         if($response === false) {
-            $msg = "cURL & Stream Error: " . $err;
+            $msg = "cURL Error: " . $err;
         } elseif($httpcode != 200) {
             $err_json = json_decode($response, true);
             $reason = isset($err_json['error']['message']) ? $err_json['error']['message'] : $response;
@@ -218,31 +204,21 @@ elseif($action == 'get') {
                         )
                     );
 
+                    // 🛠️ ถอดแบบโครงสร้าง cURL มาจาก Botnoi Plugin สำหรับ AI หลัก
                     $ch = curl_init($api_url);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Referer: ' . $_G['siteurl'] ));
-                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_POST, 1);
                     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
-                    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0); 
-                    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                        'Content-Type: application/json',
+                        'Referer: ' . $_G['siteurl']
+                    ));
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // บรรทัดแห่งการตื่นรู้!
+                    
                     $response = curl_exec($ch);
                     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                     $curlerror = curl_error($ch);
                     curl_close($ch);
-
-                    // 🛡️ ไม้ตาย: สลับไปใช้ Stream ถ้า cURL โดนบล็อกเรื่อง SSL
-                    if($response === false && stripos($curlerror, 'SSL') !== false) {
-                        $ctx = stream_context_create(array(
-                            'http' => array('method' => 'POST', 'header' => "Content-Type: application/json\r\nReferer: " . $_G['siteurl'] . "\r\n", 'content' => json_encode($post_data), 'timeout' => 15, 'ignore_errors' => true),
-                            'ssl' => array('verify_peer' => false, 'verify_peer_name' => false)
-                        ));
-                        $response = @file_get_contents($api_url, false, $ctx);
-                        if($response !== false) { 
-                            $curlerror = ''; $httpcode = 200;
-                            if(isset($http_response_header)) { foreach($http_response_header as $h) { if(preg_match('/^HTTP\/\d+\.\d+\s+(\d+)/', $h, $m)) { $httpcode = intval($m[1]); break; } } }
-                        }
-                    }
 
                     if($response === false) {
                         DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ Debug Bot', 'message' => "[ระบบขัดข้อง] ยิง API ไม่ผ่าน (cURL Error): " . $curlerror, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $current_room_id, 'badge_icon' => '❌'));
