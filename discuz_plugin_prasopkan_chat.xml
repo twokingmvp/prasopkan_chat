@@ -14,7 +14,7 @@
 			<item id="datatables"><![CDATA[]]></item>
 			<item id="directory"><![CDATA[prasopkan_chat/]]></item>
 			<item id="copyright"><![CDATA[Prasopkan.com]]></item>
-			<item id="version"><![CDATA[2.0.1]]></item>
+			<item id="version"><![CDATA[2.0.2]]></item>
 			<item id="__modules">
 				<item id="0">
 					<item id="name"><![CDATA[chat_hook]]></item>
