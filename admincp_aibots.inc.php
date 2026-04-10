@@ -4,11 +4,9 @@ if(!defined('IN_DISCUZ') || !defined('IN_ADMINCP')) { exit('Access Denied'); }
 if(submitcheck('aibotssubmit')) {
     $allowed_forums = isset($_GET['ai_allowed_forums']) ? $_GET['ai_allowed_forums'] : array();
     
-    // ถ้าระบบติ๊ก 'ห้องพูดคุยทั่วไป' (ค่าเป็น 1) ให้เพิ่ม 1 เข้าไปในอาเรย์
     if(isset($_GET['allow_general_room'])) {
         if(!in_array(1, $allowed_forums)) { $allowed_forums[] = 1; }
     } else {
-        // ถ้าไม่ติ๊ก ให้เอาห้อง 1 ออก
         if(($key = array_search(1, $allowed_forums)) !== false) { unset($allowed_forums[$key]); }
     }
 
@@ -42,7 +40,9 @@ if(empty($config)) {
     );
 }
 
+// 🔥 เพิ่มคำสั่งเปิดฟอร์มตรงนี้ครับ ไม่งั้นปุ่มเซฟจะไม่โชว์!
 showformheader('plugins&operation=config&do='.$pluginid.'&identifier=prasopkan_chat&pmod=admincp_aibots');
+
 showtableheader('🤖 การตั้งค่า AI Bots อัจฉริยะ (Gemini API)');
 
 showsetting('เปิดใช้งาน AI คุยกันเอง', 'enable_ai_bots', $config['enable_ai_bots'], 'radio', '', 'เปิดระบบให้หน้าม้า AI พิมพ์คุยโต้ตอบกันในแชทเพื่อสร้างความครึกครื้น');
@@ -51,10 +51,8 @@ showsetting('ลิมิตข้อความ AI ต่อวัน 💰', '
 showsetting('ความถี่ในการให้ AI คุยกัน (นาที) ⏱️', 'ai_chat_interval', $config['ai_chat_interval'], 'number', '', 'ระยะห่างระหว่างแต่ละข้อความของ AI (แนะนำ 15-30 นาที เพื่อความเนียน)');
 showsetting('รายชื่อและบุคลิกของ AI Bots 👥', 'ai_bot_list', $config['ai_bot_list'], 'textarea', '', '<b>รูปแบบ:</b> ชื่อ|ไอคอน|บุคลิก (กด Enter เพื่อขึ้นบรรทัดใหม่สำหรับบอทตัวต่อไป)');
 
-// 🌟 เปลี่ยนหัวข้อสนทนาให้เป็นแบบ Textarea เพื่อให้สุ่มได้
 showsetting('หัวข้อสนทนาที่อนุญาตให้ AI ชวนคุย (Topics) 💬', 'ai_chat_topic', $config['ai_chat_topic'], 'textarea', '', 'พิมพ์หัวข้อที่อยากให้ AI สุ่มหยิบมาชวนคุย (<b>กด Enter เพื่อขึ้นบรรทัดใหม่</b>)');
 
-// 🌟 เพิ่ม Checkbox แยกสำหรับห้อง ทั่วไป
 $general_room_checked = in_array(1, $config['ai_allowed_forums']) ? 'checked' : '';
 $general_room_html = "<label><input type=\"checkbox\" class=\"checkbox\" name=\"allow_general_room\" value=\"1\" $general_room_checked> <b>ห้องพูดคุยทั่วไป (ห้องหลัก)</b></label><br><br>";
 
@@ -63,6 +61,7 @@ $forumselect = $general_room_html . '<select name="ai_allowed_forums[]" multiple
 
 showsetting('อนุญาตให้ AI คุยในห้องไหนบ้าง? 🚪', '', '', $forumselect, '', 'เลือกห้องที่ให้ AI โผล่ไปคุย (<b>กด Ctrl ค้างไว้เพื่อเลือกหลายห้องของบอร์ด</b>)');
 
+// 🔥 ปุ่ม Submit จะทำงานได้เมื่ออยู่ภายใน showformheader และ showformfooter
 showsubmit('aibotssubmit');
 showtablefooter();
 showformfooter();
