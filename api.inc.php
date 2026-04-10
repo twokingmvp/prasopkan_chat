@@ -167,7 +167,6 @@ elseif($action == 'get') {
             $ai_allowed_forums = array_map('intval', $raw_allowed_forums);
             $current_room_id = intval($room_id);
 
-            // บังคับพูดถ้าเพิ่งกด testbot
             $is_time_to_talk = ($last_talk_time == 0) || ($_G['timestamp'] - $last_talk_time > ($ai_interval_minutes * 60));
 
             if($is_time_to_talk && in_array($current_room_id, $ai_allowed_forums)) {
@@ -179,6 +178,7 @@ elseif($action == 'get') {
                 $bots = array();
                 foreach($ai_bot_list_raw as $b) {
                     $parts = explode("|", $b);
+                    // 🔥 เอาไอคอนไปรวมกับชื่อเลย ไม่ต้องเรียกใช้คอลัมน์ใหม่
                     if(count($parts) >= 3) { $bots[] = array('name' => trim($parts[1]) . ' ' . trim($parts[0]), 'persona' => trim($parts[2])); }
                 }
 
@@ -231,7 +231,7 @@ elseif($action == 'get') {
                     $curlerror = curl_error($ch);
                     curl_close($ch);
 
-                    // 🛡️ ไม้ตาย: ถ้า cURL ดื้อดึงเรื่อง SSL ให้ใช้ file_get_contents ทะลวงกำแพงแทน
+                    // 🛡️ ไม้ตาย: สลับไปใช้ Stream ถ้า cURL โดนบล็อกเรื่อง SSL
                     if($response === false && stripos($curlerror, 'SSL') !== false) {
                         $ctx = stream_context_create(array(
                             'http' => array('method' => 'POST', 'header' => "Content-Type: application/json\r\nReferer: " . $_G['siteurl'] . "\r\n", 'content' => json_encode($post_data), 'timeout' => 15, 'ignore_errors' => true),
@@ -436,7 +436,7 @@ elseif($action == 'upload') {
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     if(!in_array($ext, array('jpg', 'jpeg', 'png', 'gif', 'webp'))) { echo json_encode(array('status'=>'error','msg'=>'รองรับรูปภาพเท่านั้น')); exit; }
     $filename = 'img_'.$_G['uid'].'_'.time().'_'.rand(1000,9999).'.'.$ext;
-    if(move_uploaded_file($file['tmp_name'], $upload_dir.$filename)) { echo json_encode(array('status'=>'success', 'url'=>'source/plugin/prasopkan_chat/uploads/'.$filename)); } else { echo json_encode(array('status'=>'error','msg'=>'บันึกไฟล์ไม่ได้')); } exit;
+    if(move_uploaded_file($file['tmp_name'], $upload_dir.$filename)) { echo json_encode(array('status'=>'success', 'url'=>'source/plugin/prasopkan_chat/uploads/'.$filename)); } else { echo json_encode(array('status'=>'error','msg'=>'บันทึกไฟล์ไม่ได้')); } exit;
 }
 elseif($action == 'send_redpacket') {
     loadcache('plugin'); $config = $_G['cache']['plugin']['prasopkan_chat'];
