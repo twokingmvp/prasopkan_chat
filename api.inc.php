@@ -30,7 +30,7 @@ if($action == 'send') {
 
         $masked = substr($key, 0, 5) . '***' . substr($key, -4);
         
-        // 🚀 แก้ไขเวอร์ชันจาก v1beta เป็น v1 (เวอร์ชันเสถียรที่ Google รองรับ)
+        // 🚀 เวอร์ชันเสถียรที่ Google รองรับ
         $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $key;
         
         $post_data = array("contents" => array(array("parts" => array(array("text" => "ตอบกลับมาสั้นๆ ว่า '✅ ระบบ AI เชื่อมต่อสำเร็จแล้ว!'")))));
@@ -197,17 +197,23 @@ elseif($action == 'get') {
                     if(!empty($chat_history)) { $context .= implode("\n", array_reverse($chat_history)); } 
                     else { $context .= "(ยังไม่มีใครคุยกันเลย คุณเป็นคนแรก)"; }
 
+                    // 🔥 สุ่มความยาวเป้าหมาย (จากที่ตั้งค่าไว้หลังบ้าน)
+                    $min_len = isset($ai_config['ai_min_len']) ? intval($ai_config['ai_min_len']) : 1;
+                    $max_len = isset($ai_config['ai_max_len']) ? intval($ai_config['ai_max_len']) : 3;
+                    if($min_len < 1) $min_len = 1;
+                    if($max_len < $min_len) $max_len = $min_len;
+                    $target_len = rand($min_len, $max_len);
+
                     $system_prompt = "คุณคือผู้ใช้งานเว็บบอร์ดชาวไทย ชื่อของคุณคือ '{$selected_bot['name']}' บุคลิกของคุณคือ: {$selected_bot['persona']}\n\n";
                     $system_prompt .= "หัวข้อหลักที่เว็บนี้ชอบคุยกันคือ: {$selected_topic}\n";
                     $system_prompt .= "กฎข้อบังคับ (สำคัญมาก):\n";
                     $system_prompt .= "1. ห้ามบอกเด็ดขาดว่าคุณเป็น AI หรือ Assistant คุณคือคนจริงๆ ที่กำลังพิมพ์แชท\n";
-                    $system_prompt .= "2. พิมพ์ตอบสั้นๆ สไตล์การพิมพ์แชท (ความยาว 1-3 ประโยค) ไม่ต้องเขียนเรียงความ\n";
+                    $system_prompt .= "2. พิมพ์ตอบสไตล์การพิมพ์แชท โดยมีความยาวประมาณ {$target_len} ประโยค (ไม่ต้องเขียนเป็นเรียงความ)\n"; // 🔥 อัปเดตความยาว
                     $system_prompt .= "3. ใช้คำศัพท์วัยรุ่น หรือคำสร้อยแบบธรรมชาติ ตามบุคลิก\n";
                     $system_prompt .= "4. พิมพ์เฉพาะข้อความที่คุณจะตอบ ห้ามพิมพ์ชื่อตัวเองนำหน้า\n";
                     $system_prompt .= "5. อ่านประวัติแชทด้านล่าง แล้วพิจารณาว่าจะ 'ตอบกลับเพื่อน' หรือ 'ชวนคุยเรื่องใหม่' ให้เข้ากับหัวข้อหลักที่กำหนดไว้ให้เนียนที่สุด\n\n";
                     $system_prompt .= $context;
 
-                    // 🚀 เปลี่ยนเป็นเวอร์ชัน v1 สำหรับบอทหลักเช่นเดียวกัน
                     $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $gemini_api_key;
                     
                     $post_data = array(
@@ -425,6 +431,11 @@ elseif($action == 'delete') {
     if(!$_G['uid'] || $_G['adminid'] <= 0) { echo json_encode(array('status' => 'error', 'msg' => 'ไม่มีสิทธิ์ในการลบข้อความ')); exit; }
     $msg_id = isset($_GET['msg_id']) ? intval($_GET['msg_id']) : 0;
     if($msg_id) DB::delete('prasopkan_chat_messages', "msg_id='$msg_id'");
+    echo json_encode(array('status' => 'success')); exit;
+}
+elseif($action == 'clear_all') {
+    if(!$_G['uid'] || $_G['adminid'] != 1) { echo json_encode(array('status' => 'error', 'msg' => 'ไม่มีสิทธิ์ในการลบแชท')); exit; }
+    DB::delete('prasopkan_chat_messages', "room_id='$room_id'");
     echo json_encode(array('status' => 'success')); exit;
 }
 elseif($action == 'upload') {
