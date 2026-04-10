@@ -12,6 +12,22 @@ while($s = DB::fetch($q_shop)) {
 }
 
 if($action == 'send') {
+	if($action == 'send') {
+    if(!$uid) { echo json_encode(array('status' => 'error', 'msg' => 'Please login')); exit; }
+    $message = daddslashes(trim($_GET['message']));
+    if(empty($message)) { echo json_encode(array('status' => 'error', 'msg' => 'Empty message')); exit; }
+    
+    // 🧹 ระบบแอบเคลียร์ประวัติแชทอัตโนมัติ (ดึงการตั้งค่าจากหลังบ้าน)
+    $auto_cleanup_days = isset($plugin_config['auto_cleanup_days']) ? intval($plugin_config['auto_cleanup_days']) : 7;
+    if($auto_cleanup_days > 0) {
+        $cleanup_time = $_G['timestamp'] - ($auto_cleanup_days * 86400); // 86400 วินาที = 1 วัน
+        DB::query("DELETE FROM ".DB::table('prasopkan_chat_messages')." WHERE dateline < $cleanup_time");
+    }
+
+    $eq = DB::fetch_first("SELECT e.name_style, e.bubble_skin, s1.css_code as n_css, s2.css_code as b_css FROM ".DB::table('prasopkan_chat_equipped')." e 
+        LEFT JOIN ".DB::table('prasopkan_chat_shop')." s1 ON e.name_style = s1.item_key 
+        LEFT JOIN ".DB::table('prasopkan_chat_shop')." s2 ON e.bubble_skin = s2.item_key 
+        WHERE e.uid='$uid'");
     $message = dhtmlspecialchars(trim($_GET['message']));
     if(empty($message)) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาพิมพ์ข้อความ')); exit; }
     if(!$_G['uid']) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาล็อกอินก่อนส่งข้อความ')); exit; }
@@ -99,6 +115,41 @@ elseif($action == 'get') {
         }
     }
     foreach($messages as &$m) { $m['reactions'] = isset($reactions_map[$m['msg_id']]) ? $reactions_map[$m['msg_id']] : null; }
+	// 💡 ระบบบอทสุ่มกระทู้คุณภาพมาแนะนำ (ดึงการตั้งค่าจากหลังบ้าน)
+    $enable_random_bot = isset($plugin_config['enable_random_bot']) ? intval($plugin_config['enable_random_bot']) : 0;
+    
+    if($enable_random_bot) {
+        loadcache('prasopkan_chat_random_bot_time');
+        $last_random_time = intval($_G['cache']['prasopkan_chat_random_bot_time']);
+        
+        // ดึงการตั้งค่าเวลา (แปลงเป็นวินาที)
+        $interval_minutes = isset($plugin_config['bot_interval']) ? intval($plugin_config['bot_interval']) : 60;
+        $random_interval = $interval_minutes * 60; 
+        
+        if($_G['timestamp'] - $last_random_time > $random_interval) {
+            savecache('prasopkan_chat_random_bot_time', $_G['timestamp']);
+            
+            // ดึงการตั้งค่าความฉลาด (ยอดตอบกลับขั้นต่ำ)
+            $min_replies = isset($plugin_config['bot_min_replies']) ? intval($plugin_config['bot_min_replies']) : 5;
+            
+            // 🧠 ความฉลาดของบอท: เลือกเฉพาะกระทู้ปกติ (displayorder=0), ไม่โดนปิด (closed=0), และมีคนตอบเยอะเกินเกณฑ์
+            $random_thread = DB::fetch_first("SELECT tid, subject, author, views, replies FROM ".DB::table('forum_thread')." 
+                WHERE displayorder = 0 AND closed = 0 AND replies >= $min_replies 
+                ORDER BY RAND() LIMIT 1");
+            
+            if($random_thread) {
+                // ข้อความชวนคุยดึงดูดใจ โชว์ยอดวิวและยอดตอบกลับ
+                $bot_msg = "💡 แวะมาป้ายยากระทู้เด็ด: [url=forum.php?mod=viewthread&tid=".$random_thread['tid']."]".$random_thread['subject']."[/url] (เข้าชม ".$random_thread['views']." ครั้ง, ตอบกลับ ".$random_thread['replies']." ครั้ง)";
+                
+                $chat_forums = @unserialize($plugin_config['chat_forums']); 
+                if(!is_array($chat_forums)) $chat_forums = array(1);
+                
+                foreach($chat_forums as $r_id) { 
+                    DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🤖 System Bot', 'message' => $bot_msg, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => intval($r_id))); 
+                }
+            }
+        }
+    }
     $messages = array_reverse($messages); $is_admin = ($_G['uid'] && $_G['adminid'] > 0) ? true : false;
     
     echo json_encode(array('status' => 'success', 'data' => $messages, 'is_admin' => $is_admin, 'enable_mention' => $enable_mention, 'enable_reaction' => $enable_reaction, 'current_uid' => $current_uid, 'typing_users' => $typing_users)); exit;
