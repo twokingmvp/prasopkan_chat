@@ -29,10 +29,10 @@ if($action == 'send') {
         }
 
         $masked = substr($key, 0, 5) . '***' . substr($key, -4);
-        $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $key;
+        // 🚀 อัปเดตชื่อ Model เป็น gemini-1.5-flash-latest
+        $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' . $key;
         $post_data = array("contents" => array(array("parts" => array(array("text" => "ตอบกลับมาสั้นๆ ว่า '✅ ระบบ AI เชื่อมต่อสำเร็จแล้ว!'")))));
         
-        // 1. ลองยิงด้วย cURL ก่อน
         $ch = curl_init($api_url);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
@@ -46,7 +46,6 @@ if($action == 'send') {
         $err = curl_error($ch);
         curl_close($ch);
 
-        // 🛡️ ไม้ตาย: ถ้า cURL ดื้อดึงเรื่อง SSL ให้ใช้ file_get_contents ทะลวงกำแพงแทน
         if($response === false && stripos($err, 'SSL') !== false) {
             $ctx = stream_context_create(array(
                 'http' => array('method' => 'POST', 'header' => "Content-Type: application/json\r\nReferer: " . $_G['siteurl'] . "\r\n", 'content' => json_encode($post_data), 'timeout' => 15, 'ignore_errors' => true),
@@ -71,7 +70,7 @@ if($action == 'send') {
             $res_json = json_decode($response, true);
             $ans = isset($res_json['candidates'][0]['content']['parts'][0]['text']) ? trim($res_json['candidates'][0]['content']['parts'][0]['text']) : 'ไม่สามารถอ่านข้อความได้';
             $msg = "เชื่อมต่อสำเร็จ! Key [$masked] \nAI ตอบว่า: " . $ans;
-            savecache('prasopkan_chat_ai_last_talk', 0); // รีเซ็ตเวลาให้ AI อัตโนมัติคุยรอบถัดไป
+            savecache('prasopkan_chat_ai_last_talk', 0);
         }
 
         DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ API Test', 'message' => $msg, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $room_id));
@@ -178,7 +177,6 @@ elseif($action == 'get') {
                 $bots = array();
                 foreach($ai_bot_list_raw as $b) {
                     $parts = explode("|", $b);
-                    // 🔥 เอาไอคอนไปรวมกับชื่อเลย ไม่ต้องเรียกใช้คอลัมน์ใหม่
                     if(count($parts) >= 3) { $bots[] = array('name' => trim($parts[1]) . ' ' . trim($parts[0]), 'persona' => trim($parts[2])); }
                 }
 
@@ -207,7 +205,8 @@ elseif($action == 'get') {
                     $system_prompt .= "5. อ่านประวัติแชทด้านล่าง แล้วพิจารณาว่าจะ 'ตอบกลับเพื่อน' หรือ 'ชวนคุยเรื่องใหม่' ให้เข้ากับหัวข้อหลักที่กำหนดไว้ให้เนียนที่สุด\n\n";
                     $system_prompt .= $context;
 
-                    $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $gemini_api_key;
+                    // 🚀 อัปเดตชื่อ Model เป็น gemini-1.5-flash-latest สำหรับบอทหลัก
+                    $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' . $gemini_api_key;
                     
                     $post_data = array(
                         "contents" => array(
@@ -231,7 +230,6 @@ elseif($action == 'get') {
                     $curlerror = curl_error($ch);
                     curl_close($ch);
 
-                    // 🛡️ ไม้ตาย: สลับไปใช้ Stream ถ้า cURL โดนบล็อกเรื่อง SSL
                     if($response === false && stripos($curlerror, 'SSL') !== false) {
                         $ctx = stream_context_create(array(
                             'http' => array('method' => 'POST', 'header' => "Content-Type: application/json\r\nReferer: " . $_G['siteurl'] . "\r\n", 'content' => json_encode($post_data), 'timeout' => 15, 'ignore_errors' => true),
