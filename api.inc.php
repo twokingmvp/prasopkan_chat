@@ -16,7 +16,7 @@ if($action == 'send') {
     if(empty($message)) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาพิมพ์ข้อความ')); exit; }
     if(!$_G['uid']) { echo json_encode(array('status' => 'error', 'msg' => 'กรุณาล็อกอินก่อนส่งข้อความ')); exit; }
 
-    // 🔥 คำสั่งลับสำหรับแอดมิน (ใช้โครงสร้าง cURL แบบเดียวกับ Botnoi เป๊ะๆ)
+    // 🔥 คำสั่งลับสำหรับแอดมิน เพื่อทดสอบ API แบบยิงสด (Live Test)
     if($message === '!testbot' && $_G['adminid'] == 1) {
         $ai_config = $_G['setting']['prasopkan_chat_aibots'];
         if(is_string($ai_config)) { $ai_config = @unserialize($ai_config); }
@@ -24,7 +24,8 @@ if($action == 'send') {
         $key = isset($ai_config['gemini_api_key']) ? preg_replace('/[^a-zA-Z0-9_-]/', '', $ai_config['gemini_api_key']) : '';
         
         if(empty($key)) {
-            DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ System', 'message' => 'ไม่พบ API Key กรุณาตั้งค่าหลังบ้านก่อน', 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $room_id, 'badge_icon' => '❌'));
+            // 🔥 ลบ badge_icon ออก
+            DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ System', 'message' => 'ไม่พบ API Key กรุณาตั้งค่าหลังบ้านก่อน', 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $room_id));
             echo json_encode(array('status' => 'success')); exit;
         }
 
@@ -32,16 +33,12 @@ if($action == 'send') {
         $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $key;
         $post_data = array("contents" => array(array("parts" => array(array("text" => "ตอบกลับมาสั้นๆ ว่า '✅ ระบบ AI เชื่อมต่อสำเร็จแล้ว!'")))));
         
-        // 🛠️ ถอดแบบโครงสร้าง cURL มาจาก Botnoi Plugin
         $ch = curl_init($api_url);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json',
-            'Referer: ' . $_G['siteurl'] 
-        ));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Referer: ' . $_G['siteurl']));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // ใช้แค่บรรทัดนี้ตามแบบ Botnoi
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
         $response = curl_exec($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $err = curl_error($ch);
@@ -60,7 +57,8 @@ if($action == 'send') {
             savecache('prasopkan_chat_ai_last_talk', 0);
         }
 
-        DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ API Test', 'message' => $msg, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $room_id, 'badge_icon' => '⚡'));
+        // 🔥 ลบ badge_icon ออก
+        DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ API Test', 'message' => $msg, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $room_id));
         echo json_encode(array('status' => 'success')); exit;
     }
 
@@ -164,7 +162,8 @@ elseif($action == 'get') {
                 $bots = array();
                 foreach($ai_bot_list_raw as $b) {
                     $parts = explode("|", $b);
-                    if(count($parts) >= 3) { $bots[] = array('name' => trim($parts[0]), 'icon' => trim($parts[1]), 'persona' => trim($parts[2])); }
+                    // 🔥 ปรับให้ AI ใช้ชื่อแบบมีไอคอนติดไปกับชื่อเลย ไม่ต้องแยกคอลัมน์
+                    if(count($parts) >= 3) { $bots[] = array('name' => trim($parts[1]) . ' ' . trim($parts[0]), 'persona' => trim($parts[2])); }
                 }
 
                 if(!empty($bots)) {
@@ -204,7 +203,6 @@ elseif($action == 'get') {
                         )
                     );
 
-                    // 🛠️ ถอดแบบโครงสร้าง cURL มาจาก Botnoi Plugin สำหรับ AI หลัก
                     $ch = curl_init($api_url);
                     curl_setopt($ch, CURLOPT_POST, 1);
                     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
@@ -213,7 +211,7 @@ elseif($action == 'get') {
                         'Referer: ' . $_G['siteurl']
                     ));
                     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // บรรทัดแห่งการตื่นรู้!
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
                     
                     $response = curl_exec($ch);
                     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -221,11 +219,13 @@ elseif($action == 'get') {
                     curl_close($ch);
 
                     if($response === false) {
-                        DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ Debug Bot', 'message' => "[ระบบขัดข้อง] ยิง API ไม่ผ่าน (cURL Error): " . $curlerror, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $current_room_id, 'badge_icon' => '❌'));
+                        // 🔥 ลบ badge_icon ออก
+                        DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ Debug Bot', 'message' => "[ระบบขัดข้อง] ยิง API ไม่ผ่าน (cURL Error): " . $curlerror, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $current_room_id));
                     } elseif ($httpcode != 200) {
                         $err_data = json_decode($response, true);
                         $err_msg = isset($err_data['error']['message']) ? $err_data['error']['message'] : "รหัส ($httpcode)";
-                        DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ Debug Bot', 'message' => "[API Error] Google ปฏิเสธ: " . $err_msg, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $current_room_id, 'badge_icon' => '❌'));
+                        // 🔥 ลบ badge_icon ออก
+                        DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ Debug Bot', 'message' => "[API Error] Google ปฏิเสธ: " . $err_msg, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $current_room_id));
                     } else {
                         $res_json = json_decode($response, true);
                         if(isset($res_json['candidates'][0]['content']['parts'][0]['text'])) {
@@ -234,14 +234,14 @@ elseif($action == 'get') {
                             $ai_reply = preg_replace('/^\[\s*'.$selected_bot['name'].'\s*\]\s*/i', '', $ai_reply);
 
                             if(!empty($ai_reply)) {
+                                // 🔥 ลบ badge_icon ออก
                                 DB::insert('prasopkan_chat_messages', array(
                                     'uid' => 0, 
                                     'username' => $selected_bot['name'], 
                                     'message' => $ai_reply, 
                                     'dateline' => $_G['timestamp'], 
                                     'ip' => '127.0.0.1', 
-                                    'room_id' => $current_room_id,
-                                    'badge_icon' => $selected_bot['icon']
+                                    'room_id' => $current_room_id
                                 ));
                             }
                         }
