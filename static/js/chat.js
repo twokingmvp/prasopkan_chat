@@ -48,7 +48,7 @@
         var shopModal = $('#pk-chat-shop-modal'); var currentShopType = 'name_style'; var shopDataCache = null;
         function loadShop() { $.ajax({ url: apiUrl + '&action=shop_info', type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') { shopDataCache = res; $('#pk-user-balance').text(res.credit + ' ' + res.credit_name); renderShopItems(currentShopType); } } }); }
         
-function renderShopItems(type) {
+        function renderShopItems(type) {
             if(!shopDataCache) return; var html = ''; var items = shopDataCache.items[type]; var inv = shopDataCache.inventory; var eq = shopDataCache.equipment[type];
             $.each(items, function(key, val) {
                 var isOwned = inv.indexOf(key) !== -1; var isEquipped = (eq === key);
@@ -59,7 +59,6 @@ function renderShopItems(type) {
                 else { html += '<div class="pk-shop-item-preview">'+val.icon+' ชื่อคุณ</div>'; }
                 html += '<div class="pk-shop-item-name">'+val.name+'</div>';
                 
-                // 💎 แก้ไขข้อความปุ่มตรงนี้! (สุ่มกาชา)
                 if(type === 'gacha') { 
                     html += '<button class="pk-btn-buy" style="background:#d9363e;" data-key="'+key+'" data-type="'+type+'" data-price="'+val.price+'">สุ่มลุ้นโชค! '+val.price+' '+shopDataCache.credit_name+'</button>'; 
                 } 
@@ -71,7 +70,6 @@ function renderShopItems(type) {
                         html += '<button class="pk-btn-equip" data-key="'+key+'" data-type="'+type+'">ใช้งาน</button>'; 
                     } 
                     else { 
-                        // 💎 แก้ไขข้อความปุ่มตรงนี้! (ซื้อสินค้า)
                         html += '<button class="pk-btn-buy" data-key="'+key+'" data-type="'+type+'" data-price="'+val.price+'">ซื้อ '+val.price+' '+shopDataCache.credit_name+'</button>'; 
                     }
                 }
@@ -133,6 +131,10 @@ function renderShopItems(type) {
                 success: function(res) {
                     if(res.status === 'success') {
                         window.pkIsAdmin = res.is_admin; window.pkCurrentUid = res.current_uid; window.pkEnableMention = res.enable_mention; window.pkEnableReaction = res.enable_reaction;
+                        
+                        // 🔥 ระบบโชว์/ซ่อนปุ่มล้างแชทเฉพาะแอดมิน
+                        if(res.is_admin) { $('.pk-admin-only').show(); } else { $('.pk-admin-only').hide(); }
+
                         var html = '';
                         if(res.typing_users && res.typing_users.length > 0) { $('#pk-typing-names').text(res.typing_users.join(', ')); $('#pk-chat-typing-indicator').show(); } else { $('#pk-chat-typing-indicator').hide(); }
                         if(res.data.length === 0) { html = '<div style="text-align:center; padding:15px; color:var(--pk-text-muted);">ยังไม่มีคนคุย มาเริ่มคุยกันเลย!</div>'; } else {
@@ -225,9 +227,8 @@ function renderShopItems(type) {
 
         function sendMessage(e) { if(e) e.preventDefault(); var inputField = $('#pk-chat-input'); if(inputField.length === 0) return; var msg = inputField.val(); if(msg.trim() !== '') { inputField.prop('disabled', true); emojiPicker.fadeOut(150); $.ajax({ url: apiUrl + '&action=send&room_id=' + currentRoomId, type: 'GET', data: { message: msg }, dataType: 'json', success: function(res) { inputField.prop('disabled', false).val('').focus(); if(res.status === 'success') fetchMessages(true); else showToast('❌ ' + res.msg, 'error'); }, error: function() { inputField.prop('disabled', false).focus(); showToast('❌ เกิดข้อผิดพลาดในการส่ง', 'error'); } }); } }
         $('#pk-chat-send').off('click').on('click', sendMessage); $('#pk-chat-input').off('keypress').on('keypress', function(e) { if(e.which == 13) { sendMessage(e); } });
-    });
-	
-	// 🛠️ ระบบเคลียร์แชททั้งหมด (เฉพาะ Admin)
+
+        // 🛠️ ระบบเคลียร์แชททั้งหมด (ย้ายเข้ามาอยู่ใน document.ready อย่างถูกต้อง)
         $('#pk-chat-clear-all').click(function() {
             if(confirm('⚠️ คำเตือน: คุณแน่ใจหรือไม่ว่าจะลบประวัติการแชท "ทั้งหมด" ในห้องนี้?\n(การกระทำนี้ลบแล้วลบเลย ไม่สามารถกู้คืนได้!)')) {
                 $.ajax({
@@ -250,4 +251,6 @@ function renderShopItems(type) {
                 });
             }
         });
+
+    });
 })(jQuery);
