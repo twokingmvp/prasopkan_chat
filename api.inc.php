@@ -220,7 +220,7 @@ elseif($action == 'get') {
                         ),
                         "generationConfig" => array(
                             "temperature" => 0.8,
-                            "maxOutputTokens" => 200
+                            "maxOutputTokens" => 3000
                         )
                     );
 
