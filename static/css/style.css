@@ -8,7 +8,7 @@
    ✨ บังคับใช้ฟอนต์ LINE Seed Sans TH ทั้งระบบแชท
 ========================================= */
 #pk-chat-box, #pk-chat-box *, 
-#pk-chat-head-container, #pk-chat-head-container *, 
+#pk-chat-head, #pk-chat-head *, 
 #pk-chat-action-overlay, #pk-chat-action-overlay *, 
 #pk-chat-toast, #pk-chat-toast *,
 #pk-chat-shop-modal, #pk-chat-shop-modal *,
@@ -19,40 +19,34 @@
 }
 
 /* =========================================
-   2. 🖼️ โครงสร้างหลักของแชท (Layout) แบบมี Container
+   2. 🖼️ โครงสร้างหลักของแชท (Layout)
 ========================================= */
-#pk-chat-head-container {
-    position: fixed;
-    bottom: 25px;
-    right: 25px;
-    width: 60px;
-    height: 60px;
-    z-index: 9999;
-}
-
 #pk-chat-head { 
-    position: absolute; 
-    top: 0; left: 0; width: 100%; height: 100%;
+    position: fixed; /* 🔥 บังคับให้ลอยตัว เสมอ! */
+    bottom: 25px; 
+    right: 25px; 
+    width: 60px; 
+    height: 60px; 
     background: linear-gradient(135deg, #4CA1AF, #0056cc); 
     border-radius: 50%; 
     box-shadow: 0 4px 15px rgba(0, 115, 255, 0.4); 
-    display: flex; align-items: center; justify-content: center; cursor: pointer; 
+    display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 9999; 
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
     animation: pk-pulse 2s infinite; 
 }
 #pk-chat-head:hover { transform: scale(1.1); }
 
-/* ปุ่ม X สีแดง ล็อกติดขอบขวาบนของ Container เสมอ */
+/* 🔥 ปุ่ม X เกาะที่มุมขวาบนของวงกลมแชทเสมอ */
 #pk-chat-head-close {
     position: absolute;
-    top: -5px; right: -5px;
-    width: 24px; height: 24px; background: #ff3b30; color: white;
+    top: -2px; right: -2px;
+    width: 22px; height: 22px; background: #ff3b30; color: white;
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: bold; cursor: pointer; z-index: 10;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4); border: 2px solid var(--pk-bg);
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-size: 11px; font-weight: bold; cursor: pointer; z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3); border: 2px solid var(--pk-bg);
+    transition: all 0.2s;
 }
-#pk-chat-head-close:hover { transform: scale(1.2) rotate(90deg); background: #d32f2f; }
+#pk-chat-head-close:hover { transform: scale(1.2); background: #d32f2f; }
 
 #pk-chat-box { position: fixed; bottom: 25px; right: 25px; width: 350px !important; max-width: 90vw; background: var(--pk-bg); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column; z-index: 9999; overflow: hidden; border: 1px solid var(--pk-border); }
 #pk-chat-header { background: var(--pk-header); color: var(--pk-header-text); padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
@@ -164,13 +158,15 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 @keyframes pk-pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 115, 255, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(0, 115, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 115, 255, 0); } }
 @keyframes pk-bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-3px); } }
 
+/* 🔥 Badge แจ้งเตือน ขยับไปอยู่ซ้ายบน แทนขวาบน เพราะมีปุ่ม X แล้ว */
 #pk-chat-badge { 
     position: absolute; 
-    top: -2px; left: -2px; right: auto; /* ขยับหนีปุ่ม X มาอยู่ซ้ายบนแทน */
+    top: -2px; left: -2px; right: auto;
     background: #ff3b30; color: white; border-radius: 50%; min-width: 18px; height: 18px; line-height: 18px; text-align: center; font-size: 11px; font-weight: bold; border: 2px solid var(--pk-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.2); animation: pk-bounce 1s infinite alternate; z-index: 2; 
 }
+
 #pk-chat-tooltip { 
-    position: absolute; right: 75px; top: 12px; /* อยู่ทางซ้ายของ Container เสมอ */
+    position: absolute; right: 75px; top: 12px;
     background: var(--pk-bg); color: var(--pk-text); padding: 8px 14px; border-radius: 12px; font-size: 13px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.15); white-space: nowrap; pointer-events: none; border: 1px solid var(--pk-border); opacity: 0; transform: translateX(10px); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
 }
 #pk-chat-tooltip::after { content: ''; position: absolute; right: -6px; top: 50%; transform: translateY(-50%); border-width: 6px 0 6px 6px; border-style: solid; border-color: transparent transparent transparent var(--pk-bg); }
@@ -227,11 +223,9 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
    9. 📱 Responsive สำหรับหน้าจอมือถือ (Mobile UI)
 ========================================= */
 @media screen and (max-width: 768px) {
-    /* ย้ายกล่อง Container ในมือถือแทนการย้ายตัววงกลมตรงๆ */
-    #pk-chat-head-container { left: 15px !important; right: auto !important; bottom: 85px !important; width: 56px; height: 56px; z-index: 999999 !important; }
-    
-    /* ขยับปุ่ม X ให้เกาะบนขวาเสมอ ไม่ว่าจะใน PC หรือ มือถือ */
-    #pk-chat-head-close { top: -4px !important; right: -4px !important; left: auto !important; bottom: auto !important; }
+    /* หน้าจอมือถือ วงกลมจะมาอยู่ซ้ายล่าง และปุ่ม X ก็จะเกาะตามไปอัตโนมัติ! */
+    #pk-chat-head { left: 15px !important; right: auto !important; bottom: 85px !important; width: 56px; height: 56px; box-shadow: 0 5px 15px rgba(0, 115, 255, 0.4); z-index: 999999 !important; }
+    #pk-chat-badge { left: 40px !important; right: auto !important; }
     
     #pk-chat-box { left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100% !important; max-width: 100% !important; height: 85vh !important; max-height: 85vh !important; border-radius: 20px 20px 0 0 !important; border: none !important; box-shadow: 0 -5px 25px rgba(0,0,0,0.15), 0 0 0 2000px rgba(0,0,0,0.6) !important; z-index: 999999 !important; animation: pk-slide-up 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1); }
     

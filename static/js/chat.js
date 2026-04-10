@@ -97,7 +97,10 @@
         if (tooltip.length > 0) { function showTooltip() { if (chatBoxContainer.is(':hidden')) { tooltip.addClass('pk-tooltip-show'); setTimeout(function() { tooltip.removeClass('pk-tooltip-show'); }, 5000); } } setTimeout(showTooltip, 3000); setInterval(showTooltip, 45000); }
         
         // ------------------ ระบบเปิด-ปิดแชท ------------------
-        function toggleChat() {
+        function toggleChat(e) {
+            // ถ้าผู้ใช้กดโดนปุ่ม X ให้หยุดการทำงาน ไม่ต้องเปิดแชทขึ้นมา
+            if(e && $(e.target).closest('#pk-chat-head-close').length > 0) return;
+
             if(chatBoxContainer.is(':hidden')) { 
                 chatHead.hide(); 
                 badge.hide(); tooltip.removeClass('pk-tooltip-show'); 
@@ -124,7 +127,7 @@
 
         // 🔘 ปุ่ม 'X สีแดง' 
         chatHeadClose.off('click').on('click', function(e) {
-            e.stopPropagation(); // สำคัญมาก! ป้องกันไม่ให้แชทเด้งเปิดตอนกด X
+            e.stopPropagation(); // หยุดไม่ให้มันทะลุไปกดโดนวงกลม
             $('#pk-chat-snooze-modal').fadeIn(200);
         });
 
