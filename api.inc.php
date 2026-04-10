@@ -258,7 +258,7 @@ elseif($action == 'get') {
 
                             if(!empty($ai_reply)) {
                                 DB::insert('prasopkan_chat_messages', array(
-                                    'uid' => 0, 
+                                    'uid' => 999999, 
                                     'username' => $selected_bot['name'], 
                                     'message' => $ai_reply, 
                                     'dateline' => $_G['timestamp'], 
@@ -309,7 +309,7 @@ elseif($action == 'get') {
 
         $row['name_css'] = ''; $row['badge_icon'] = ''; $row['bubble_css'] = '';
         if(!empty($row['name_style']) && isset($shop_items['name_style'][$row['name_style']])) { $row['name_css'] = $shop_items['name_style'][$row['name_style']]['css']; } 
-        elseif($row['uid'] == 0) { $row['name_css'] = 'color:#ff6600;'; } 
+        elseif($row['uid'] == 0 || $row['uid'] == 999999) { $row['name_css'] = 'color:#ff6600;'; } 
         elseif($enable_color && !empty($row['groupid'])) { $group_color = $_G['cache']['usergroups'][$row['groupid']]['color']; if(!empty($group_color)) $row['name_css'] = 'color:'.$group_color.';'; }
 
         if(!empty($row['badge']) && isset($shop_items['badge'][$row['badge']])) { $row['badge_icon'] = $shop_items['badge'][$row['badge']]['icon']; }
