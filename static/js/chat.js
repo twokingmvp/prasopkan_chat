@@ -14,6 +14,7 @@
         var chatBody = $('#pk-chat-body'); 
         var chatHead = $('#pk-chat-head'); 
         var chatHeadClose = $('#pk-chat-head-close'); 
+        var chatHeadContainer = $('#pk-chat-head-container'); 
         var chatBoxContainer = $('#pk-chat-box');
         var badge = $('#pk-chat-badge'); 
         var tooltip = $('#pk-chat-tooltip');
@@ -98,18 +99,17 @@
         
         // ------------------ ระบบเปิด-ปิดแชท ------------------
         function toggleChat(e) {
-            // ถ้าผู้ใช้กดโดนปุ่ม X ให้หยุดการทำงาน ไม่ต้องเปิดแชทขึ้นมา
             if(e && $(e.target).closest('#pk-chat-head-close').length > 0) return;
 
             if(chatBoxContainer.is(':hidden')) { 
-                chatHead.hide(); 
+                chatHeadContainer.hide(); 
                 badge.hide(); tooltip.removeClass('pk-tooltip-show'); 
                 chatBoxContainer.css('display', 'flex').hide().fadeIn(200);
                 localStorage.setItem('prasopkan_chat_state', 'open'); fetchMessages(true); setTimeout(function(){ $('#pk-chat-input').focus(); }, 200); 
             } 
             else { 
                 chatBoxContainer.fadeOut(200, function() { 
-                    chatHead.fadeIn(200); 
+                    chatHeadContainer.fadeIn(200); 
                     chatHeadClose.show();
                 }); 
                 localStorage.setItem('prasopkan_chat_state', 'closed'); setTimeout(function() { badge.text(Math.floor(Math.random() * 2) + 1).fadeIn(); }, 15000); 
@@ -120,14 +120,14 @@
         $('#pk-chat-close-btn').on('click', toggleChat);
         
         if(chatState === 'open') { 
-            chatBoxContainer.css('display', 'flex'); chatHead.hide(); 
+            chatBoxContainer.css('display', 'flex'); chatHeadContainer.hide(); 
         } else { 
-            chatBoxContainer.hide(); chatHead.show(); chatHeadClose.show();
+            chatBoxContainer.hide(); chatHeadContainer.show(); chatHeadClose.show();
         }
 
-        // 🔘 ปุ่ม 'X สีแดง' 
+        // 🔘 ปุ่ม 'X สีแดง' เกาะมุมบนขวา
         chatHeadClose.off('click').on('click', function(e) {
-            e.stopPropagation(); // หยุดไม่ให้มันทะลุไปกดโดนวงกลม
+            e.stopPropagation(); 
             $('#pk-chat-snooze-modal').fadeIn(200);
         });
 
@@ -136,10 +136,10 @@
             $('#pk-chat-snooze-modal').fadeOut(150);
         });
 
-        // 🔘 กดปุ่มเลือกเวลา (แบบจำลอง) -> ซ่อนแชททั้งหมด
+        // 🔘 กดปุ่มเลือกเวลา (แบบจำลอง)
         $(document).on('click', '.pk-snooze-btn', function() {
             $('#pk-chat-snooze-modal').fadeOut(150);
-            chatHead.fadeOut(200);
+            chatHeadContainer.fadeOut(200);
             tooltip.hide();
             showToast('🤫 ซ่อนแชทชั่วคราวแล้ว! (นี่คือระบบทดสอบ UI ถ้ารีเฟรชปุ่มจะกลับมา)', 'success');
         });
