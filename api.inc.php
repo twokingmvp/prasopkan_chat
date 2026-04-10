@@ -31,7 +31,7 @@ if($action == 'send') {
         $masked = substr($key, 0, 5) . '***' . substr($key, -4);
         
         // 🚀 แก้ไขเวอร์ชันจาก v1beta เป็น v1 (เวอร์ชันเสถียรที่ Google รองรับ)
-        $api_url = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=' . $key;
+        $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $key;
         
         $post_data = array("contents" => array(array("parts" => array(array("text" => "ตอบกลับมาสั้นๆ ว่า '✅ ระบบ AI เชื่อมต่อสำเร็จแล้ว!'")))));
         
@@ -208,7 +208,7 @@ elseif($action == 'get') {
                     $system_prompt .= $context;
 
                     // 🚀 เปลี่ยนเป็นเวอร์ชัน v1 สำหรับบอทหลักเช่นเดียวกัน
-                    $api_url = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=' . $gemini_api_key;
+                    $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $gemini_api_key;
                     
                     $post_data = array(
                         "contents" => array(
