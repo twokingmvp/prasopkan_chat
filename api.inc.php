@@ -29,6 +29,8 @@ if($action == 'send') {
         }
 
         $masked = substr($key, 0, 5) . '***' . substr($key, -4);
+        
+        // 🚀 เวอร์ชันเสถียรที่ Google รองรับ
         $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $key;
         
         $post_data = array("contents" => array(array("parts" => array(array("text" => "ตอบกลับมาสั้นๆ ว่า '✅ ระบบ AI เชื่อมต่อสำเร็จแล้ว!'")))));
@@ -70,7 +72,9 @@ if($action == 'send') {
             $res_json = json_decode($response, true);
             $ans = isset($res_json['candidates'][0]['content']['parts'][0]['text']) ? trim($res_json['candidates'][0]['content']['parts'][0]['text']) : 'ไม่สามารถอ่านข้อความได้';
             $msg = "เชื่อมต่อสำเร็จ! Key [$masked] \nAI ตอบว่า: " . $ans;
-            savecache('prasopkan_chat_ai_last_talk', 0);
+            
+            // 🛠️ แก้ไข: รีเซ็ตเวลาเฉพาะของห้องนี้เท่านั้น
+            savecache('prasopkan_chat_ai_last_talk_'.$room_id, 0); 
         }
 
         DB::insert('prasopkan_chat_messages', array('uid' => 0, 'username' => '🛠️ API Test', 'message' => $msg, 'dateline' => $_G['timestamp'], 'ip' => '127.0.0.1', 'room_id' => $room_id));
@@ -157,27 +161,42 @@ elseif($action == 'get') {
         $daily_limit = isset($ai_config['ai_daily_limit']) ? intval($ai_config['ai_daily_limit']) : 50;
 
         if($daily_usage < $daily_limit) {
+            $current_room_id = intval($room_id);
             
-            loadcache('prasopkan_chat_ai_last_talk');
-            $last_talk_time = intval($_G['cache']['prasopkan_chat_ai_last_talk']);
+            // 🛠️ แก้ไข: แยกการนับเวลาให้เป็นอิสระตามห้อง (ใครห้องมัน ไม่แย่งกัน)
+            loadcache('prasopkan_chat_ai_last_talk_'.$current_room_id);
+            $last_talk_time = intval($_G['cache']['prasopkan_chat_ai_last_talk_'.$current_room_id]);
             $ai_interval_minutes = isset($ai_config['ai_chat_interval']) ? intval($ai_config['ai_chat_interval']) : 20;
             
             $raw_allowed_forums = isset($ai_config['ai_allowed_forums']) && is_array($ai_config['ai_allowed_forums']) ? $ai_config['ai_allowed_forums'] : array(1);
             $ai_allowed_forums = array_map('intval', $raw_allowed_forums);
-            $current_room_id = intval($room_id);
 
             $is_time_to_talk = ($last_talk_time == 0) || ($_G['timestamp'] - $last_talk_time > ($ai_interval_minutes * 60));
 
             if($is_time_to_talk && in_array($current_room_id, $ai_allowed_forums)) {
                 
-                savecache('prasopkan_chat_ai_last_talk', $_G['timestamp']);
+                savecache('prasopkan_chat_ai_last_talk_'.$current_room_id, $_G['timestamp']);
                 savecache('prasopkan_chat_ai_usage_'.$today_date, $daily_usage + 1);
 
                 $ai_bot_list_raw = explode("\n", str_replace("\r", "", $ai_config['ai_bot_list']));
                 $bots = array();
                 foreach($ai_bot_list_raw as $b) {
+                    if(trim($b) === '') continue; // ข้ามบรรทัดว่าง
                     $parts = explode("|", $b);
-                    if(count($parts) >= 3) { $bots[] = array('name' => trim($parts[1]) . ' ' . trim($parts[0]), 'persona' => trim($parts[2])); }
+                    
+                    if(count($parts) >= 3) {
+                        // รูปแบบเต็ม: ชื่อ | ไอคอน | บุคลิก
+                        $icon = trim($parts[1]);
+                        $name = trim($parts[0]);
+                        $full_name = $icon ? $icon . ' ' . $name : $name;
+                        $bots[] = array('name' => $full_name, 'persona' => trim($parts[2]));
+                    } elseif(count($parts) == 2) {
+                        // แบบไม่มีไอคอน: ชื่อ | บุคลิก
+                        $bots[] = array('name' => trim($parts[0]), 'persona' => trim($parts[1]));
+                    } else {
+                        // พิมพ์มาแค่ชื่ออย่างเดียว
+                        $bots[] = array('name' => trim($parts[0]), 'persona' => 'ผู้ใช้งานเว็บบอร์ดทั่วไป คุยเรื่องทั่วไป');
+                    }
                 }
 
                 if(!empty($bots)) {
@@ -195,7 +214,7 @@ elseif($action == 'get') {
                     if(!empty($chat_history)) { $context .= implode("\n", array_reverse($chat_history)); } 
                     else { $context .= "(ยังไม่มีใครคุยกันเลย คุณเป็นคนแรก)"; }
 
-                    // 🔥 สุ่มความยาวเป้าหมาย (จากที่ตั้งค่าไว้หลังบ้าน)
+                    // สุ่มความยาวเป้าหมาย
                     $min_len = isset($ai_config['ai_min_len']) ? intval($ai_config['ai_min_len']) : 1;
                     $max_len = isset($ai_config['ai_max_len']) ? intval($ai_config['ai_max_len']) : 3;
                     if($min_len < 1) $min_len = 1;
@@ -220,7 +239,7 @@ elseif($action == 'get') {
                         ),
                         "generationConfig" => array(
                             "temperature" => 0.8,
-                            "maxOutputTokens" => 3000
+                            "maxOutputTokens" => 1000 // 🔥 โควต้าเขียนยาวๆ เต็มที่
                         )
                     );
 
