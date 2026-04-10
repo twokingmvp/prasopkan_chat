@@ -29,8 +29,10 @@ if($action == 'send') {
         }
 
         $masked = substr($key, 0, 5) . '***' . substr($key, -4);
-        // 🚀 อัปเดตชื่อ Model เป็น gemini-1.5-flash-latest
-        $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' . $key;
+        
+        // 🚀 แก้ไขเวอร์ชันจาก v1beta เป็น v1 (เวอร์ชันเสถียรที่ Google รองรับ)
+        $api_url = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=' . $key;
+        
         $post_data = array("contents" => array(array("parts" => array(array("text" => "ตอบกลับมาสั้นๆ ว่า '✅ ระบบ AI เชื่อมต่อสำเร็จแล้ว!'")))));
         
         $ch = curl_init($api_url);
@@ -39,13 +41,13 @@ if($action == 'send') {
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Referer: ' . $_G['siteurl'] ));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         $response = curl_exec($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $err = curl_error($ch);
         curl_close($ch);
 
+        // 🛡️ ไม้ตายทะลวงบล็อกโฮสติ้ง (Fallback)
         if($response === false && stripos($err, 'SSL') !== false) {
             $ctx = stream_context_create(array(
                 'http' => array('method' => 'POST', 'header' => "Content-Type: application/json\r\nReferer: " . $_G['siteurl'] . "\r\n", 'content' => json_encode($post_data), 'timeout' => 15, 'ignore_errors' => true),
@@ -205,8 +207,8 @@ elseif($action == 'get') {
                     $system_prompt .= "5. อ่านประวัติแชทด้านล่าง แล้วพิจารณาว่าจะ 'ตอบกลับเพื่อน' หรือ 'ชวนคุยเรื่องใหม่' ให้เข้ากับหัวข้อหลักที่กำหนดไว้ให้เนียนที่สุด\n\n";
                     $system_prompt .= $context;
 
-                    // 🚀 อัปเดตชื่อ Model เป็น gemini-1.5-flash-latest สำหรับบอทหลัก
-                    $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' . $gemini_api_key;
+                    // 🚀 เปลี่ยนเป็นเวอร์ชัน v1 สำหรับบอทหลักเช่นเดียวกัน
+                    $api_url = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=' . $gemini_api_key;
                     
                     $post_data = array(
                         "contents" => array(
@@ -224,7 +226,6 @@ elseif($action == 'get') {
                     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Referer: ' . $_G['siteurl']));
                     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0); 
-                    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
                     $response = curl_exec($ch);
                     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                     $curlerror = curl_error($ch);
