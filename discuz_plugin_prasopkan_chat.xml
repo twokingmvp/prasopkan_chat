@@ -42,6 +42,19 @@
 					<item id="navsubname"><![CDATA[]]></item>
 					<item id="navsuburl"><![CDATA[]]></item>
 				</item>
+                <item id="2">
+					<item id="name"><![CDATA[admincp_aibots]]></item>
+					<item id="param"><![CDATA[]]></item>
+					<item id="menu"><![CDATA[🤖 ตั้งค่า AI Bots]]></item>
+					<item id="url"><![CDATA[]]></item>
+					<item id="type"><![CDATA[3]]></item>
+					<item id="adminid"><![CDATA[1]]></item>
+					<item id="displayorder"><![CDATA[2]]></item>
+					<item id="navtitle"><![CDATA[]]></item>
+					<item id="navicon"><![CDATA[]]></item>
+					<item id="navsubname"><![CDATA[]]></item>
+					<item id="navsuburl"><![CDATA[]]></item>
+				</item>
 			</item>
 		</item>
 		<item id="version"><![CDATA[X3.4]]></item>
@@ -217,71 +230,6 @@
 				<item id="variable"><![CDATA[bot_min_replies]]></item>
 				<item id="type"><![CDATA[number]]></item>
 				<item id="value"><![CDATA[5]]></item>
-				<item id="extra"><![CDATA[]]></item>
-			</item>
-
-            <item id="19">
-				<item id="displayorder"><![CDATA[40]]></item>
-				<item id="title"><![CDATA[--- AI BOTS --- เปิดใช้งาน AI คุยกันเอง 🧠]]></item>
-				<item id="description"><![CDATA[เปิดระบบให้หน้าม้า AI พิมพ์คุยโต้ตอบกันในแชทเพื่อสร้างความครึกครื้น]]></item>
-				<item id="variable"><![CDATA[enable_ai_bots]]></item>
-				<item id="type"><![CDATA[radio]]></item>
-				<item id="value"><![CDATA[0]]></item> <item id="extra"><![CDATA[]]></item>
-			</item>
-            <item id="20">
-				<item id="displayorder"><![CDATA[41]]></item>
-				<item id="title"><![CDATA[Gemini API Key 🔑]]></item>
-				<item id="description"><![CDATA[ใส่ API Key ของคุณที่ได้จาก Google AI Studio]]></item>
-				<item id="variable"><![CDATA[gemini_api_key]]></item>
-				<item id="type"><![CDATA[text]]></item>
-				<item id="value"><![CDATA[]]></item>
-				<item id="extra"><![CDATA[]]></item>
-			</item>
-            <item id="21">
-				<item id="displayorder"><![CDATA[42]]></item>
-				<item id="title"><![CDATA[ลิมิตข้อความ AI ต่อวัน (ป้องกันงบบานปลาย) 💰]]></item>
-				<item id="description"><![CDATA[อนุญาตให้ AI พิมพ์คุยได้สูงสุดกี่ข้อความต่อวัน (เช่น 50)]]></item>
-				<item id="variable"><![CDATA[ai_daily_limit]]></item>
-				<item id="type"><![CDATA[number]]></item>
-				<item id="value"><![CDATA[50]]></item>
-				<item id="extra"><![CDATA[]]></item>
-			</item>
-            <item id="22">
-				<item id="displayorder"><![CDATA[43]]></item>
-				<item id="title"><![CDATA[ความถี่ในการให้ AI คุยกัน (นาที) ⏱️]]></item>
-				<item id="description"><![CDATA[ระยะห่างระหว่างแต่ละข้อความของ AI (แนะนำ 15-30 นาที)]]></item>
-				<item id="variable"><![CDATA[ai_chat_interval]]></item>
-				<item id="type"><![CDATA[number]]></item>
-				<item id="value"><![CDATA[20]]></item>
-				<item id="extra"><![CDATA[]]></item>
-			</item>
-            <item id="23">
-				<item id="displayorder"><![CDATA[44]]></item>
-				<item id="title"><![CDATA[รายชื่อและบุคลิกของ AI Bots 👥]]></item>
-				<item id="description"><![CDATA[รูปแบบ: ชื่อ|ไอคอน|บุคลิก (คั่นแต่ละตัวด้วย Enter)]]></item>
-				<item id="variable"><![CDATA[ai_bot_list]]></item>
-				<item id="type"><![CDATA[textarea]]></item>
-				<item id="value"><![CDATA[แม่บ้านรีวิว|👩‍🍳|เป็นแม่บ้านชอบทำอาหารและแชร์ของใช้ในบ้าน พูดจาเป็นกันเอง
-ทาสแมว|🐱|รักแมวมาก ชอบถามและคุยเรื่องสัตว์เลี้ยง ใช้ภาษาวัยรุ่น
-ช่างไม้ใจดี|🛠️|มีความรู้เรื่องซ่อมบ้าน ช่างสังเกต ชอบให้คำแนะนำสั้นๆ ได้ใจความ]]></item>
-				<item id="extra"><![CDATA[]]></item>
-			</item>
-            <item id="24">
-				<item id="displayorder"><![CDATA[45]]></item>
-				<item id="title"><![CDATA[หัวข้อสนทนาหลัก (Topic) 💬]]></item>
-				<item id="description"><![CDATA[พิมพ์เรื่องที่คุณอยากให้ AI ชวนคุย (เช่น: รีวิวของใช้จุกจิกมินิมอล, ไอเดียแต่งบ้าน, ข่าวสารทั่วไป)]]></item>
-				<item id="variable"><![CDATA[ai_chat_topic]]></item>
-				<item id="type"><![CDATA[text]]></item>
-				<item id="value"><![CDATA[พูดคุยเรื่องไอเดียแต่งบ้าน ของใช้มินิมอล และไลฟ์สไตล์การใช้ชีวิตประจำวัน]]></item>
-				<item id="extra"><![CDATA[]]></item>
-			</item>
-            <item id="25">
-				<item id="displayorder"><![CDATA[46]]></item>
-				<item id="title"><![CDATA[อนุญาตให้ AI คุยในห้องไหนบ้าง? 🚪]]></item>
-				<item id="description"><![CDATA[เลือกห้อง(Forums)ที่ให้ AI โผล่ไปคุย (เช่น ห้องพูดคุยทั่วไป)]]></item>
-				<item id="variable"><![CDATA[ai_allowed_forums]]></item>
-				<item id="type"><![CDATA[forums]]></item>
-				<item id="value"><![CDATA[]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
 		</item>
