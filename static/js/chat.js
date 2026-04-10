@@ -226,4 +226,28 @@ function renderShopItems(type) {
         function sendMessage(e) { if(e) e.preventDefault(); var inputField = $('#pk-chat-input'); if(inputField.length === 0) return; var msg = inputField.val(); if(msg.trim() !== '') { inputField.prop('disabled', true); emojiPicker.fadeOut(150); $.ajax({ url: apiUrl + '&action=send&room_id=' + currentRoomId, type: 'GET', data: { message: msg }, dataType: 'json', success: function(res) { inputField.prop('disabled', false).val('').focus(); if(res.status === 'success') fetchMessages(true); else showToast('❌ ' + res.msg, 'error'); }, error: function() { inputField.prop('disabled', false).focus(); showToast('❌ เกิดข้อผิดพลาดในการส่ง', 'error'); } }); } }
         $('#pk-chat-send').off('click').on('click', sendMessage); $('#pk-chat-input').off('keypress').on('keypress', function(e) { if(e.which == 13) { sendMessage(e); } });
     });
+	
+	// 🛠️ ระบบเคลียร์แชททั้งหมด (เฉพาะ Admin)
+        $('#pk-chat-clear-all').click(function() {
+            if(confirm('⚠️ คำเตือน: คุณแน่ใจหรือไม่ว่าจะลบประวัติการแชท "ทั้งหมด" ในห้องนี้?\n(การกระทำนี้ลบแล้วลบเลย ไม่สามารถกู้คืนได้!)')) {
+                $.ajax({
+                    url: apiUrl + '&action=clear_all&room_id=' + currentRoomId,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(res) {
+                        if(res.status === 'success') {
+                            $('#pk-chat-messages').empty(); // ล้างหน้าจอทันที
+                            showToast('🗑️ ล้างประวัติแชทเรียบร้อยแล้ว', 'success');
+                            $('#pk-chat-settings-menu').fadeOut(200); // ปิดเมนูตั้งค่า
+                            fetchMessages(true); // โหลดข้อความใหม่ (ซึ่งจะว่างเปล่า)
+                        } else {
+                            showToast('❌ ' + res.msg, 'error');
+                        }
+                    },
+                    error: function() {
+                        showToast('❌ ขัดข้องในการเชื่อมต่อระบบ', 'error');
+                    }
+                });
+            }
+        });
 })(jQuery);

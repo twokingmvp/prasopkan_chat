@@ -420,6 +420,7 @@ elseif($action == 'react') {
     if($exists) DB::delete('prasopkan_chat_reactions', "id='{$exists['id']}'"); else DB::insert('prasopkan_chat_reactions', array('msg_id'=>$msg_id, 'uid'=>$_G['uid'], 'reaction'=>$reaction));
     echo json_encode(array('status'=>'success')); exit;
 }
+
 elseif($action == 'delete') {
     if(!$_G['uid'] || $_G['adminid'] <= 0) { echo json_encode(array('status' => 'error', 'msg' => 'ไม่มีสิทธิ์ในการลบข้อความ')); exit; }
     $msg_id = isset($_GET['msg_id']) ? intval($_GET['msg_id']) : 0;
