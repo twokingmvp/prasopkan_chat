@@ -14,7 +14,6 @@
         var chatBody = $('#pk-chat-body'); 
         var chatHead = $('#pk-chat-head'); 
         var chatHeadClose = $('#pk-chat-head-close'); 
-        var chatHeadContainer = $('#pk-chat-head-container'); // กล่องรวมปุ่มลอย
         var chatBoxContainer = $('#pk-chat-box');
         var badge = $('#pk-chat-badge'); 
         var tooltip = $('#pk-chat-tooltip');
@@ -90,21 +89,25 @@
         $(document).on('click', '.pk-btn-equip', function() { $.ajax({ url: apiUrl + '&action=shop_equip&item_key='+$(this).data('key')+'&item_type='+$(this).data('type'), type: 'GET', dataType: 'json', success: function(res) { if(res.status === 'success') { loadShop(); fetchMessages(); } else { showToast('❌ ' + res.msg, 'error'); } } }); });
 
         var chatState = localStorage.getItem('prasopkan_chat_state');
-        if(chatState !== 'open') { badge.text(Math.floor(Math.random() * 3) + 1).show(); }
+        if(chatState !== 'open') { 
+            chatHeadClose.show();
+            badge.text(Math.floor(Math.random() * 3) + 1).show(); 
+        }
         
         if (tooltip.length > 0) { function showTooltip() { if (chatBoxContainer.is(':hidden')) { tooltip.addClass('pk-tooltip-show'); setTimeout(function() { tooltip.removeClass('pk-tooltip-show'); }, 5000); } } setTimeout(showTooltip, 3000); setInterval(showTooltip, 45000); }
         
         // ------------------ ระบบเปิด-ปิดแชท ------------------
         function toggleChat() {
             if(chatBoxContainer.is(':hidden')) { 
-                chatHeadContainer.hide(); // ซ่อนกล่องลอยทั้งหมด
+                chatHead.hide(); 
                 badge.hide(); tooltip.removeClass('pk-tooltip-show'); 
                 chatBoxContainer.css('display', 'flex').hide().fadeIn(200);
                 localStorage.setItem('prasopkan_chat_state', 'open'); fetchMessages(true); setTimeout(function(){ $('#pk-chat-input').focus(); }, 200); 
             } 
             else { 
                 chatBoxContainer.fadeOut(200, function() { 
-                    chatHeadContainer.fadeIn(200); // โชว์กล่องลอยกลับมา
+                    chatHead.fadeIn(200); 
+                    chatHeadClose.show();
                 }); 
                 localStorage.setItem('prasopkan_chat_state', 'closed'); setTimeout(function() { badge.text(Math.floor(Math.random() * 2) + 1).fadeIn(); }, 15000); 
             }
@@ -114,14 +117,14 @@
         $('#pk-chat-close-btn').on('click', toggleChat);
         
         if(chatState === 'open') { 
-            chatBoxContainer.css('display', 'flex'); chatHeadContainer.hide(); 
+            chatBoxContainer.css('display', 'flex'); chatHead.hide(); 
         } else { 
-            chatBoxContainer.hide(); chatHeadContainer.show(); chatHeadClose.show();
+            chatBoxContainer.hide(); chatHead.show(); chatHeadClose.show();
         }
 
-        // 🔘 ปุ่ม 'X สีแดง' ที่เกาะขอบวงกลม -> เปิดเมนูเลือกซ่อน (Snooze)
+        // 🔘 ปุ่ม 'X สีแดง' 
         chatHeadClose.off('click').on('click', function(e) {
-            e.stopPropagation();
+            e.stopPropagation(); // สำคัญมาก! ป้องกันไม่ให้แชทเด้งเปิดตอนกด X
             $('#pk-chat-snooze-modal').fadeIn(200);
         });
 
@@ -133,7 +136,7 @@
         // 🔘 กดปุ่มเลือกเวลา (แบบจำลอง) -> ซ่อนแชททั้งหมด
         $(document).on('click', '.pk-snooze-btn', function() {
             $('#pk-chat-snooze-modal').fadeOut(150);
-            chatHeadContainer.fadeOut(200);
+            chatHead.fadeOut(200);
             tooltip.hide();
             showToast('🤫 ซ่อนแชทชั่วคราวแล้ว! (นี่คือระบบทดสอบ UI ถ้ารีเฟรชปุ่มจะกลับมา)', 'success');
         });
