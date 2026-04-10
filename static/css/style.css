@@ -3,35 +3,67 @@
 ========================================= */
 :root { --pk-bg: #ffffff; --pk-header: #4CA1AF; --pk-header-text: #ffffff; --pk-border: #f0f0f0; --pk-msg-bg: #fafafa; --pk-text: #333333; --pk-text-muted: #888888; --pk-bubble-mine: #4CA1AF; --pk-bubble-mine-text: #ffffff; --pk-bubble-other: #ffffff; --pk-bubble-other-border: #e0e0e0; --pk-input-bg: #f9f9f9; }
 .pk-dark-mode { --pk-bg: #1e1e24; --pk-header: #2b2b36; --pk-header-text: #ffffff; --pk-border: #333344; --pk-msg-bg: #121216; --pk-text: #e0e0e0; --pk-text-muted: #aaaaaa; --pk-bubble-mine: #0066cc; --pk-bubble-mine-text: #ffffff; --pk-bubble-other: #2b2b36; --pk-bubble-other-border: #3a3a4a; --pk-input-bg: #2b2b36; }
+
 /* =========================================
    ✨ บังคับใช้ฟอนต์ LINE Seed Sans TH ทั้งระบบแชท
 ========================================= */
 #pk-chat-box, #pk-chat-box *, 
-#pk-chat-head, #pk-chat-head *, 
+#pk-chat-head-container, #pk-chat-head-container *, 
 #pk-chat-action-overlay, #pk-chat-action-overlay *, 
 #pk-chat-toast, #pk-chat-toast *,
 #pk-chat-shop-modal, #pk-chat-shop-modal *,
 #pk-chat-emoji-picker, #pk-chat-emoji-picker *,
-#pk-chat-rp-modal, #pk-chat-rp-modal * {
+#pk-chat-rp-modal, #pk-chat-rp-modal *,
+#pk-chat-snooze-modal, #pk-chat-snooze-modal * {
     font-family: "LINE Seed Sans TH", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
 }
+
 /* =========================================
-   2. 🖼️ โครงสร้างหลักของแชท (Layout)
+   2. 🖼️ โครงสร้างหลักของแชท (Layout) แบบมี Container
 ========================================= */
-#pk-chat-head { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: linear-gradient(135deg, #4CA1AF, #0056cc); border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 115, 255, 0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 9999; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); animation: pk-pulse 2s infinite; }
+#pk-chat-head-container {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 60px;
+    height: 60px;
+    z-index: 9999;
+}
+
+#pk-chat-head { 
+    position: absolute; 
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(135deg, #4CA1AF, #0056cc); 
+    border-radius: 50%; 
+    box-shadow: 0 4px 15px rgba(0, 115, 255, 0.4); 
+    display: flex; align-items: center; justify-content: center; cursor: pointer; 
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    animation: pk-pulse 2s infinite; 
+}
 #pk-chat-head:hover { transform: scale(1.1); }
+
+/* ปุ่ม X สีแดง ล็อกติดขอบขวาบนของ Container เสมอ */
+#pk-chat-head-close {
+    position: absolute;
+    top: -5px; right: -5px;
+    width: 24px; height: 24px; background: #ff3b30; color: white;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: bold; cursor: pointer; z-index: 10;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4); border: 2px solid var(--pk-bg);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+#pk-chat-head-close:hover { transform: scale(1.2) rotate(90deg); background: #d32f2f; }
+
 #pk-chat-box { position: fixed; bottom: 25px; right: 25px; width: 350px !important; max-width: 90vw; background: var(--pk-bg); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column; z-index: 9999; overflow: hidden; border: 1px solid var(--pk-border); }
 #pk-chat-header { background: var(--pk-header); color: var(--pk-header-text); padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
 .pk-header-title { font-weight: bold; font-size: 15px; }
 
-/* ปุ่มบน Header */
 .pk-header-actions { display: flex; align-items: center; gap: 10px; }
 .pk-header-icon, #pk-chat-settings-btn, #pk-chat-close-btn, #pk-chat-shop-btn { color: var(--pk-header-text) !important; opacity: 0.75; transition: all 0.2s; cursor: pointer; }
 .pk-header-icon:hover, #pk-chat-settings-btn:hover, #pk-chat-close-btn:hover, #pk-chat-shop-btn:hover { opacity: 1 !important; transform: scale(1.1); }
 #pk-chat-shop-btn { color: #ffeb3b !important; }
 #pk-chat-shop-btn:hover { transform: scale(1.1) rotate(-10deg); }
 
-/* เมนูตั้งค่า */
 #pk-chat-settings-menu { position: absolute; top: 50px; right: 15px; background: var(--pk-bg); border: 1px solid var(--pk-border); border-radius: 8px; padding: 12px 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 10002; color: var(--pk-text); min-width: 160px; }
 .pk-setting-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 500;}
 .pk-switch { position: relative; display: inline-block; width: 34px; height: 20px; }
@@ -76,7 +108,6 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 
 .pk-chat-img { max-width: 100%; max-height: 180px; width: auto; object-fit: contain; border-radius: 8px; margin-top: 5px; background: transparent; }
 
-/* 🛡️ ป้องกัน Safari คลุมดำข้อความและปิดไฮไลต์สีเทาเวลากด (ใช้ร่วมกับเมนูกดค้าง) */
 .pk-bubble, .pk-bubble * {
     -webkit-touch-callout: none !important;
     -webkit-user-select: none !important;
@@ -87,88 +118,19 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
     -webkit-tap-highlight-color: transparent !important;
 }
 
-/* ลบกล่อง Action อันเก่าที่ไม่ใช้แล้วทิ้งไป */
 .pk-msg-actions-inline { display: none !important; }
 
 /* =========================================
    4. ⌨️ ส่วนพิมพ์ข้อความ (Input Area)
 ========================================= */
-#pk-chat-input-area { 
-    display: flex; 
-    padding: 10px 15px; 
-    background: var(--pk-bg); 
-    border-top: 1px solid var(--pk-border); 
-    align-items: center; 
-    gap: 8px; /* เพิ่มระยะห่างระหว่างปุ่มนิดหน่อย */
-    box-sizing: border-box; /* สำคัญ: ป้องกันกล่องล้นขอบจอ */
-}
-
-/* ปรับปรุงปุ่ม Action ต่างๆ (อีโมจิ, รูปภาพ, อั่งเปา) */
-.pk-action-btn { 
-    background: transparent !important; /* เปลี่ยนพื้นหลังเป็นโปร่งใส */
-    border: none; 
-    border-radius: 50%; 
-    width: 36px; /* ขยายขนาดปุ่มให้แตะง่ายขึ้น */
-    height: 36px; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    font-size: 20px; /* ขยายไอคอน */
-    cursor: pointer; 
-    transition: transform 0.2s ease, background 0.2s ease; 
-    padding: 0; 
-    outline: none; 
-    color: var(--pk-text-muted); /* ใช้สีเทาอ่อนให้ดูคลีน */
-}
-
-.pk-action-btn:hover { 
-    background: var(--pk-border) !important; /* เพิ่มพื้นหลังตอน Hover */
-    transform: scale(1.1); 
-    color: var(--pk-header); /* เปลี่ยนสีไอคอนตอน Hover */
-}
-
-.pk-dark-mode .pk-action-btn:hover { 
-    background: #333 !important; 
-}
-
-/* ปรับปรุงกล่องพิมพ์ข้อความ */
-#pk-chat-input { 
-    flex: 1; 
-    padding: 10px 16px; 
-    background: var(--pk-input-bg); 
-    border: 1px solid var(--pk-border); 
-    border-radius: 20px; 
-    outline: none; 
-    color: var(--pk-text); 
-    font-size: 14px; /* ปรับขนาดฟอนต์ให้พอดี */
-    min-width: 0; 
-    transition: border-color 0.2s ease;
-}
-
-#pk-chat-input:focus {
-    border-color: var(--pk-header); /* เพิ่มสีขอบตอนพิมพ์ */
-}
-
-/* ปรับปรุงปุ่มส่งข้อความ */
-#pk-chat-send { 
-    background: var(--pk-header) !important; 
-    border: none; 
-    width: 40px; /* ขยายขนาดปุ่มส่ง */
-    height: 40px; 
-    border-radius: 50%; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    cursor: pointer; 
-    transition: transform 0.2s, background 0.2s ease;
-    color: white; /* เปลี่ยนสีไอคอนเป็นสีขาว */
-    font-size: 18px;
-}
-
-#pk-chat-send:hover { 
-    transform: scale(1.1); 
-    background: #0056cc !important; /* เปลี่ยนสีตอน Hover */
-}
+#pk-chat-input-area { display: flex; padding: 10px 15px; background: var(--pk-bg); border-top: 1px solid var(--pk-border); align-items: center; gap: 8px; box-sizing: border-box; }
+.pk-action-btn { background: transparent !important; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; justify-content: center; align-items: center; font-size: 20px; cursor: pointer; transition: transform 0.2s ease, background 0.2s ease; padding: 0; outline: none; color: var(--pk-text-muted); }
+.pk-action-btn:hover { background: var(--pk-border) !important; transform: scale(1.1); color: var(--pk-header); }
+.pk-dark-mode .pk-action-btn:hover { background: #333 !important; }
+#pk-chat-input { flex: 1; padding: 10px 16px; background: var(--pk-input-bg); border: 1px solid var(--pk-border); border-radius: 20px; outline: none; color: var(--pk-text); font-size: 14px; min-width: 0; transition: border-color 0.2s ease; }
+#pk-chat-input:focus { border-color: var(--pk-header); }
+#pk-chat-send { background: var(--pk-header) !important; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s, background 0.2s ease; color: white; font-size: 18px; }
+#pk-chat-send:hover { transform: scale(1.1); background: #0056cc !important; }
 
 /* =========================================
    5. 🔗 ส่วนขยาย (Link Preview, Reactions, อั่งเปา)
@@ -196,21 +158,21 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 .pk-emoji-item { font-size: 22px; cursor: pointer; text-align: center; border-radius: 4px; transition: background 0.2s;}
 .pk-emoji-item:hover { background: var(--pk-border); }
 
-#pk-chat-rp-modal { position: absolute; bottom: 70px; right: 15px; width: 260px; background: var(--pk-bg); border-radius: 12px; padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); z-index:10000;}
-#pk-chat-rp-modal h3 { margin: 0 0 12px 0; color: #d9363e; text-align: center; }
-.pk-rp-input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--pk-border); border-radius: 6px; box-sizing: border-box; background: var(--pk-input-bg); color: var(--pk-text); }
-.pk-rp-btn-group { display: flex; justify-content: space-between; }
-#pk-rp-submit { background: #d9363e; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 48%; font-weight:bold; font-size: 14px;}
-#pk-rp-cancel { background: var(--pk-border); color: var(--pk-text); border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 48%; }
-
 /* =========================================
    6. 🔴 แจ้งเตือน (Badge & Tooltip)
 ========================================= */
 @keyframes pk-pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 115, 255, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(0, 115, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 115, 255, 0); } }
 @keyframes pk-bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-3px); } }
 
-#pk-chat-badge { position: absolute; top: -2px; right: -2px; background: #ff3b30; color: white; border-radius: 50%; min-width: 18px; height: 18px; line-height: 18px; text-align: center; font-size: 11px; font-weight: bold; border: 2px solid var(--pk-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.2); animation: pk-bounce 1s infinite alternate; z-index: 2; }
-#pk-chat-tooltip { position: absolute; right: 75px; top: 12px; background: var(--pk-bg); color: var(--pk-text); padding: 8px 14px; border-radius: 12px; font-size: 13px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.15); white-space: nowrap; pointer-events: none; border: 1px solid var(--pk-border); opacity: 0; transform: translateX(10px); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+#pk-chat-badge { 
+    position: absolute; 
+    top: -2px; left: -2px; right: auto; /* ขยับหนีปุ่ม X มาอยู่ซ้ายบนแทน */
+    background: #ff3b30; color: white; border-radius: 50%; min-width: 18px; height: 18px; line-height: 18px; text-align: center; font-size: 11px; font-weight: bold; border: 2px solid var(--pk-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.2); animation: pk-bounce 1s infinite alternate; z-index: 2; 
+}
+#pk-chat-tooltip { 
+    position: absolute; right: 75px; top: 12px; /* อยู่ทางซ้ายของ Container เสมอ */
+    background: var(--pk-bg); color: var(--pk-text); padding: 8px 14px; border-radius: 12px; font-size: 13px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.15); white-space: nowrap; pointer-events: none; border: 1px solid var(--pk-border); opacity: 0; transform: translateX(10px); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+}
 #pk-chat-tooltip::after { content: ''; position: absolute; right: -6px; top: 50%; transform: translateY(-50%); border-width: 6px 0 6px 6px; border-style: solid; border-color: transparent transparent transparent var(--pk-bg); }
 .pk-dark-mode #pk-chat-tooltip { background: var(--pk-input-bg); border-color: var(--pk-border); }
 .pk-dark-mode #pk-chat-tooltip::after { border-color: transparent transparent transparent var(--pk-input-bg); }
@@ -248,9 +210,6 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 .pk-btn-close { width: 100%; padding: 8px; background: var(--pk-border); color: var(--pk-text); border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
 .pk-chat-badge-icon { font-size: 14px; margin-right: 2px; }
 
-@keyframes pk-hue { from { filter: hue-rotate(0deg); } to { filter: hue-rotate(360deg); } }
-@keyframes pk-flash { 0%, 50%, 100% { opacity: 1; text-shadow: 0px 0px 8px rgba(0,242,254,0.8); } 25%, 75% { opacity: 0.8; text-shadow: 0px 0px 15px #00f2fe, 0px 0px 25px #00f2fe; } }
-
 /* =========================================
    8. 💬 ระบบเมนูกดค้าง (Messenger Action Menu)
 ========================================= */
@@ -268,8 +227,12 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
    9. 📱 Responsive สำหรับหน้าจอมือถือ (Mobile UI)
 ========================================= */
 @media screen and (max-width: 768px) {
-    #pk-chat-head { left: 15px !important; right: auto !important; bottom: 85px !important; width: 56px; height: 56px; box-shadow: 0 5px 15px rgba(0, 115, 255, 0.4); z-index: 999999 !important; }
-    #pk-chat-badge { left: 40px !important; right: auto !important; }
+    /* ย้ายกล่อง Container ในมือถือแทนการย้ายตัววงกลมตรงๆ */
+    #pk-chat-head-container { left: 15px !important; right: auto !important; bottom: 85px !important; width: 56px; height: 56px; z-index: 999999 !important; }
+    
+    /* ขยับปุ่ม X ให้เกาะบนขวาเสมอ ไม่ว่าจะใน PC หรือ มือถือ */
+    #pk-chat-head-close { top: -4px !important; right: -4px !important; left: auto !important; bottom: auto !important; }
+    
     #pk-chat-box { left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100% !important; max-width: 100% !important; height: 85vh !important; max-height: 85vh !important; border-radius: 20px 20px 0 0 !important; border: none !important; box-shadow: 0 -5px 25px rgba(0,0,0,0.15), 0 0 0 2000px rgba(0,0,0,0.6) !important; z-index: 999999 !important; animation: pk-slide-up 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1); }
     
     @keyframes pk-slide-up { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -281,63 +244,23 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
     #pk-chat-body { flex: 1 !important; display: flex !important; flex-direction: column !important; min-height: 0 !important; height: 100% !important; }
     #pk-chat-messages { flex: 1 !important; padding: 15px 15px 20px 15px !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; overscroll-behavior-y: contain !important; }
 
-/* จัดการ Input Area บนมือถือให้ดูเหมือนแอปมากขึ้น */
-    #pk-chat-input-area { 
-        padding: 8px 12px !important; /* ลด Padding ให้กระชับขึ้น */
-        padding-bottom: calc(8px + env(safe-area-inset-bottom)) !important; 
-        background: var(--pk-bg) !important; 
-        border-top: 1px solid var(--pk-border) !important; 
-        flex-shrink: 0 !important; 
-        display: flex; 
-        align-items: center;
-        gap: 6px; /* ลดระยะห่างระหว่างปุ่ม */
-    }
-
-    /* ปรับแต่งกล่องข้อความบนมือถือ */
-    #pk-chat-input { 
-        font-size: 16px !important; /* ป้องกัน iOS ซูม */
-        padding: 10px 14px !important; 
-        border-radius: 20px !important; 
-        background: var(--pk-input-bg) !important; 
-        border: 1px solid var(--pk-border) !important; 
-        flex: 1 !important; 
-        min-width: 0 !important; 
-    }
+    #pk-chat-input-area { padding: 8px 12px !important; padding-bottom: calc(8px + env(safe-area-inset-bottom)) !important; background: var(--pk-bg) !important; border-top: 1px solid var(--pk-border) !important; flex-shrink: 0 !important; display: flex; align-items: center; gap: 6px; }
+    #pk-chat-input { font-size: 16px !important; padding: 10px 14px !important; border-radius: 20px !important; background: var(--pk-input-bg) !important; border: 1px solid var(--pk-border) !important; flex: 1 !important; min-width: 0 !important; }
     
-    /* ซ่อนปุ่มที่ไม่จำเป็นบนมือถือ (เช่น อีโมจิ หรือ อั่งเปา ถ้าระยะไม่พอ) */
-    /* แต่ในกรณีนี้เราจะพยายามจัดให้พอดี */
-    .pk-action-btn, #pk-chat-send { 
-        flex-shrink: 0 !important; 
-    }
-    
-    /* ขยายปุ่ม Action ให้แตะง่ายขึ้นบนมือถือ */
-    .pk-action-btn { 
-        width: 36px; 
-        height: 36px; 
-        font-size: 20px; /* ไอคอนใหญ่ขึ้น */
-        background: transparent !important; 
-        color: var(--pk-text-muted);
-    }
-    
-    #pk-chat-send { 
-        width: 40px; 
-        height: 40px; 
-        background: var(--pk-header) !important;
-        color: white;
-    }
+    .pk-action-btn, #pk-chat-send { flex-shrink: 0 !important; }
+    .pk-action-btn { width: 36px; height: 36px; font-size: 20px; background: transparent !important; color: var(--pk-text-muted); }
+    #pk-chat-send { width: 40px; height: 40px; background: var(--pk-header) !important; color: white; }
 
     #pk-chat-shop-modal, #pk-chat-emoji-picker, #pk-chat-rp-modal { left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100% !important; border-radius: 20px 20px 0 0 !important; border: none !important; box-shadow: 0 -5px 25px rgba(0,0,0,0.2) !important; box-sizing: border-box !important; max-height: 80vh !important; z-index: 1000000 !important; animation: pk-slide-up 0.25s ease-out !important; }
     .pk-shop-grid { max-height: 50vh !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; overscroll-behavior-y: contain !important; }
     .pk-btn-close { border-radius: 24px !important; padding: 12px !important; font-size: 14px; }
     #pk-chat-settings-menu { right: 15px !important; top: 55px !important; z-index: 1000000 !important; }
     #pk-chat-tooltip { display: none !important; }
-    
-    /* ขยายฟอนต์หลังบ้านบนมือถือ */
     div.container table td { font-size: 14px !important; line-height: 1.5 !important; padding-left: 5px !important; padding-right: 5px !important; }
 }
 
 /* =========================================
-   🌟 10. แอนิเมชันสำหรับไอเทมร้านค้าระดับพรีเมียม (ใช้งานได้ทั้ง PC และ มือถือ)
+   🌟 10. แอนิเมชันสำหรับไอเทมร้านค้าระดับพรีเมียม
 ========================================= */
 @keyframes pk-wave-text { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 @keyframes pk-float-bubble { 0% { transform: translateY(0px); } 50% { transform: translateY(-4px); } 100% { transform: translateY(0px); } }
@@ -347,71 +270,33 @@ input:checked + .pk-slider:before { transform: translateX(14px); }
 /* =========================================
    11. 🎁 ปรับปรุง Modal อั่งเปา (ตรงกลาง) & ระบบแจ้งเตือน (Toast)
 ========================================= */
-
-/* บังคับหน้าต่างแจกอั่งเปาให้อยู่ตรงกลางจอ พร้อมฉากหลังสีดำดรอปลง */
 #pk-chat-rp-modal {
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    bottom: auto !important;
-    right: auto !important;
-    width: 85% !important;
-    max-width: 320px !important;
-    background: var(--pk-bg) !important;
-    border-radius: 20px !important;
-    padding: 24px !important;
-    /* เวทมนตร์สร้างฉากหลังสีดำทับแชทโดยไม่ต้องใช้ Div เพิ่ม */
-    box-shadow: 0 15px 40px rgba(0,0,0,0.3), 0 0 0 2000px rgba(0,0,0,0.5) !important;
-    z-index: 1000006 !important;
-    text-align: center;
-    border: none !important;
+    position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; bottom: auto !important; right: auto !important; width: 85% !important; max-width: 320px !important; background: var(--pk-bg) !important; border-radius: 20px !important; padding: 24px !important; box-shadow: 0 15px 40px rgba(0,0,0,0.3), 0 0 0 2000px rgba(0,0,0,0.5) !important; z-index: 1000006 !important; text-align: center; border: none !important;
 }
-
 #pk-chat-rp-modal h3 { font-size: 18px; margin-top: 0; margin-bottom: 15px; }
-
-/* 🛡️ แก้บั๊ก iOS Zoom: บังคับฟอนต์ 16px และปรับดีไซน์ให้สวยขึ้น */
-.pk-rp-input {
-    font-size: 16px !important; 
-    text-align: center;
-    padding: 12px !important;
-    border-radius: 12px !important;
-    margin-bottom: 15px !important;
-    width: 100% !important;
-    box-sizing: border-box;
-    border: 2px solid var(--pk-border) !important;
-    background: var(--pk-input-bg) !important;
-    color: var(--pk-text) !important;
-    transition: border-color 0.2s;
-}
+.pk-rp-input { font-size: 16px !important; text-align: center; padding: 12px !important; border-radius: 12px !important; margin-bottom: 15px !important; width: 100% !important; box-sizing: border-box; border: 2px solid var(--pk-border) !important; background: var(--pk-input-bg) !important; color: var(--pk-text) !important; transition: border-color 0.2s; }
 .pk-rp-input:focus { border-color: #d9363e !important; outline: none; }
-
 .pk-rp-btn-group { display: flex; gap: 10px; }
 #pk-rp-submit, #pk-rp-cancel { flex: 1; padding: 12px !important; border-radius: 12px !important; font-size: 15px !important; font-weight: bold; }
 
-/* 🍞 Custom Toast Notification (แทนที่หน้าต่าง Alert สีขาวๆ ของเบราว์เซอร์) */
-#pk-chat-toast {
-    position: fixed;
-    top: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 12px 24px;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: bold;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    z-index: 1000010;
-    display: none;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-    animation: pk-toast-slide 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
+#pk-chat-toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: bold; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 1000010; display: none; align-items: center; gap: 8px; white-space: nowrap; animation: pk-toast-slide 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 #pk-chat-toast.toast-error { background: #ff3b30; color: white; }
 #pk-chat-toast.toast-success { background: #34c759; color: white; }
 #pk-chat-toast.toast-info { background: #007aff; color: white; }
+@keyframes pk-toast-slide { from { transform: translate(-50%, -20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 
-@keyframes pk-toast-slide {
-    from { transform: translate(-50%, -20px); opacity: 0; }
-    to { transform: translate(-50%, 0); opacity: 1; }
+/* =========================================
+   12. ⏱️ ระบบปิดแชทชั่วคราว (Snooze UI)
+========================================= */
+#pk-chat-snooze-modal {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    z-index: 1000010; display: flex; align-items: center; justify-content: center; padding: 20px;
 }
+.pk-snooze-content { background: var(--pk-bg); padding: 24px; border-radius: 20px; text-align: center; width: 100%; max-width: 280px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: pk-slide-up 0.2s ease-out; }
+.pk-snooze-content h4 { margin: 0 0 8px 0; color: var(--pk-text); font-size: 18px; }
+.pk-snooze-content p { font-size: 13px; color: var(--pk-text-muted); margin-bottom: 20px; }
+.pk-snooze-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+.pk-snooze-btn { padding: 12px; border: 1px solid var(--pk-border); background: var(--pk-input-bg); color: var(--pk-text); border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s; }
+.pk-snooze-btn:hover { background: #ff3b30; color: white; border-color: #ff3b30; transform: scale(1.02); }
+#pk-snooze-cancel { background: transparent; border: none; color: var(--pk-text-muted); font-size: 14px; cursor: pointer; text-decoration: underline; }
