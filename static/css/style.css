@@ -28,7 +28,6 @@
 .pk-header-actions { display: flex; align-items: center; gap: 10px; }
 .pk-header-icon, #pk-chat-settings-btn, #pk-chat-close-btn, #pk-chat-shop-btn { color: var(--pk-header-text) !important; opacity: 0.75; transition: all 0.2s; cursor: pointer; }
 .pk-header-icon:hover, #pk-chat-settings-btn:hover, #pk-chat-close-btn:hover, #pk-chat-shop-btn:hover { opacity: 1 !important; transform: scale(1.1); }
-#pk-chat-shop-btn { color: #ffeb3b !important; }
 #pk-chat-shop-btn:hover { transform: scale(1.1) rotate(-10deg); }
 
 /* เมนูตั้งค่า */
