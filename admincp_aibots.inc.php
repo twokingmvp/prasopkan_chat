@@ -18,8 +18,10 @@ if(submitcheck('aibotssubmit')) {
         'gemini_api_key' => trim($_GET['gemini_api_key']),
         'ai_daily_limit' => intval($_GET['ai_daily_limit']),
         'ai_chat_interval' => intval($_GET['ai_chat_interval']),
-        'ai_min_len' => intval($_GET['ai_min_len']), // 🔥 เพิ่มค่าขั้นต่ำ
-        'ai_max_len' => intval($_GET['ai_max_len']), // 🔥 เพิ่มค่าสูงสุด
+        'ai_min_len' => intval($_GET['ai_min_len']),
+        'ai_max_len' => intval($_GET['ai_max_len']),
+        'ai_temperature' => floatval($_GET['ai_temperature']), // 🔥 เพิ่มการรับค่า Temperature
+        'ai_max_tokens' => intval($_GET['ai_max_tokens']),   // 🔥 เพิ่มการรับค่า Max Tokens
         'ai_bot_list' => trim($_GET['ai_bot_list']),
         'ai_chat_topic' => trim($_GET['ai_chat_topic']),
         'ai_allowed_forums' => $allowed_forums
@@ -39,10 +41,12 @@ if(empty($config)) {
         'gemini_api_key' => '', 
         'ai_daily_limit' => 50, 
         'ai_chat_interval' => 20, 
-        'ai_min_len' => 1, // 🔥 ค่าเริ่มต้น 1 ประโยค
-        'ai_max_len' => 3, // 🔥 ค่าเริ่มต้น 3 ประโยค
-        'ai_bot_list' => "แม่บ้านรีวิว|👩‍🍳|เป็นแม่บ้านชอบแต่งบ้านและทำอาหาร มีคนพิมพ์มาถามอะไรให้ตอบสั้นๆ เป็นกันเอง\nทาสแมว|🐱|รักแมวมาก ชอบคุยเรื่องสัตว์เลี้ยง\nช่างไม้ใจดี|🛠️|มีความรู้เรื่องซ่อมบ้าน ช่างสังเกต ชอบให้คำแนะนำสั้นๆ ได้ใจความ", 
-        'ai_chat_topic' => "ไอเดียแต่งบ้านสไตล์มินิมอล\nรีวิวของใช้ในบ้านที่คุ้มค่า\nการทำความสะอาดและจัดบ้าน\nพูดคุยเรื่องสัตว์เลี้ยงและอาหารแมว\nเรื่องตลกๆ ในชีวิตประจำวัน", 
+        'ai_min_len' => 1,
+        'ai_max_len' => 3,
+        'ai_temperature' => 0.8, // 🔥 ค่าเริ่มต้น 0.8
+        'ai_max_tokens' => 2000, // 🔥 ค่าเริ่มต้น 2000
+        'ai_bot_list' => "กูรูเว็บ|👨‍💻|เป็นนักพัฒนาเว็บไซต์ ชอบแชร์เทคนิคการทำเว็บให้ติดหน้าแรก Google\nคอกาแฟ|☕|หลงใหลในการสกัดกาแฟ Espresso ชอบแนะนำอุปกรณ์และเทคนิค\nทาสแมวตัวยง|🐈|เลี้ยงแมว Scottish Fold ชอบรีวิวของใช้และอาหารแมวแบบจัดเต็ม", 
+        'ai_chat_topic' => "เทคนิคการปรับแต่งโครงสร้างเว็บและ SEO\nรีวิวเครื่องใช้ไฟฟ้าและเคล็ดลับการชงกาแฟที่บ้าน\nแชร์ประสบการณ์การดูแลและของใช้สำหรับสัตว์เลี้ยงแสนรัก\nบ่นเรื่องสภาพอากาศและการเดินทาง\nชวนคุยเรื่องอาหารการกินและของอร่อย", 
         'ai_allowed_forums' => array(1)
     );
 }
@@ -54,8 +58,13 @@ showsetting('เปิดใช้งาน AI คุยกันเอง', 'en
 showsetting('Gemini API Key 🔑', 'gemini_api_key', $config['gemini_api_key'], 'text', '', 0, 'ใส่ API Key ของคุณที่ได้จาก Google AI Studio (ปล่อยว่างไว้หากต้องการปิดระบบ)');
 showsetting('ลิมิตข้อความ AI ต่อวัน 💰', 'ai_daily_limit', $config['ai_daily_limit'], 'number', '', 0, 'อนุญาตให้ AI พิมพ์คุยได้สูงสุดกี่ข้อความต่อวัน (ป้องกันการเรียกใช้งานเกินโควต้า)');
 showsetting('ความถี่ในการให้ AI คุยกัน (นาที) ⏱️', 'ai_chat_interval', $config['ai_chat_interval'], 'number', '', 0, 'ระยะห่างระหว่างแต่ละข้อความของ AI (แนะนำ 15-30 นาที เพื่อความเนียน)');
-showsetting('AI: จำนวนประโยคขั้นต่ำ 📝', 'ai_min_len', isset($config['ai_min_len']) ? $config['ai_min_len'] : 1, 'number', '', 0, 'จำนวนประโยคที่น้อยที่สุดที่บอทจะพิมพ์ (แนะนำ: 1)'); // 🔥 ช่องใหม่
-showsetting('AI: จำนวนประโยคสูงสุด 📝', 'ai_max_len', isset($config['ai_max_len']) ? $config['ai_max_len'] : 3, 'number', '', 0, 'จำนวนประโยคที่มากที่สุดที่บอทจะพิมพ์ (แนะนำ: 3-5)'); // 🔥 ช่องใหม่
+
+// 🔥 ช่องตั้งค่า Generation Config ใหม่
+showsetting('AI: ความคิดสร้างสรรค์ (Temperature) 🧠', 'ai_temperature', isset($config['ai_temperature']) ? $config['ai_temperature'] : 0.8, 'text', '', 0, 'ค่า 0.0 - 2.0 (ค่าน้อย = ตอบมีเหตุผลตรงไปตรงมา, ค่ามาก = ตอบสร้างสรรค์/กวนๆ แนะนำ: 0.8 - 1.0)');
+showsetting('AI: โควต้าความยาวคำ (Max Tokens) 📏', 'ai_max_tokens', isset($config['ai_max_tokens']) ? $config['ai_max_tokens'] : 2000, 'number', '', 0, 'ลิมิตคำที่ AI พิมพ์ได้ต่อครั้งเพื่อป้องกันการตอบไม่จบประโยค (สูงสุด 8192 สำหรับ Gemini Flash แนะนำ: 2000 - 8192)');
+
+showsetting('AI: จำนวนประโยคขั้นต่ำ 📝', 'ai_min_len', isset($config['ai_min_len']) ? $config['ai_min_len'] : 1, 'number', '', 0, 'จำนวนประโยคที่น้อยที่สุดที่บอทจะพิมพ์ (เช่น 1)');
+showsetting('AI: จำนวนประโยคสูงสุด 📝', 'ai_max_len', isset($config['ai_max_len']) ? $config['ai_max_len'] : 3, 'number', '', 0, 'จำนวนประโยคที่มากที่สุดที่บอทจะพิมพ์ (แนะนำ 3-5)');
 showsetting('รายชื่อและบุคลิกของ AI Bots 👥', 'ai_bot_list', $config['ai_bot_list'], 'textarea', '', 0, '<b>รูปแบบ:</b> ชื่อ|ไอคอน|บุคลิก (กด Enter เพื่อขึ้นบรรทัดใหม่สำหรับบอทตัวต่อไป)');
 showsetting('หัวข้อสนทนาที่อนุญาตให้ AI ชวนคุย (Topics) 💬', 'ai_chat_topic', $config['ai_chat_topic'], 'textarea', '', 0, 'พิมพ์หัวข้อที่อยากให้ AI สุ่มหยิบมาชวนคุย (<b>กด Enter เพื่อขึ้นบรรทัดใหม่</b>)');
 
