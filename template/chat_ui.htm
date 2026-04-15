@@ -3,9 +3,9 @@
 
 <script>
     var pkMobileSettings = {
-        smart_scroll: parseInt('{$mobile_cfg["smart_scroll"]}'),
-        fade_idle: parseInt('{$mobile_cfg["fade_idle"]}'),
-        draggable: parseInt('{$mobile_cfg["draggable"]}')
+        smart_scroll: parseInt('{$mobile_cfg["smart_scroll"]}') || 0,
+        fade_idle: parseInt('{$mobile_cfg["fade_idle"]}') || 0,
+        draggable: parseInt('{$mobile_cfg["draggable"]}') || 0
     };
 </script>
 
