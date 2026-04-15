@@ -8,36 +8,43 @@
 			<item id="name"><![CDATA[Prasopkan Public Chat]]></item>
 			<item id="identifier"><![CDATA[prasopkan_chat]]></item>
 			<item id="description"><![CDATA[ระบบห้องแชทรวมและแยกตามหมวดหมู่ พร้อมฟีเจอร์ขั้นสูง รองรับ PC และ Mobile]]></item>
-			<item id="datatables"><![CDATA[prasopkan_chat_messages,prasopkan_chat_envelopes,prasopkan_chat_envlogs,prasopkan_chat_reactions,prasopkan_chat_inventory,prasopkan_chat_equipment,prasopkan_chat_shop_items]]></item>
+			<item id="datatables"><![CDATA[prasopkan_chat_messages,prasopkan_chat_envelopes,prasopkan_chat_envlogs,prasopkan_chat_reactions,prasopkan_chat_inventory,prasopkan_chat_equipment,prasopkan_chat_shop_items,prasopkan_chat_levels]]></item>
 			<item id="directory"><![CDATA[prasopkan_chat/]]></item>
 			<item id="copyright"><![CDATA[Prasopkan]]></item>
-			<item id="version"><![CDATA[2.0.3]]></item>
+			<item id="version"><![CDATA[2.1.0]]></item>
 			<item id="__modules">
-                <item id="0">
+				<item id="0">
 					<item id="name"><![CDATA[chat_hook]]></item>
 					<item id="type"><![CDATA[11]]></item>
 				</item>
-                <item id="1">
+				<item id="1">
 					<item id="name"><![CDATA[admincp_shop]]></item>
 					<item id="menu"><![CDATA[จัดการร้านค้าแชท 🛒]]></item>
 					<item id="type"><![CDATA[3]]></item>
 					<item id="adminid"><![CDATA[1]]></item>
 					<item id="displayorder"><![CDATA[1]]></item>
 				</item>
-                <item id="2">
+				<item id="2">
 					<item id="name"><![CDATA[admincp_aibots]]></item>
 					<item id="menu"><![CDATA[🤖 ตั้งค่า AI Bots]]></item>
 					<item id="type"><![CDATA[3]]></item>
 					<item id="adminid"><![CDATA[1]]></item>
 					<item id="displayorder"><![CDATA[2]]></item>
 				</item>
-                <item id="3">
+				<item id="3">
+					<item id="name"><![CDATA[admincp_mobile]]></item>
+					<item id="menu"><![CDATA[📱 ตั้งค่าปุ่มแชท (Mobile)]]></item>
+					<item id="type"><![CDATA[3]]></item>
+					<item id="adminid"><![CDATA[1]]></item>
+					<item id="displayorder"><![CDATA[3]]></item>
+				</item>
+				<item id="4">
 					<item id="name"><![CDATA[chat_hook]]></item>
 					<item id="type"><![CDATA[28]]></item>
 				</item>
 			</item>
 		</item>
-        <item id="version"><![CDATA[X3.5, X5, X5+]]></item>
+		<item id="version"><![CDATA[X3.5, X5, X5+]]></item>
 		<item id="var">
 			<item id="0">
 				<item id="displayorder"><![CDATA[1]]></item>
@@ -57,7 +64,7 @@
 				<item id="value"><![CDATA[]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-            <item id="2">
+			<item id="2">
 				<item id="displayorder"><![CDATA[3]]></item>
 				<item id="title"><![CDATA[เปิดใช้งาน ส่งรูปภาพ/GIF 📸]]></item>
 				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้อัปโหลดและส่งรูปภาพในแชทได้]]></item>
@@ -66,7 +73,7 @@
 				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-            <item id="3">
+			<item id="3">
 				<item id="displayorder"><![CDATA[4]]></item>
 				<item id="title"><![CDATA[เปิดใช้งาน สีชื่อตามยศ 🎖️]]></item>
 				<item id="description"><![CDATA[แสดงสีชื่อของสมาชิกตามกลุ่มผู้ใช้งานของ Discuz]]></item>
@@ -75,7 +82,7 @@
 				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-            <item id="4">
+			<item id="4">
 				<item id="displayorder"><![CDATA[5]]></item>
 				<item id="title"><![CDATA[เปิดใช้งาน แท็กชื่อ (@Mention) 💬]]></item>
 				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้พิมพ์ @ เพื่อแท็กหรือตอบกลับสมาชิกคนอื่น]]></item>
@@ -84,7 +91,7 @@
 				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-            <item id="5">
+			<item id="5">
 				<item id="displayorder"><![CDATA[6]]></item>
 				<item id="title"><![CDATA[เปิดใช้งาน บอทแจ้งเตือนกระทู้ใหม่ 🤖]]></item>
 				<item id="description"><![CDATA[ให้ระบบส่งข้อความแจ้งเตือนลงแชทอัตโนมัติเมื่อมีคนตั้งกระทู้ใหม่]]></item>
@@ -93,7 +100,7 @@
 				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-            <item id="6">
+			<item id="6">
 				<item id="displayorder"><![CDATA[7]]></item>
 				<item id="title"><![CDATA[เปิดใช้งาน แจกอั่งเปาเครดิต 🧧]]></item>
 				<item id="description"><![CDATA[อนุญาตให้สมาชิกแจกเครดิตแบบสุ่มในแชทได้]]></item>
@@ -102,7 +109,7 @@
 				<item id="value"><![CDATA[0]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-            <item id="7">
+			<item id="7">
 				<item id="displayorder"><![CDATA[8]]></item>
 				<item id="title"><![CDATA[ชนิดของเครดิตที่ใช้แจกอั่งเปา (extcredits)]]></item>
 				<item id="description"><![CDATA[ระบุหมายเลข 1-8 ของระบบเงินในเว็บ (เช่น 2 สำหรับเหรียญ/เครดิตหลัก)]]></item>
@@ -111,7 +118,7 @@
 				<item id="value"><![CDATA[2]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-            <item id="8">
+			<item id="8">
 				<item id="displayorder"><![CDATA[9]]></item>
 				<item id="title"><![CDATA[จำนวนเครดิตแจก ขั้นต่ำ]]></item>
 				<item id="description"><![CDATA[จำนวนเครดิตน้อยที่สุดที่ตั้งแจกซองอั่งเปาได้]]></item>
@@ -120,7 +127,7 @@
 				<item id="value"><![CDATA[10]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-            <item id="9">
+			<item id="9">
 				<item id="displayorder"><![CDATA[10]]></item>
 				<item id="title"><![CDATA[จำนวนเครดิตแจก สูงสุด]]></item>
 				<item id="description"><![CDATA[จำนวนเครดิตมากที่สุดที่ตั้งแจกซองอั่งเปาได้]]></item>
@@ -129,7 +136,7 @@
 				<item id="value"><![CDATA[1000]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-            <item id="10">
+			<item id="10">
 				<item id="displayorder"><![CDATA[11]]></item>
 				<item id="title"><![CDATA[เปิดใช้งาน พรีวิวลิงก์กระทู้ 🖼️]]></item>
 				<item id="description"><![CDATA[ดึงรูปภาพและหัวข้อกระทู้มาแสดงแบบการ์ดอัตโนมัติเมื่อมีคนส่งลิงก์]]></item>
@@ -138,7 +145,7 @@
 				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-            <item id="11">
+			<item id="11">
 				<item id="displayorder"><![CDATA[12]]></item>
 				<item id="title"><![CDATA[เปิดใช้งาน รีแอคชั่นข้อความ 💖]]></item>
 				<item id="description"><![CDATA[อนุญาตให้ผู้ใช้กดปุ่ม Like, Heart ท้ายข้อความของคนอื่นได้]]></item>
@@ -147,7 +154,7 @@
 				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-            <item id="12">
+			<item id="12">
 				<item id="displayorder"><![CDATA[13]]></item>
 				<item id="title"><![CDATA[ข้อความประกาศจากแอดมิน 📢]]></item>
 				<item id="description"><![CDATA[ข้อความนี้จะถูกตรึงไว้ด้านบนสุดของแชทเสมอ (เว้นว่างไว้หากไม่ต้องการแสดง)]]></item>
@@ -156,7 +163,7 @@
 				<item id="value"><![CDATA[]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-            <item id="13">
+			<item id="13">
 				<item id="displayorder"><![CDATA[14]]></item>
 				<item id="title"><![CDATA[ข้อความบอลลูนทักทาย 💭]]></item>
 				<item id="description"><![CDATA[ข้อความที่จะลอยขึ้นมาข้างๆ ปุ่มแชทเพื่อดึงดูดความสนใจ (เว้นว่างไว้เพื่อปิดใช้งาน)]]></item>
@@ -165,7 +172,7 @@
 				<item id="value"><![CDATA[เข้ามาป้ายยากันเถอะ! ✨]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-            <item id="14">
+			<item id="14">
 				<item id="displayorder"><![CDATA[15]]></item>
 				<item id="title"><![CDATA[ชนิดของเครดิตที่ใช้ในร้านค้าแชท 🛒 (extcredits)]]></item>
 				<item id="description"><![CDATA[ระบุหมายเลข 1-8 ของระบบเงินในเว็บสำหรับให้สมาชิกซื้อของตกแต่งแชท (เช่น 2 สำหรับเหรียญ/เครดิตหลัก)]]></item>
@@ -183,7 +190,7 @@
 				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-            <item id="16">
+			<item id="16">
 				<item id="displayorder"><![CDATA[31]]></item>
 				<item id="title"><![CDATA[เปิดใช้งาน บอทป้ายยากระทู้เก่า 🤖]]></item>
 				<item id="description"><![CDATA[บอทจะคัดเลือกกระทู้คุณภาพ (คนตอบเยอะ) มาแชร์ในแชทอัตโนมัติ]]></item>
@@ -192,7 +199,7 @@
 				<item id="value"><![CDATA[1]]></item>
 				<item id="extra"><![CDATA[]]></item>
 			</item>
-            <item id="17">
+			<item id="17">
 				<item id="displayorder"><![CDATA[32]]></item>
 				<item id="title"><![CDATA[ความถี่ของบอทป้ายยา (นาที)]]></item>
 				<item id="description"><![CDATA[ตั้งเวลาให้บอทสุ่มกระทู้มาแชร์ (แนะนำ: 60)]]></item>
