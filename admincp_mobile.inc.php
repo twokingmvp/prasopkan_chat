@@ -9,15 +9,16 @@ if(submitcheck('mobilesubmit')) {
         'fade_idle' => intval($_GET['fade_idle']),
         'draggable' => intval($_GET['draggable'])
     );
-    // 🛠️ แก้ไข: บันทึกลงระบบ Cache ของ Discuz โดยตรง ชัวร์ 100%
-    savecache('prasopkan_chat_mobile', $config);
+    // 🛠️ บันทึกลงตาราง common_setting ของ Discuz แบบมาตรฐาน (ชัวร์ 100%)
+    C::t('common_setting')->update('prasopkan_chat_mobile', serialize($config));
+    updatecache('setting');
     cpmsg('อัปเดตการตั้งค่า Mobile UX เรียบร้อยแล้ว', 'action='.$plugin_url, 'succeed');
 }
 
-loadcache('prasopkan_chat_mobile');
-$config = $_G['cache']['prasopkan_chat_mobile'];
+$config_raw = $_G['setting']['prasopkan_chat_mobile'];
+$config = is_string($config_raw) ? unserialize($config_raw) : $config_raw;
 
-if(empty($config)) {
+if(empty($config) || !is_array($config)) {
     $config = array('smart_scroll' => 1, 'fade_idle' => 1, 'draggable' => 1);
 }
 

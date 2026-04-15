@@ -2,11 +2,8 @@
 <link rel="stylesheet" type="text/css" href="source/plugin/prasopkan_chat/static/css/game.css" />
 
 <script>
-    var pkMobileSettings = {
-        smart_scroll: {echo intval($pk_mob_cfg['smart_scroll'])},
-        fade_idle: {echo intval($pk_mob_cfg['fade_idle'])},
-        draggable: {echo intval($pk_mob_cfg['draggable'])}
-    };
+    // ส่งข้อมูลให้ JS ทำงาน
+    var pkMobileSettings = {$pk_mob_json};
 </script>
 
 <script src="source/plugin/prasopkan_chat/static/js/chat.js" type="text/javascript"></script>
